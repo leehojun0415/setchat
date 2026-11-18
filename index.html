@@ -303,6 +303,46 @@
     color:var(--brand);
     margin-left:auto;
   }
+  /* 🤝 토론·종합 토글 칩 */
+  .quick-chip.debate{display:inline-flex;align-items:center;gap:4px;}
+  .quick-chip.debate.on{
+    background:linear-gradient(180deg,#E8F9F0,#DCF4E8);
+    border-color:#8FD3B0;
+    color:#0F6B41;
+    font-weight:700;
+    box-shadow:0 0 0 2px rgba(31,122,77,.10);
+  }
+
+  /* 📌 최종 종합 답변 + 💬 토론 과정 박스 */
+  .final-tag{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:11.5px;font-weight:700;letter-spacing:-0.01em;
+    color:#0F6B41;background:#E6F7EE;border:1px solid #BFE8D2;
+    border-radius:999px;padding:3px 9px;margin:0 0 6px;
+  }
+  .debate{
+    align-self:flex-start;max-width:100%;
+    border:1px solid var(--line);border-radius:14px;background:#FAFBFC;
+    margin:4px 0 2px;padding:0 12px 2px;
+  }
+  .debate > summary{
+    cursor:pointer;list-style:none;
+    font-size:12.5px;font-weight:600;color:#374151;letter-spacing:-0.01em;
+    padding:9px 0;
+  }
+  .debate > summary::-webkit-details-marker{display:none;}
+  .debate > summary::before{
+    content:'▸';display:inline-block;width:14px;color:var(--muted);
+    transition:transform .15s ease;
+  }
+  .debate[open] > summary::before{transform:rotate(90deg);}
+  .debate .d-stage{font-size:11.5px;font-weight:700;color:var(--brand);margin:8px 0 5px;}
+  .debate .d-item{
+    font-size:12px;line-height:1.55;color:#374151;letter-spacing:-0.01em;
+    margin:0 0 8px;padding-left:9px;border-left:2px solid #E6E8EC;
+    white-space:pre-wrap;word-break:break-word;
+  }
+  .debate .d-name{font-weight:700;color:#111827;}
 
   /* ── 입력창 (흰색 알약) ────────────────── */
   .composer{
@@ -440,6 +480,17 @@
   .btn.danger{background:var(--warn-soft);border-color:#F5D2CC;color:var(--warn);}
   .btn.ghost{background:transparent;}
   .btn:disabled{opacity:.55;cursor:default;}
+
+  /* 설정 하단 고정 저장 바 — 키·모델·Worker 주소를 한 번에 저장해요 */
+  .sheet-ft{
+    position:sticky;bottom:0;z-index:2;
+    margin:14px -16px -20px;
+    padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));
+    background:#fff;border-top:1px solid var(--line);
+    display:flex;flex-direction:column;gap:6px;
+  }
+  .sheet-ft .btn{width:100%;flex:none;}
+  .sheet-ft .ft-note{margin:0;font-size:11.5px;line-height:1.45;color:var(--faint);text-align:center;letter-spacing:-0.01em;}
 
   .test-result{font-size:12.5px;line-height:1.55;color:#1F7A4D;margin:9px 0 0;white-space:pre-wrap;word-break:break-word;}
   .test-result.err{color:var(--warn);}
@@ -607,6 +658,7 @@
       <button type="button" class="quick-chip" data-member="pickle" data-mention="@피클 ">🥒 피클</button>
       <button type="button" class="quick-chip" data-member="claude" data-mention="@Gemini ">🤖 Gemini</button>
       <button type="button" class="quick-chip" data-member="groq" data-mention="@Groq ">⚡ Groq</button>
+      <button type="button" class="quick-chip debate" id="debate-chip" aria-pressed="false" title="검색 → AI끼리 토론 → 최종 종합">🤝 토론·종합</button>
       <button type="button" class="quick-chip search" id="quick-search">🔍 검색·추천</button>
     </div>
 
@@ -687,8 +739,8 @@
     </section>
 
     <section class="sec free">
-      <div class="sec-title">🆓 무료로 시작하기 (Groq ⚡ · Google Gemini)</div>
-      <p class="free-lead">키 하나만 넣으면 피클·Gemini·Groq 셋 다 진짜 AI로 답해요. 둘 다 카드 등록 없이 무료예요. Groq 키를 넣으면 Groq를 먼저 써요.</p>
+      <div class="sec-title">🆓 무료로 시작하기 (Gemini · Groq · OpenRouter)</div>
+      <p class="free-lead">무료 키 하나만 넣으면 피클·Gemini·Groq 셋 다 진짜 AI로 답해요. 셋 다 카드 등록 없이 무료이고, <b>Gemini → Groq → OpenRouter</b> 순서로 시도하다가 한도 초과·장애면 저장된 다음 무료 키로 자동 전환해요.</p>
 
       <div class="sub-hd first">⚡ Groq</div>
 
@@ -750,18 +802,47 @@
         <button type="button" class="btn" id="save-gemini">저장</button>
       </div>
       <p class="test-result" id="gemini-result" hidden></p>
+
+      <div class="sub-hd">🌐 OpenRouter</div>
+
+      <label class="field">
+        <span>OpenRouter API Key <em>무료</em></span>
+        <div class="input-row">
+          <input id="key-openrouter" type="password" placeholder="sk-or-v1-..." autocomplete="off" spellcheck="false">
+          <button type="button" class="mini" data-toggle="key-openrouter">보기</button>
+        </div>
+      </label>
+      <label class="field">
+        <span>OpenRouter 모델</span>
+        <select id="pick-openrouter" aria-label="OpenRouter 모델 선택">
+          <option value="openrouter/free">openrouter/free (기본·무료)</option>
+          <option value="__custom">직접 입력…</option>
+        </select>
+        <input id="model-openrouter" type="text" placeholder="openrouter/free" autocomplete="off" spellcheck="false" hidden>
+      </label>
+
+      <p class="hint">
+        <a href="https://openrouter.ai/keys" target="_blank" rel="noreferrer">openrouter.ai/keys</a> → <b>Create Key</b> 로 무료 키를 받아요. 기본 모델 <b>openrouter/free</b> 는 카드 없이 쓸 수 있고, 한도를 넘기면 Gemini·Groq로 다시 넘어가요.
+      </p>
+
+      <div class="btn-row">
+        <button type="button" class="btn primary" id="test-conn">연결 테스트</button>
+        <button type="button" class="btn" id="save-settings">저장</button>
+        <button type="button" class="btn ghost" id="clear-keys">키 지우기</button>
+      </div>
+      <p class="test-result" id="test-result" hidden></p>
     </section>
 
     <section class="sec">
       <div class="sec-title">연결 상태</div>
-      <div class="status-row"><span class="dot" id="dot-groq"></span><span id="label-groq">Groq</span><span class="status" id="status-groq">데모 모드</span></div>
-      <div class="status-row"><span class="dot" id="dot-claude"></span><span id="label-claude">Gemini</span><span class="status" id="status-claude">데모 모드</span></div>
-      <div class="status-row"><span class="dot" id="dot-pickle"></span><span id="label-pickle">피클</span><span class="status" id="status-pickle">데모 모드</span></div>
-      <p class="hint">키 하나면 셋 다 실제로 답해요. 순서는 <b>Groq 키 → Gemini 키 → 데모 모드</b>이고, AI별 전용 키(Anthropic·OpenAI)를 넣으면 그 키를 먼저 씁니다.</p>
+      <div class="status-row"><span class="dot" id="dot-groq"></span><span id="label-groq">Groq</span><span class="status" id="status-groq">확인 중</span></div>
+      <div class="status-row"><span class="dot" id="dot-claude"></span><span id="label-claude">Gemini</span><span class="status" id="status-claude">확인 중</span></div>
+      <div class="status-row"><span class="dot" id="dot-pickle"></span><span id="label-pickle">피클</span><span class="status" id="status-pickle">확인 중</span></div>
+      <p class="hint">무료 키가 있으면 <b>Gemini → Groq → OpenRouter</b> 순서로 답하고, 한도 초과·장애·키 없음이면 다음 무료 키로 자동 전환해요. 무료 키가 하나도 없을 때만 데모로 답합니다.</p>
     </section>
 
     <section class="sec">
-      <div class="sec-title">AI별 전용 키 (선택)</div>
+      <div class="sec-title">💳 유료 엔진 키 <em>직접 고를 때만</em></div>
 
       <label class="field">
         <span>Anthropic API Key <em>Gemini</em></span>
@@ -797,31 +878,10 @@
         <input id="model-pickle" type="text" placeholder="gpt-4o-mini" autocomplete="off" spellcheck="false" hidden>
       </label>
 
-      <label class="field">
-        <span>OpenRouter API Key <em>무료 모델</em></span>
-        <div class="input-row">
-          <input id="key-openrouter" type="password" placeholder="sk-or-v1-..." autocomplete="off" spellcheck="false">
-          <button type="button" class="mini" data-toggle="key-openrouter">보기</button>
-        </div>
-      </label>
-      <label class="field">
-        <span>OpenRouter 모델</span>
-        <select id="pick-openrouter" aria-label="OpenRouter 모델 선택">
-          <option value="openrouter/free">openrouter/free (기본·무료)</option>
-          <option value="__custom">직접 입력…</option>
-        </select>
-        <input id="model-openrouter" type="text" placeholder="openrouter/free" autocomplete="off" spellcheck="false" hidden>
-      </label>
-
+      <p class="hint">여기 키를 넣어도 자동 답변에는 쓰지 않아요. 그 AI의 엔진을 직접 골랐을 때만 호출합니다. 무료 엔진만 쓰려면 비워 두세요.</p>
       <p class="hint">키는 이 브라우저의 localStorage에만 저장되고 그 외 어디에도 전송되지 않아요. 각 AI 호출에만 쓰입니다.</p>
+      <p class="hint" id="paid-save-note">여기 값도 아래 <b>「모든 설정 한 번에 저장」</b>으로 함께 저장돼요.</p>
       <p class="hint warn" id="origin-hint" hidden></p>
-
-      <div class="btn-row">
-        <button type="button" class="btn primary" id="save-settings">저장</button>
-        <button type="button" class="btn" id="test-conn">연결 테스트</button>
-        <button type="button" class="btn ghost" id="clear-keys">키 지우기</button>
-      </div>
-      <p class="test-result" id="test-result" hidden></p>
     </section>
 
     <section class="sec">
@@ -885,6 +945,11 @@
       <p class="test-result" id="lock-result" hidden></p>
       <p class="hint">비밀번호는 SHA-256 해시로만 이 브라우저(localStorage)에 저장돼요. 잊으면 브라우저 저장값을 지우면 되고, 대화 내용은 그대로 남아요.</p>
     </section>
+
+    <div class="sheet-ft">
+      <button type="button" class="btn primary" id="save-all">모든 설정 한 번에 저장</button>
+      <p class="ft-note" id="save-all-note">키 · 모델 · 워커 주소를 한 번에 저장해요</p>
+    </div>
   </div>
 </div>
 
@@ -894,7 +959,7 @@
       <h2 id="ai-modal-title">새 AI 추가</h2>
       <button type="button" class="icon-btn" id="ai-close" aria-label="닫기">✕</button>
     </div>
-    <p class="hint" id="ai-lead">이름·성격·엔진만 고르면 돼요. 키가 없으면 데모 응답으로 답하고, 키를 넣으면 바로 실제 AI가 돼요.</p>
+    <p class="hint" id="ai-lead">이름·성격·엔진만 고르면 돼요. 무료 엔진을 고르면 한도 초과 시 다른 무료 엔진으로 자동 전환합니다.</p>
 
     <label class="field">
       <span>AI 이름 <em>필수 · 최대 16자</em></span>
@@ -918,7 +983,7 @@
     <label class="field">
       <span>사용할 엔진</span>
       <select id="ai-engine">
-        <option value="auto" id="ai-engine-auto">자동 (기본 연결: Groq → Gemini → 데모)</option>
+        <option value="auto" id="ai-engine-auto">자동 (무료 우선·자동 전환)</option>
         <option value="gemini">Gemini 무료 키 (실시간 검색 가능)</option>
         <option value="groq">Groq 무료 키 (빠른 답변)</option>
         <option value="openrouter">OpenRouter (무료)</option>
@@ -1145,15 +1210,20 @@
   };
   var ENGINE_KEYS = ['gemini', 'groq', 'openrouter', 'openai', 'anthropic', 'custom'];
 
+  // 무료 우선 자동 전환 — 이 셋만 자동으로 이어 부릅니다. 유료 엔진은 직접 골랐을 때만 씁니다.
+  var FREE_CHAIN = ['gemini', 'groq', 'openrouter'];
+  var FREE_ENGINES = ['gemini', 'groq', 'openrouter'];
+  var FREE_EXHAUSTED_TEXT = '무료 모델을 모두 시도했지만 사용 한도에 도달했어요. 잠시 후 다시 시도하거나 다른 무료 키를 추가해 주세요.';
+
   var AI_ENGINE_HINT = {
-    gemini: '설정에 저장한 Gemini 키로 답해요. 키가 없으면 데모 응답으로 답하고, 키를 넣으면 실시간 구글 검색까지 붙일 수 있어요.',
-    groq: '설정에 저장한 Groq 키로 답해요. 카드 없이 무료로 쓸 수 있고 답이 빠릅니다. 키가 없으면 데모 응답이에요.',
-    openrouter: 'OpenRouter 키로 답해요. openrouter/free는 카드 없이 무료로 쓸 수 있어요. Worker 주소를 넣으면 키 없이도 Worker로 불러요.',
-    openai: 'OpenAI 키를 넣으면 ChatGPT가 답해요. 비워 두면 위 설정의 OpenAI 키를 써요.',
-    anthropic: 'Anthropic 키를 넣으면 Claude가 답해요. 비워 두면 위 설정의 Anthropic 키를 써요.',
+    gemini: '설정에 저장한 Gemini 키로 답해요. 실시간 구글 검색까지 붙일 수 있고, 한도 초과·장애면 다른 무료 엔진(Groq·OpenRouter)으로 자동 전환해요.',
+    groq: '설정에 저장한 Groq 키로 답해요. 카드 없이 무료이고 답이 빠릅니다. 실패하면 다른 무료 엔진으로 자동 전환해요.',
+    openrouter: 'OpenRouter 무료 모델(openrouter/free)로 답해요. 카드 없이 무료이고, 실패하면 Gemini·Groq로 자동 전환해요. Worker 주소를 넣으면 키 없이도 Worker로 불러요.',
+    openai: 'OpenAI 키를 넣으면 ChatGPT가 답해요. 비워 두면 위 설정의 OpenAI 키를 쓰고, 이 엔진을 직접 고른 경우에만 호출해요.',
+    anthropic: 'Anthropic 키를 넣으면 Claude가 답해요. 비워 두면 위 설정의 Anthropic 키를 쓰고, 이 엔진을 직접 고른 경우에만 호출해요.',
     custom: 'OpenAI 호환 API(예: 로컬 LLM·프록시)를 직접 불러요. 엔드포인트 주소와 모델 이름이 필요해요.'
   };
-  AI_ENGINE_HINT.auto = '기본 연결 순서(Groq 키 → Gemini 키 → AI별 전용 키 → 데모)를 그대로 써요.';
+  AI_ENGINE_HINT.auto = '무료 엔진을 고르면 한도 초과 시 다른 무료 엔진으로 자동 전환합니다. Gemini → Groq → OpenRouter 순서예요.';
 
   var state = {
     messages: [],
@@ -1172,6 +1242,7 @@
       pickleModel: 'gpt-4o-mini',
       members: { pickle: true, claude: true, groq: true },      // 대화에 부를 AI
       webSearch: true,                                          // Gemini 실시간 구글 검색
+      debateMode: false,                                        // 🤝 검색 → 토론 → 종합 모드
       searchFor: { pickle: true, claude: true, groq: true },    // 검색 결과를 붙일 답변
       names: { pickle: '', claude: '', groq: '' },              // 비우면 기본 이름
       builtins: {                                               // 기본 AI의 아이콘·성격·엔진 바꾸기
@@ -1399,14 +1470,19 @@
     ].join('\n');
   }
 
-  function personaFor(who) {
+  function personaFor(who, ctx) {
+    var base;
     if (isCustomKey(who)) {
       var c = customById(who);
-      return PERSONA[who] || buildCustomPersona(c || { name: 'AI' });
+      base = PERSONA[who] || buildCustomPersona(c || { name: 'AI' });
+    } else {
+      base = applyNames(PERSONA[who] || '');
+      var extra = builtinPref(who).prompt.trim();
+      if (extra) base += '\n- 사용자가 정한 역할·성격: ' + extra;
     }
-    var base = applyNames(PERSONA[who] || '');
-    var extra = builtinPref(who).prompt.trim();
-    if (extra) base += '\n- 사용자가 정한 역할·성격: ' + extra;
+    // 🤝 토론·종합처럼 이번 호출에만 붙는 지시문
+    var tail = (ctx && ctx.personaExtra) ? String(ctx.personaExtra).trim() : '';
+    if (tail) base += '\n\n' + tail;
     return base;
   }
 
@@ -1451,6 +1527,7 @@
   var toastTimer = null;
   var migrated = false;
   var typing = {};            // 입력 중인 AI → 그 AI가 답할 방
+  var lastEngine = {};        // 마지막으로 답한 엔진 (연결 상태 표시)
   var unread = {};            // 방별 새 메시지 표시
 
   var el = {
@@ -1491,6 +1568,8 @@
     dotPickle: document.getElementById('dot-pickle'),
     dotGroq: document.getElementById('dot-groq'),
     saveSettings: document.getElementById('save-settings'),
+    saveAll: document.getElementById('save-all'),
+    saveAllNote: document.getElementById('save-all-note'),
     pickGroq: document.getElementById('pick-groq'),
     pickGemini: document.getElementById('pick-gemini'),
     pickClaude: document.getElementById('pick-claude'),
@@ -1521,6 +1600,7 @@
     searchGroq: document.getElementById('search-groq'),
     searchHint: document.getElementById('search-hint'),
     quickChips: document.getElementById('quick-chips'),
+    debateChip: document.getElementById('debate-chip'),
     quickSearch: document.getElementById('quick-search'),
     toast: document.getElementById('toast'),
     lock: document.getElementById('lock'),
@@ -2079,6 +2159,9 @@
         kept.channel = ch;
         var links = normalizeLinks(m.links);   // 저장된 링크도 다시 검사합니다
         if (links.length) kept.links = links;
+        if (m.final === true) kept.final = true;
+        var debate = normalizeDebate(m.debate);
+        if (debate) kept.debate = debate;
         state.messages.push(kept);
       });
     }
@@ -2144,6 +2227,7 @@
       if (typeof data.settings.pickleModel === 'string' && data.settings.pickleModel) state.settings.pickleModel = data.settings.pickleModel;
       state.settings.members = readFlags(data.settings.members, state.settings.members, true);
       if (typeof data.settings.webSearch === 'boolean') state.settings.webSearch = data.settings.webSearch;
+      if (typeof data.settings.debateMode === 'boolean') state.settings.debateMode = data.settings.debateMode;
       state.settings.searchFor = readFlags(data.settings.searchFor, state.settings.searchFor, false);
     }
 
@@ -2267,6 +2351,10 @@
     }
     var col = h('div', 'col');
     if (!compact) col.appendChild(h('div', 'name', meta.name));
+    if (m.final) {
+      var nPart = (m.debate && m.debate.participants) ? m.debate.participants.length : 1;
+      col.appendChild(h('div', 'final-tag', DEBATE_TAG + ' · ' + nPart + '명 종합'));
+    }
     var line = h('div', 'line');
     line.appendChild(richText('div', 'bubble', m.text));
     line.appendChild(h('div', 'time', fmtTime(m.ts)));
@@ -2306,6 +2394,47 @@
       wrap.appendChild(r);
     }
     return wrap;
+  }
+
+  // 💬 AI 토론 과정 보기 — 접고 펼 수 있는 박스
+  function debateEl(m) {
+    var d = m.debate || {};
+    var box = document.createElement('details');
+    box.className = 'debate';
+    var n = (d.participants && d.participants.length) || 1;
+    var sum = document.createElement('summary');
+    sum.textContent = '💬 AI 토론 과정 보기 (' + n + '명 참여)';
+    box.appendChild(sum);
+
+    (d.stages || []).forEach(function (st) {
+      box.appendChild(h('div', 'd-stage', st.title || '토론'));
+      (st.items || []).forEach(function (it) {
+        var p = h('div', 'd-item');
+        p.appendChild(h('span', 'd-name', (it.name || 'AI') + ': '));
+        p.appendChild(document.createTextNode(clipText(it.text, 1200)));
+        box.appendChild(p);
+      });
+    });
+    return box;
+  }
+
+  function normalizeDebate(d) {
+    if (!d || typeof d !== 'object') return null;
+    var parts = Array.isArray(d.participants)
+      ? d.participants.filter(function (x) { return typeof x === 'string'; }).slice(0, 8)
+      : [];
+    var stages = [];
+    (Array.isArray(d.stages) ? d.stages : []).slice(0, 4).forEach(function (st) {
+      if (!st || typeof st !== 'object') return;
+      var items = [];
+      (Array.isArray(st.items) ? st.items : []).slice(0, 8).forEach(function (it) {
+        if (!it || typeof it.text !== 'string') return;
+        items.push({ name: String(it.name || 'AI').slice(0, 30), text: it.text.slice(0, 2000) });
+      });
+      if (items.length) stages.push({ title: String(st.title || '토론').slice(0, 40), items: items });
+    });
+    if (!stages.length) return null;
+    return { participants: parts, stages: stages };
   }
 
   function typingEl(who) {
@@ -2375,6 +2504,7 @@
         return;
       }
       if (m.who !== 'user' && !AI[m.who]) return;
+      if (m.debate) feed.appendChild(debateEl(m));
       feed.appendChild(rowEl(m, m.who !== 'user' && m.who === prevWho));
       prevWho = m.who;
     });
@@ -2383,11 +2513,13 @@
     scrollToBottom(false);
   }
 
-  function addMessage(who, text, links, channel) {
+  function addMessage(who, text, links, channel, extra) {
     var ch = channel || state.currentChannel;
     var m = { id: uid(), who: who, text: text, ts: Date.now(), channel: ch };
     var safeLinks = normalizeLinks(links);
     if (safeLinks.length) m.links = safeLinks;
+    if (extra && extra.final) m.final = true;
+    if (extra && extra.debate) m.debate = normalizeDebate(extra.debate);
     state.messages.push(m);
     prune();
     save();
@@ -2569,22 +2701,23 @@
     await sleep(delayFor(who));
 
     var got = null;
-    var errText = '';
+    var err = null;
     try {
       got = await replyFor(who, text, [], { channel: room });
-    } catch (err) {
-      errText = shortErr(err, 120);
-    }
-
-    if (!got || !got.text) {
-      try { got = demoReply(who, text, []); } catch (e) { got = null; }
+    } catch (e) {
+      err = e;
     }
     delete typing[who];
 
-    if (errText) {
-      addMessage('system', '⚠️ ' + AI[who].name + ' 실시간 응답 실패: ' + errText + ' — 데모 응답으로 대신했어요.', null, room);
+    if (!got || !got.text) {
+      // 무료 엔진을 모두 시도했거나 유료 엔진이 실패했으면 가짜 데모 답변 대신 사유를 보여 줍니다.
+      if (err) {
+        addMessage('system', '⚠️ ' + (err.freeExhausted ? err.message : AI[who].name + ' 응답 실패: ' + shortErr(err, 140)), null, room);
+      } else {
+        addMessage('system', '⚠️ ' + AI[who].name + ' 답변을 받지 못했어요. 잠시 뒤 다시 불러 주세요.', null, room);
+      }
+      return null;
     }
-    if (!got || !got.text) got = { text: '지금은 답하기 어려워요. 잠시 뒤 다시 불러 주세요.', links: [] };
 
     addMessage(who, cleanReply(got.text), normalizeLinks(got.links), room);
     return who;
@@ -2614,6 +2747,11 @@
       return;
     }
 
+    if (state.settings.debateMode) {
+      if (room === CHANNEL_ALL) { await runDebate(text, targets); return; }
+      addMessage('system', '🤝 토론·종합은 💬 전체 방에서 동작해요. 여기서는 ' + AI[room].name + '만 답해요.', null, room);
+    }
+
     setBusy(true);
     targets.forEach(function (who) { typing[who] = room; });
     render();
@@ -2626,6 +2764,278 @@
     setBusy(false);
     render();
     try { el.input.focus(); } catch (e) {}
+  }
+
+  /* ── 🤝 토론·종합 모드 ─────────────────── */
+  // 1단계: 켜진 AI들이 병렬로 검색·초안 → 2단계: 서로의 초안을 한 라운드 교차 검토
+  // → 3단계: 대표 AI가 하나의 최종 답변으로 종합. 무료 한도를 아끼려고 최대 3명까지만 토론해요.
+  var DEBATE_MAX = 3;
+  var DEBATE_TAG = '📌 최종 종합 답변';
+  var DEBATE_DRAFT_RULE = [
+    '지금은 「토론·종합」 1단계예요. 아래 질문에 대한 1차 초안을 쓰세요.',
+    '형식: ① 핵심 결론 2~3줄 ② 근거 2~3개 ③ 확인이 필요한 점 1개.',
+    '300자 안팎으로 짧게, 인사말 없이. 실시간 검색이 되면 출처 링크를 붙이세요.'
+  ].join('\n');
+  var DEBATE_REVIEW_RULE = [
+    '지금은 「토론·종합」 2단계예요. 아래 다른 AI의 초안을 읽고',
+    '빠진 점 · 다른 관점 · 주의할 점만 3~4줄로 짧게 보완하세요.',
+    '동의 인사나 같은 말 반복은 쓰지 마세요.'
+  ].join('\n');
+  var DEBATE_FINAL_RULE = [
+    '지금은 「토론·종합」 3단계, 최종 종합이에요. 아래 1차 초안과 교차 검토를 하나로 합치세요.',
+    '형식: ① 결론 2~3문장 ② 핵심 근거 3개(- 로 시작) ③ 주의할 점 1~2개 ④ 다음 행동 1개.',
+    '서로 다른 의견은 「의견 차이」로 표시하고, 확인되지 않은 내용은 추정이라고 밝히세요.',
+    '출처 링크는 본문에 넣지 마세요. 링크는 따로 카드로 보여 줍니다.'
+  ].join('\n');
+
+  function clipText(s, n) {
+    var t = String(s || '').replace(/\r/g, '').replace(/\n{3,}/g, '\n\n').trim();
+    return t.length > n ? t.slice(0, n) + '…' : t;
+  }
+
+  function firstLine(s) {
+    var t = String(s || '').replace(/\s+/g, ' ').trim();
+    var cut = t.split(/[.!?。]\s/)[0] || t;
+    return cut.length > 70 ? cut.slice(0, 70) + '…' : cut;
+  }
+
+  function syncDebateChip() {
+    if (!el.debateChip) return;
+    var on = !!state.settings.debateMode;
+    if (on) el.debateChip.classList.add('on');
+    else el.debateChip.classList.remove('on');
+    el.debateChip.setAttribute('aria-pressed', on ? 'true' : 'false');
+    el.debateChip.textContent = on ? '🤝 토론·종합 켜짐' : '🤝 토론·종합';
+  }
+
+  // 실제 키가 하나라도 있어 AI끼리 진짜로 토론할 수 있는지
+  function debateLive(list) {
+    if (workerEndpoint(state.settings.workerUrl)) return true;
+    for (var i = 0; i < list.length; i++) {
+      var chain = chainFor(list[i]);
+      for (var j = 0; j < chain.length; j++) {
+        if (hasDirectKey(chain[j], list[i])) return true;
+      }
+    }
+    return false;
+  }
+
+  function setDebateStatus(m, text) {
+    if (!m) return;
+    m.text = text;
+    save();
+    if (channelOf(m) === state.currentChannel) render();
+  }
+
+  function removeMessage(m) {
+    var i = state.messages.indexOf(m);
+    if (i < 0) return;
+    state.messages.splice(i, 1);
+    save();
+    render();
+  }
+
+  function debateStages(drafts, reviews) {
+    var stages = [{
+      title: '1단계 · 검색·초안',
+      items: drafts.map(function (d) { return { name: d.name, text: d.text }; })
+    }];
+    if (reviews && reviews.length) {
+      stages.push({
+        title: '2단계 · AI끼리 교차 검토',
+        items: reviews.map(function (r) { return { name: r.name, text: r.text }; })
+      });
+    }
+    return stages;
+  }
+
+  function finishDebate(repWho, text, links, drafts, reviews, status) {
+    var names = drafts.map(function (d) { return d.name; });
+    (reviews || []).forEach(function (r) { if (names.indexOf(r.name) < 0) names.push(r.name); });
+    removeMessage(status);
+    addMessage(repWho, text, links, CHANNEL_ALL, {
+      final: true,
+      debate: { participants: names, stages: debateStages(drafts, reviews) }
+    });
+    setBusy(false);
+    render();
+    toast('토론·종합 완료 — ' + names.length + '명 참여');
+  }
+
+  async function runDebate(question, targets) {
+    var list = targets.slice(0, DEBATE_MAX);
+    var names = list.map(function (w) { return AI[w].name; }).join(' · ');
+
+    setBusy(true);
+    list.forEach(function (w) { typing[w] = CHANNEL_ALL; });
+    render();
+    scrollToBottom(true);
+
+    var status = addMessage('system', '🤝 토론·종합 1/3 — ' + names + ' 검색·초안 작성 중...', null, CHANNEL_ALL);
+
+    // 키가 하나도 없는 데모 상태에서도 흐름이 자연스럽게 보이도록 전용 경로로 보여 줍니다.
+    if (!debateLive(list)) return runDebateDemo(question, list, status);
+
+    // ── 1단계: 병렬 초안 + 실시간 검색 ──
+    var drafts = [];
+    var lastErr = null;
+    await Promise.all(list.map(function (w) {
+      return replyFor(w, question, [], { channel: CHANNEL_ALL, personaExtra: DEBATE_DRAFT_RULE })
+        .then(function (got) {
+          if (got && got.text) {
+            drafts.push({ who: w, name: AI[w].name, text: cleanReply(got.text), links: (got && got.links) || [] });
+          }
+        })
+        .catch(function (err) { lastErr = err; });
+    }));
+    drafts.sort(function (a, b) { return list.indexOf(a.who) - list.indexOf(b.who); });
+    list.forEach(function (w) { delete typing[w]; });
+    render();
+
+    if (!drafts.length) {
+      var why = (lastErr && lastErr.freeExhausted)
+        ? lastErr.message
+        : 'AI 초안을 만들지 못했어요. 잠시 후 다시 시도해 주세요.' + (lastErr ? ' (사유: ' + shortErr(lastErr, 90) + ')' : '');
+      setDebateStatus(status, '⚠️ ' + why);
+      setBusy(false);
+      return;
+    }
+
+    // ── 2단계: 서로의 초안을 한 라운드 교차 검토 ──
+    setDebateStatus(status, '🤝 토론·종합 2/3 — AI끼리 서로의 초안을 검토하는 중...');
+    var reviews = [];
+    await Promise.all(drafts.map(function (d) {
+      var others = drafts.filter(function (x) { return x.who !== d.who; });
+      var body = '[내 초안]\n' + clipText(d.text, 400);
+      if (others.length) {
+        body += '\n\n' + others.map(function (x) {
+          return '[' + x.name + ' 초안]\n' + clipText(x.text, 600);
+        }).join('\n\n');
+      }
+      return replyFor(d.who, question, [], { channel: CHANNEL_ALL, personaExtra: DEBATE_REVIEW_RULE + '\n\n' + body })
+        .then(function (got) {
+          if (got && got.text) reviews.push({ who: d.who, name: d.name, text: cleanReply(got.text) });
+        })
+        .catch(function () {});
+    }));
+    reviews.sort(function (a, b) { return list.indexOf(a.who) - list.indexOf(b.who); });
+    render();
+
+    // ── 3단계: 대표 AI(피클 우선)가 최종 종합 ──
+    var repWho = drafts[0].who;
+    for (var i = 0; i < drafts.length; i++) { if (drafts[i].who === 'pickle') repWho = 'pickle'; }
+
+    setDebateStatus(status, '🤝 토론·종합 3/3 — ' + AI[repWho].name + '가 최종 답변을 종합하는 중...');
+
+    var block = drafts.map(function (d) {
+      return '[1단계 · ' + d.name + ' 초안]\n' + clipText(d.text, 700);
+    }).join('\n\n');
+    if (reviews.length) {
+      block += '\n\n' + reviews.map(function (r) {
+        return '[2단계 · ' + r.name + ' 검토]\n' + clipText(r.text, 500);
+      }).join('\n\n');
+    }
+
+    var final = null;
+    try {
+      final = await replyFor(repWho, question, [], { channel: CHANNEL_ALL, personaExtra: DEBATE_FINAL_RULE + '\n\n' + block });
+    } catch (e) { final = null; }
+
+    var finalText;
+    if (final && final.text) {
+      finalText = cleanReply(final.text);
+    } else {
+      // 종합 단계가 한도에 걸리면 대표 초안으로 대신하고, 그 사실을 밝힙니다(가짜 종합 금지).
+      var own = drafts.filter(function (d) { return d.who === repWho; })[0] || drafts[0];
+      finalText = '⚠️ 종합 단계가 한도·장애로 끝나지 못해 대표 초안으로 대신했어요.\n\n' + own.text;
+    }
+
+    var links = [];
+    var seen = {};
+    drafts.concat([{ links: (final && final.links) || [] }]).forEach(function (d) {
+      (d.links || []).forEach(function (l) {
+        if (!l || !l.url || seen[l.url]) return;
+        seen[l.url] = true;
+        links.push(l);
+      });
+    });
+
+    finishDebate(repWho, finalText, links.slice(0, 6), drafts, reviews, status);
+  }
+
+  // 데모에서도 3단계 흐름을 그대로 보여 줍니다(실시간 검색은 하지 않아요).
+  async function runDebateDemo(question, list, status) {
+    var drafts = list.map(function (w) {
+      var got = demoReply(w, question, []);
+      return { who: w, name: AI[w].name, text: cleanReply((got && got.text) || ''), links: (got && got.links) || [] };
+    });
+    list.forEach(function (w) { delete typing[w]; });
+    render();
+
+    await sleep(500);
+    setDebateStatus(status, '🤝 토론·종합 2/3 — AI끼리 서로의 초안을 검토하는 중... (데모)');
+
+    var reviews = drafts.map(function (d, i) {
+      var other = drafts[(i + 1) % drafts.length] || d;
+      return {
+        who: d.who,
+        name: d.name,
+        text: d.name + ' 관점: ' + other.name + ' 초안의 「' + firstLine(other.text) + '」 방향은 맞아요. ' +
+          '여기에 비용·시간 조건과 최신 가격을 확인하는 항목을 더하고, 결론은 한 문장으로 줄이는 게 좋겠어요.'
+      };
+    });
+
+    await sleep(450);
+    var repWho = drafts[0].who;
+    for (var i = 0; i < drafts.length; i++) { if (drafts[i].who === 'pickle') repWho = 'pickle'; }
+    var rep = drafts.filter(function (d) { return d.who === repWho; })[0] || drafts[0];
+
+    setDebateStatus(status, '🤝 토론·종합 3/3 — ' + rep.name + '가 최종 답변을 종합하는 중... (데모)');
+    await sleep(350);
+
+    var lines = [
+      '결론',
+      '- ' + firstLine(rep.text),
+      '',
+      '핵심 근거',
+      drafts.slice(0, 3).map(function (d) { return '- ' + d.name + ': ' + firstLine(d.text); }).join('\n'),
+      '',
+      '주의할 점',
+      '- 지금은 데모 모드라 실시간 검색 결과가 아니에요. 가격·영업시간은 직접 확인해 주세요.',
+      reviews.length ? '- AI별 관점 차이: ' + reviews.map(function (r) { return r.name; }).join(' · ') + ' 의견을 함께 봐 주세요.' : null,
+      '',
+      '다음 행동',
+      '- 설정에서 무료 키(Gemini·Groq·OpenRouter) 하나를 넣으면 실제 검색·토론으로 답해요.'
+    ];
+    var finalText = lines.filter(function (x) { return typeof x === 'string'; }).join('\n');
+
+    var links = [];
+    var seen = {};
+    drafts.forEach(function (d) {
+      (d.links || []).forEach(function (l) {
+        if (!l || !l.url || seen[l.url]) return;
+        seen[l.url] = true;
+        links.push(l);
+      });
+    });
+
+    finishDebate(repWho, finalText, links.slice(0, 6), drafts, reviews, status);
+  }
+
+  if (el.debateChip) {
+    el.debateChip.addEventListener('click', function () {
+      state.settings.debateMode = !state.settings.debateMode;
+      save();
+      syncDebateChip();
+      if (state.settings.debateMode) {
+        toast('토론·종합 모드를 켰어요 — 검색 → 토론 → 최종 종합');
+        if (state.currentChannel !== CHANNEL_ALL) {
+          addMessage('system', '🤝 토론·종합은 💬 전체 방에서 동작해요. 위의 💬 전체 탭에서 보내 주세요.');
+        }
+      } else {
+        toast('토론·종합 모드를 껐어요');
+      }
+    });
   }
 
   /* ── ↻ 다시 생성 ──────────────────────── */
@@ -2661,20 +3071,18 @@
     scrollToBottom(true);
 
     var got = null;
-    var errText = '';
+    var err = null;
     try {
       // 다시 만드는 말풍선은 대화 기록에서 빼고 물어봅니다(같은 답을 그대로 베끼지 않게).
       got = await replyFor(who, q.text, [], { channel: ch, beforeId: m.id });
-    } catch (err) {
-      errText = shortErr(err, 120);
-    }
-    if (!got || !got.text) {
-      try { got = demoReply(who, q.text, []); } catch (e) { got = null; }
+    } catch (e) {
+      err = e;
     }
     delete typing[who];
 
-    if (errText) {
-      addMessage('system', '⚠️ ' + AI[who].name + ' 실시간 응답 실패: ' + errText + ' — 데모 응답으로 대신했어요.', null, ch);
+    // 실패하면 가짜 데모 답변으로 바꾸지 않고, 사유만 알려 주고 원래 답변은 남깁니다.
+    if (err) {
+      addMessage('system', '⚠️ ' + (err.freeExhausted ? err.message : AI[who].name + ' 응답 실패: ' + shortErr(err, 140)), null, ch);
     }
 
     if (got && got.text) {
@@ -2692,32 +3100,86 @@
   }
 
   // 모든 응답은 { text, links } 형태로 돌려줍니다.
+  // 무료 엔진을 순서대로 시도하고, 429(한도)·5xx(장애)·키 없음이면 다음 무료 엔진으로 넘어갑니다.
+  // 유료 엔진(OpenAI · Anthropic)과 커스텀 API는 사용자가 직접 고른 경우에만 그 하나를 부릅니다.
   async function replyFor(who, userText, spoken, ctx) {
-    var provider = providerFor(who);
+    var chain = chainFor(who);
     var base = workerEndpoint(state.settings.workerUrl);
+    var workerMap = base ? await workerEngines(base) : null;
+    var lastErr = null;
+    var attempts = 0;
 
-    // Worker 주소가 있으면 키가 없어도 Worker가 대신 불러 줍니다(임의 주소 커스텀 API는 직접).
-    if (base) {
-      var engines = await workerEngines(base);
-      var wEngine = engineFor(who, engines);
-      if (wEngine !== 'custom') {
+    for (var i = 0; i < chain.length; i++) {
+      var engine = chain[i];
+      var viaWorker = !!(base && engine !== 'custom' && workerMap && workerMap[engine]);
+      var direct = hasDirectKey(engine, who);
+      if (!viaWorker && !direct) continue;      // 키가 없는 엔진은 조용히 건너뜁니다
+
+      if (viaWorker) {
+        attempts++;
         try {
-          return await callWorker(who, base, wEngine, userText, ctx);
+          var out = await callWorker(who, base, engine, userText, ctx);
+          lastEngine[who] = engine;
+          syncStatus();
+          return out;
         } catch (err) {
-          // Worker가 안 되면 브라우저 키가 있을 때만 기존 경로로 한 번 더 시도합니다.
-          if (!hasBrowserKey(provider)) throw err;
+          lastErr = err;
+        }
+      }
+
+      if (direct) {
+        attempts++;
+        try {
+          var got = await callEngineDirect(engine, who, ctx);
+          lastEngine[who] = engine;
+          syncStatus();
+          return got;
+        } catch (err2) {
+          lastErr = err2;
         }
       }
     }
 
-    if (provider === 'anthropic') return { text: await callClaude(who, ctx), links: [] };
-    if (provider === 'openai') return { text: await callOpenAI(who, ctx), links: [] };
-    if (provider === 'openrouter') return { text: await callOpenRouter(who, ctx), links: [] };
-    if (provider === 'custom') return { text: await callCustomApi(who, ctx), links: [] };
-    if (provider === 'groq') return { text: await callGroq(who, ctx), links: [] };
-    if (provider === 'gemini') return await callGemini(who, ctx);
-    await sleep(220);
-    return demoReply(who, userText, spoken);
+    // 키가 하나도 없는 순수 데모 상태 — 예전처럼 데모 답변으로 답합니다.
+    if (!attempts) {
+      if (!anyKeyAtAll(workerMap)) {
+        await sleep(220);
+        return demoReply(who, userText, spoken);
+      }
+      throw new Error(engineName(chain[0]) + ' 키가 없어서 답할 수 없어요. 설정에서 키를 넣어 주세요.');
+    }
+
+    var freeTried = false;
+    for (var k = 0; k < chain.length; k++) {
+      if (FREE_ENGINES.indexOf(chain[k]) >= 0) { freeTried = true; break; }
+    }
+
+    // 유료·커스텀 엔진만 실패했으면 그 엔진의 사유만 알립니다(무료 폴백에 섞지 않음).
+    if (!freeTried) {
+      var pe = new Error(engineName(chain[0]) + ' 응답 실패: ' + shortErr(lastErr, 140));
+      pe.status = errStatus(lastErr);
+      throw pe;
+    }
+
+    var msg = isQuotaErr(lastErr)
+      ? FREE_EXHAUSTED_TEXT
+      : '무료 모델을 모두 시도했지만 지금은 답하지 못했어요. 잠시 후 다시 시도하거나 다른 무료 키를 추가해 주세요.' +
+        (lastErr ? ' (사유: ' + shortErr(lastErr, 90) + ')' : '');
+    var ex = new Error(msg);
+    ex.freeExhausted = true;
+    ex.status = errStatus(lastErr) || 429;
+    throw ex;
+  }
+
+  // 고른 엔진 하나를 브라우저에서 직접 부릅니다.
+  async function callEngineDirect(engine, who, ctx) {
+    if (engine === 'anthropic') return { text: await callClaude(who, ctx), links: [] };
+    if (engine === 'openai') return { text: await callOpenAI(who, ctx), links: [] };
+    if (engine === 'openrouter') return { text: await callOpenRouter(who, ctx), links: [] };
+    if (engine === 'custom') return { text: await callCustomApi(who, ctx), links: [] };
+    if (engine === 'groq') return { text: await callGroq(who, ctx), links: [] };
+    if (engine === 'gemini') return await callGemini(who, ctx);
+    throw new Error('알 수 없는 엔진: ' + engine);
   }
 
   function cleanReply(t) {
@@ -2786,7 +3248,7 @@
       body: JSON.stringify({
         model: model,
         max_tokens: 800,
-        system: personaFor(who),
+        system: personaFor(who, ctx),
         messages: historyFor(who, ctx)
       })
     });
@@ -2812,7 +3274,7 @@
     var key = (c && c.apiKey.trim() ? c.apiKey.trim() : state.settings.openaiKey.trim());
     var model = cleanModelName((c && c.model) || state.settings.pickleModel, 'gpt-4o-mini');
 
-    var msgs = [{ role: 'system', content: personaFor(who) }].concat(historyFor(who, ctx));
+    var msgs = [{ role: 'system', content: personaFor(who, ctx) }].concat(historyFor(who, ctx));
 
     var res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -2909,7 +3371,7 @@
 
   function geminiPayload(who, toolStyle, ctx) {
     var body = {
-      systemInstruction: { parts: [{ text: personaFor(who) }] },
+      systemInstruction: { parts: [{ text: personaFor(who, ctx) }] },
       contents: geminiContents(who, ctx),
       generationConfig: geminiGenConfig({
         temperature: who === 'claude' ? 0.5 : 0.8,
@@ -3065,7 +3527,7 @@
   function groqPayload(who, model, ctx) {
     var body = {
       model: model,
-      messages: [{ role: 'system', content: personaFor(who) }].concat(historyFor(who, ctx)),
+      messages: [{ role: 'system', content: personaFor(who, ctx) }].concat(historyFor(who, ctx)),
       temperature: who === 'claude' ? 0.5 : 0.75,
       max_completion_tokens: 800
     };
@@ -3192,7 +3654,7 @@
         model: model,
         temperature: 0.7,
         max_tokens: 800,
-        messages: [{ role: 'system', content: personaFor(who) }].concat(historyFor(who, ctx))
+        messages: [{ role: 'system', content: personaFor(who, ctx) }].concat(historyFor(who, ctx))
       })
     });
 
@@ -3212,7 +3674,7 @@
     var key = (c && c.apiKey.trim() ? c.apiKey.trim() : state.settings.openrouterKey.trim());
     var model = cleanModelName((c && c.model) || state.settings.openrouterModel, OPENROUTER_DEFAULT_MODEL);
 
-    var msgs = [{ role: 'system', content: personaFor(who) }].concat(historyFor(who, ctx));
+    var msgs = [{ role: 'system', content: personaFor(who, ctx) }].concat(historyFor(who, ctx));
 
     var res = await fetch(OPENROUTER_URL, {
       method: 'POST',
@@ -3262,7 +3724,7 @@
       model: modelForEngine(engine, who),
       message: userText,
       history: historyFor(who, ctx),
-      systemPrompt: personaFor(who),
+      systemPrompt: personaFor(who, ctx),
       search: engine === 'gemini' ? wantsSearch(who) : false
     };
 
@@ -3591,6 +4053,7 @@
     el.groqResult.hidden = true;
     el.geminiResult.hidden = true;
     el.testResult.hidden = true;
+    if (el.saveAllNote) el.saveAllNote.textContent = '키 · 모델 · 워커 주소를 한 번에 저장해요';
     refreshLockSection();
     syncMembers();
     syncSearchUI();
@@ -3666,7 +4129,7 @@
         ? '이름·아이콘·성격·엔진을 바꿀 수 있어요. 저장하면 헤더·퀵 칩·@멘션에 바로 반영돼요.'
         : (c
           ? '이름·아이콘·성격·엔진을 바꿀 수 있어요. 저장하면 대화방 이름표에도 바로 반영돼요.'
-          : '이름·성격·엔진만 고르면 돼요. 키가 없으면 데모 응답으로 답하고, 키를 넣으면 바로 실제 AI가 돼요.');
+          : '이름·성격·엔진만 고르면 돼요. 무료 엔진을 선택하면 한도 초과 시 다른 무료 엔진으로 자동 전환합니다.');
     }
     if (el.aiDelRow) el.aiDelRow.hidden = !editingAiId || editingAiId === 'pickle';
     if (el.aiResetRow) el.aiResetRow.hidden = !builtin;
@@ -4118,7 +4581,7 @@
         var nm = h('div', 'm-name');
         var lb = h('span', 'm-label', meta.name);
         nm.appendChild(lb);
-        nm.appendChild(h('small', null, (ENGINES[c.engine] ? ENGINES[c.engine].short : 'AI') + ' · ' + providerLabel(c.id)));
+        nm.appendChild(h('small', null, providerLabel(c.id)));
         row.appendChild(nm);
 
         var edit = document.createElement('button');
@@ -4260,55 +4723,30 @@
       syncStatus();
     });
   }
-  /* ── 어느 키로 답할지 ─────────────────── */
-  // Groq 키 → Gemini 키 → 데모 모드. AI별 전용 키(Anthropic·OpenAI)는 그 AI에서만 먼저 씁니다.
-  // 직접 추가한 AI는 고른 엔진을 그대로 따릅니다.
-  function providerFor(who) {
-    var hasGroq = !!state.settings.groqKey.trim();
-    var hasGemini = !!state.settings.geminiKey.trim();
-    var hasOR = !!state.settings.openrouterKey.trim();
-
+  /* ── 어느 엔진으로 답할지 (무료 우선) ─── */
+  // 무료 엔진은 Gemini → Groq → OpenRouter 순서로 자동 전환하고,
+  // 유료(OpenAI·Anthropic)·커스텀 API는 사용자가 직접 고른 경우에만 그 하나를 씁니다.
+  function chainFor(who) {
+    var selected = '';
     if (isCustomKey(who)) {
       var c = customById(who);
-      if (!c) return 'demo';
-      if (c.engine === 'gemini') return hasGemini ? 'gemini' : 'demo';
-      if (c.engine === 'groq') return hasGroq ? 'groq' : 'demo';
-      if (c.engine === 'openrouter') return (c.apiKey.trim() || hasOR) ? 'openrouter' : 'demo';
-      if (c.engine === 'openai') return (c.apiKey.trim() || state.settings.openaiKey.trim()) ? 'openai' : 'demo';
-      if (c.engine === 'anthropic') return (c.apiKey.trim() || state.settings.anthropicKey.trim()) ? 'anthropic' : 'demo';
-      if (c.engine === 'custom') return (customEndpoint(c.baseUrl) && c.model.trim()) ? 'custom' : 'demo';
-      return 'demo';
+      selected = c && c.engine;
+    } else {
+      selected = builtinPref(who).engine;
     }
+    if (selected === 'auto') selected = '';
 
-    // 기본 AI도 설정에서 엔진을 직접 고를 수 있습니다(비어 있으면 기존 순서).
-    var ov = builtinPref(who).engine;
-    if (ov) {
-      if (ov === 'gemini') return hasGemini ? 'gemini' : 'demo';
-      if (ov === 'groq') return hasGroq ? 'groq' : 'demo';
-      if (ov === 'openrouter') return hasOR ? 'openrouter' : 'demo';
-      if (ov === 'openai') return state.settings.openaiKey.trim() ? 'openai' : 'demo';
-      if (ov === 'anthropic') return state.settings.anthropicKey.trim() ? 'anthropic' : 'demo';
-      return 'demo';
+    // 무료 엔진을 직접 골라도 실패하면 나머지 무료 엔진으로 이어 갑니다.
+    if (selected && FREE_ENGINES.indexOf(selected) >= 0) {
+      return [selected].concat(FREE_CHAIN.filter(function (e) { return e !== selected; }));
     }
+    // 유료·커스텀 엔진은 직접 고른 그 하나만.
+    if (selected && ENGINE_KEYS.indexOf(selected) >= 0) return [selected];
+    return FREE_CHAIN.slice();
+  }
 
-    if (who === 'claude') {
-      if (state.settings.anthropicKey.trim()) return 'anthropic';
-      if (hasGroq) return 'groq';
-      if (hasGemini) return 'gemini';
-      if (hasOR) return 'openrouter';
-      return 'demo';
-    }
-    if (who === 'groq') {
-      if (hasGroq) return 'groq';
-      if (hasGemini) return 'gemini';
-      if (hasOR) return 'openrouter';
-      return 'demo';
-    }
-    if (state.settings.openaiKey.trim()) return 'openai';
-    if (hasGroq) return 'groq';
-    if (hasGemini) return 'gemini';
-    if (hasOR) return 'openrouter';
-    return 'demo';
+  function engineName(engine) {
+    return ENGINES[engine] ? ENGINES[engine].short : (engine || 'AI');
   }
 
   // 브라우저에 그 엔진 키가 있는지(Worker 실패 시 직접 호출로 넘어갈지 판단)
@@ -4321,30 +4759,38 @@
     return false;
   }
 
-  // 키가 없어도 Worker에 보낼 엔진을 정합니다.
-  // Worker가 알려 준 쓸 수 있는 엔진(engines)이 있으면 그 안에서 우선순위대로 고릅니다.
-  function enginePrefs(who) {
-    if (isCustomKey(who)) {
-      var c = customById(who);
-      return c ? [c.engine] : ['gemini'];
+  // 이 엔진을 지금 부를 수 있는지 — Worker 키 · 브라우저 키 · 커스텀 AI 전용 키
+  function hasDirectKey(engine, who) {
+    if (engine === 'custom') {
+      var c0 = customById(who);
+      return !!(c0 && customEndpoint(c0.baseUrl) && String(c0.model || '').trim());
     }
-    var ov = builtinPref(who).engine;
-    if (ov && ov !== 'custom') return [ov];
-    if (who === 'claude') return ['gemini', 'anthropic', 'openrouter'];
-    if (who === 'groq') return ['groq', 'gemini', 'openrouter'];
-    return ['openai', 'groq', 'gemini', 'openrouter'];
+    var c = isCustomKey(who) ? customById(who) : null;
+    if (c && c.engine === engine && c.apiKey && c.apiKey.trim()) return true;
+    return hasBrowserKey(engine);
   }
 
-  function engineFor(who, engines) {
-    var prefs = enginePrefs(who);
-    if (engines) {
-      for (var i = 0; i < prefs.length; i++) {
-        if (engines[prefs[i]]) return prefs[i];
-      }
+  // 키가 하나라도 설정돼 있는지 — 없으면 예전처럼 데모로 답합니다.
+  function anyKeyAtAll(workerMap) {
+    if (hasBrowserKey('gemini') || hasBrowserKey('groq') || hasBrowserKey('openrouter') ||
+        hasBrowserKey('openai') || hasBrowserKey('anthropic')) return true;
+    if (workerMap) {
+      var ks = Object.keys(workerMap);
+      for (var i = 0; i < ks.length; i++) { if (workerMap[ks[i]]) return true; }
     }
-    var p = providerFor(who);
-    if (p !== 'demo' && p !== 'custom') return p;
-    return prefs[0];
+    return false;
+  }
+
+  function errStatus(err) {
+    if (err && typeof err.status === 'number' && err.status > 0) return err.status;
+    var m = /HTTP\s*(\d{3})/.exec(String((err && err.message) || ''));
+    return m ? Number(m[1]) : 0;
+  }
+
+  // 429·한도 초과 계열인지 (안내 문구를 정확히 고르기 위해)
+  function isQuotaErr(err) {
+    if (errStatus(err) === 429) return true;
+    return /429|rate.?limit|quota|한도|too many/i.test(String((err && err.message) || ''));
   }
 
   // Worker에게 어떤 엔진 키가 있는지 한 번 물어보고 10분 동안 기억합니다.
@@ -4378,34 +4824,28 @@
   }
 
   function providerLabel(who) {
-    var p = providerFor(who);
+    var chain = chainFor(who);
+    var last = lastEngine[who];
 
-    if (isCustomKey(who)) {
-      var c = customById(who);
-      if (!c) return '내보냄';
-      if (p === 'anthropic') return 'Anthropic · ' + cleanModelName(c.model, state.settings.claudeModel.trim() || 'claude-sonnet-4-5');
-      if (p === 'openai') return 'OpenAI · ' + cleanModelName(c.model, state.settings.pickleModel.trim() || 'gpt-4o-mini');
-      if (p === 'openrouter') return 'OpenRouter · ' + cleanModelName(c.model, state.settings.openrouterModel.trim() || OPENROUTER_DEFAULT_MODEL);
-      if (p === 'custom') return '커스텀 API · ' + c.model;
-      if (p === 'groq') return 'Groq · ' + cleanModelName(c.model, groqModel());
-      if (p === 'gemini') return 'Gemini · ' + cleanModelName(c.model, geminiModel()) + (wantsSearch(who) ? ' 🔍' : '');
-      if (workerEndpoint(state.settings.workerUrl) && c.engine !== 'custom') return 'Worker · ' + c.engine;
-      return '데모 응답';
+    if (last) {
+      var model = modelForEngine(last, who);
+      return engineName(last) + (model ? ' · ' + model : '') +
+        (last === 'gemini' && wantsSearch(who) ? ' 🔍' : '');
     }
 
-    if (p === 'anthropic') return '실시간 · ' + (state.settings.claudeModel.trim() || 'claude-sonnet-4-5');
-    if (p === 'openai') return '실시간 · ' + (state.settings.pickleModel.trim() || 'gpt-4o-mini');
-    if (p === 'openrouter') return 'OpenRouter · ' + (state.settings.openrouterModel.trim() || OPENROUTER_DEFAULT_MODEL);
-    if (p === 'groq') return 'Groq · ' + groqModel();
-    if (p === 'gemini') return 'Gemini · ' + geminiModel() + (wantsSearch(who) ? ' 🔍' : '');
-    if (workerEndpoint(state.settings.workerUrl)) return 'Worker · ' + engineFor(who);
+    var usable = chain.filter(function (e) { return hasDirectKey(e, who); });
+    if (usable.length) return '대기 · ' + usable.map(engineName).join(' → ');
+    if (workerEndpoint(state.settings.workerUrl) && chain.indexOf('custom') < 0) return '대기 · Worker';
     return '데모 모드';
   }
 
   // 실제 AI가 답하는지(Worker 경로 포함) — 연결 상태 점 표시용
   function aiLive(who) {
-    if (providerFor(who) !== 'demo') return true;
-    return !!workerEndpoint(state.settings.workerUrl) && engineFor(who) !== 'custom';
+    var chain = chainFor(who);
+    for (var i = 0; i < chain.length; i++) {
+      if (hasDirectKey(chain[i], who)) return true;
+    }
+    return !!workerEndpoint(state.settings.workerUrl) && chain.indexOf('custom') < 0;
   }
 
   function syncStatus() {
@@ -4543,7 +4983,15 @@
     });
   }
 
+  // 설정 모달의 키·모델·Worker 주소를 한 번에 저장합니다. 모든 저장 버튼이 이 함수를 씁니다.
   function saveAllSettings() {
+    var rawWorker = el.workerUrl.value.trim();
+    if (rawWorker && !workerEndpoint(rawWorker)) {
+      setResult(el.workerResult, 'https:// 로 시작하는 Worker 주소를 넣어 주세요.', true);
+      try { el.workerUrl.focus(); } catch (e) {}
+      return false;
+    }
+
     state.settings.groqKey = el.keyGroq.value.trim();
     state.settings.groqModel = el.modelGroq.value.trim() || GROQ_DEFAULT_MODEL;
     state.settings.geminiKey = el.keyGemini.value.trim();
@@ -4552,43 +5000,62 @@
     state.settings.openaiKey = el.keyOpenai.value.trim();
     state.settings.openrouterKey = el.keyOpenrouter.value.trim();
     state.settings.openrouterModel = el.modelOpenrouter.value.trim() || OPENROUTER_DEFAULT_MODEL;
-    state.settings.workerUrl = el.workerUrl.value.trim();
+    state.settings.workerUrl = rawWorker;
     state.settings.claudeModel = el.modelClaude.value.trim() || 'claude-sonnet-4-5';
     state.settings.pickleModel = el.modelPickle.value.trim() || 'gpt-4o-mini';
+
     el.modelGroq.value = state.settings.groqModel;
     el.modelGemini.value = state.settings.geminiModel;
     el.modelOpenrouter.value = state.settings.openrouterModel;
+    el.modelClaude.value = state.settings.claudeModel;
+    el.modelPickle.value = state.settings.pickleModel;
+
+    workerInfo = { url: '', engines: null, at: 0 };   // Worker 구성이 바뀌었을 수 있어 다시 확인
     save();
+    syncModelPicks();
     syncStatus();
     syncSearchUI();
+    return true;
+  }
+
+  function markSaved() {
+    if (!el.saveAllNote) return;
+    var t = new Date();
+    var hh = String(t.getHours()).padStart(2, '0');
+    var mm = String(t.getMinutes()).padStart(2, '0');
+    el.saveAllNote.textContent = '저장했어요 · ' + hh + ':' + mm + ' · 키·모델·워커 주소 모두 반영';
   }
 
   el.saveSettings.addEventListener('click', function () {
-    saveAllSettings();
-    toast('설정을 저장했어요');
+    if (!saveAllSettings()) return;
+    markSaved();
+    toast('모든 설정을 저장했어요');
   });
 
+  if (el.saveAll) {
+    el.saveAll.addEventListener('click', function () {
+      if (!saveAllSettings()) return;
+      markSaved();
+      toast('모든 설정을 한 번에 저장했어요');
+    });
+  }
+
   el.saveGroq.addEventListener('click', function () {
-    saveAllSettings();
-    toast(state.settings.groqKey ? 'Groq 키를 저장했어요 · 셋 다 실제 응답' : 'Groq 키를 비웠어요');
+    if (!saveAllSettings()) return;
+    markSaved();
+    toast(state.settings.groqKey ? '저장했어요 · Groq 키로 답해요' : 'Groq 키를 비웠어요');
   });
 
   el.saveGemini.addEventListener('click', function () {
-    saveAllSettings();
-    toast(state.settings.geminiKey ? 'Gemini 키를 저장했어요 · 이제 세 AI 모두 실제 응답' : 'Gemini 키를 비웠어요');
+    if (!saveAllSettings()) return;
+    markSaved();
+    toast(state.settings.geminiKey ? '저장했어요 · Gemini 키로 답해요' : 'Gemini 키를 비웠어요');
   });
 
   el.saveWorker.addEventListener('click', function () {
-    var raw = el.workerUrl.value.trim();
-    if (raw && !workerEndpoint(raw)) {
-      setResult(el.workerResult, 'https:// 로 시작하는 Worker 주소를 넣어 주세요.', true);
-      return;
-    }
-    state.settings.workerUrl = raw;
-    workerInfo = { url: '', engines: null, at: 0 };
-    save();
-    syncStatus();
-    toast(raw ? 'Worker 주소를 저장했어요' : 'Worker 주소를 비웠어요');
+    if (!saveAllSettings()) return;
+    markSaved();
+    toast(state.settings.workerUrl ? '저장했어요 · Worker 주소를 씁니다' : 'Worker 주소를 비웠어요');
   });
 
   el.testWorker.addEventListener('click', async function () {
@@ -4668,7 +5135,7 @@
     try {
       var t = await testGroqKey(gqk, gqm);
       var note = t.model !== gqm ? '\n' + gqm + '은(는) 지금 쓸 수 없어서 ' + t.model + '로 확인했어요.' : '';
-      setResult(el.groqResult, 'Groq ✅ 연결됨 (' + t.model + ')' + note + '\n저장을 누르면 피클·Gemini·Groq가 이 키로 답해요.', false);
+      setResult(el.groqResult, 'Groq ✅ 연결됨 (' + t.model + ')' + note + '\n아래 「모든 설정 한 번에 저장」을 누르면 피클·Gemini·Groq가 이 키로 답해요.', false);
     } catch (err) {
       var msg = 'Groq ❌ ' + shortErr(err, 200);
       if (err && err.status === 404) {
@@ -4696,7 +5163,7 @@
     setResult(el.geminiResult, '확인 중…', false);
     try {
       var t = await testGeminiKey(gk, gm);
-      setResult(el.geminiResult, 'Gemini ✅ 연결됨 (' + t.model + ')\n저장을 누르면 피클·Gemini·Groq가 이 키로 답해요.', false);
+      setResult(el.geminiResult, 'Gemini ✅ 연결됨 (' + t.model + ')\n아래 「모든 설정 한 번에 저장」을 누르면 피클·Gemini·Groq가 이 키로 답해요.', false);
     } catch (err) {
       var msg = 'Gemini ❌ ' + shortErr(err, 200);
       if (err && err.status === 404) {
@@ -4729,7 +5196,7 @@
     var lines = [];
 
     if (!gqk && !gk && !ak && !ok) {
-      setResult(el.testResult, '키가 아직 없어요. Groq이나 Gemini 키 하나면 세 AI 모두 실제로 답해요. (지금은 모두 데모 모드)', true);
+      setResult(el.testResult, '키가 아직 없어요. 무료 키(Gemini·Groq·OpenRouter) 하나면 세 AI 모두 실제로 답해요. (지금은 데모로 답하는 상태)', true);
       el.testConn.disabled = false;
       return;
     }
@@ -4776,12 +5243,12 @@
           try { d1 = await r1.json(); } catch (e1) { d1 = null; }
           throw new Error(httpErrText(r1.status, d1));
         }
-        lines.push('Gemini ✅ 연결됨 (' + cm + ')');
+        lines.push('Anthropic ✅ 연결됨 (' + cm + ')');
       } catch (e2) {
-        lines.push('Gemini ❌ ' + shortErr(e2, 180));
+        lines.push('Anthropic ❌ ' + shortErr(e2, 180));
       }
     } else {
-      lines.push('Gemini · 전용 키 없음' + (gk ? ' (Gemini 키 사용)' : ' (데모 모드)'));
+      lines.push('Anthropic · 키 없음' + (gk ? ' (Gemini 키로 답해요)' : ''));
     }
 
     if (ok) {
@@ -4803,12 +5270,12 @@
           try { d2 = await r2.json(); } catch (e3) { d2 = null; }
           throw new Error(httpErrText(r2.status, d2));
         }
-        lines.push('피클 ✅ 연결됨 (' + pm + ')');
+        lines.push('OpenAI ✅ 연결됨 (' + pm + ')');
       } catch (e4) {
-        lines.push('피클 ❌ ' + shortErr(e4, 180));
+        lines.push('OpenAI ❌ ' + shortErr(e4, 180));
       }
     } else {
-      lines.push('피클 · 전용 키 없음' + (gqk ? ' (Groq 사용)' : (gk ? ' (Gemini 사용)' : ' (데모 모드)')));
+      lines.push('OpenAI · 키 없음 (무료 엔진으로 답해요)');
     }
 
     el.testResult.textContent = lines.join('\n');
@@ -4944,6 +5411,7 @@
     syncStatus();
     syncMembers();
     syncSearchUI();
+    syncDebateChip();
     refreshLockSection();    if (hasLock()) showLock();
     if (removed > 0) {
       addMessage('system', '30일이 지난 메시지 ' + removed + '개를 정리했어요.');
