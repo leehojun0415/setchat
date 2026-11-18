@@ -659,6 +659,7 @@
     width:100%;font-size:11.5px;font-weight:700;color:#374151;
     letter-spacing:-0.01em;margin-bottom:2px;
   }
+  .search-who-chips{display:flex;gap:6px;flex-wrap:wrap;width:100%;}
   .chip-check{
     display:inline-flex;align-items:center;gap:5px;
     border:1px solid #E6E8EC;background:#fff;border-radius:999px;
@@ -955,9 +956,7 @@
 
           <div class="search-who" id="search-who">
             <div class="sec-sub">검색 결과를 붙일 답변</div>
-            <label class="chip-check" id="search-chip-pickle"><input type="checkbox" id="search-pickle"> <span id="search-label-pickle">🥒 피클</span></label>
-            <label class="chip-check" id="search-chip-claude"><input type="checkbox" id="search-claude"> <span id="search-label-claude">🤖 Gemini</span></label>
-            <label class="chip-check" id="search-chip-groq"><input type="checkbox" id="search-groq"> <span id="search-label-groq">⚡ Groq</span></label>
+            <div class="search-who-chips" id="search-who-chips"></div>
           </div>
           <p class="hint" id="search-hint"></p>
         </section>
@@ -1527,6 +1526,7 @@
 
   var MEMBER_KEYS = BASE_KEYS.slice();
   var MENTION = {};
+  var searchWhoSig = '';      // 「검색 결과를 붙일 답변」 칩을 다시 그릴지 판단하는 지문
 
   /* ── 커스텀 AI·이름 도우미 ────────────── */
   // 받침 유무에 맞는 조사를 고릅니다(예: 피클이 / Gemini가, 피클은 / Gemini는).
@@ -1713,6 +1713,13 @@
       PERSONA[c.id] = buildCustomPersona(c);
       MEMBER_KEYS.push(c.id);
     });
+    // 지운 AI의 검색 설정은 남겨 두지 않습니다(다시 생길 id가 아니에요).
+    var sf = state.settings.searchFor;
+    if (sf && typeof sf === 'object') {
+      Object.keys(sf).forEach(function (k) {
+        if (isCustomKey(k) && !AI[k]) delete sf[k];
+      });
+    }
     buildMentions();
   }
 
@@ -1802,6 +1809,25 @@
     return out;
   }
 
+  // 「검색 결과를 붙일 답변」은 기본 AI + 직접 추가한 AI(커스텀) 모두의 값을 담습니다.
+  // 저장된 값이 없는 AI는 기본으로 켜 둔 것으로 봅니다.
+  function readSearchFor(src, base) {
+    var out = {};
+    BASE_KEYS.forEach(function (w) { out[w] = !base || base[w] !== false; });
+    customList().forEach(function (c) {
+      if (c && c.id) out[c.id] = !base || base[c.id] !== false;
+    });
+    if (src && typeof src === 'object') {
+      BASE_KEYS.forEach(function (w) {
+        if (typeof src[w] === 'boolean') out[w] = src[w];
+      });
+      customList().forEach(function (c) {
+        if (c && c.id && typeof src[c.id] === 'boolean') out[c.id] = src[c.id];
+      });
+    }
+    return out;
+  }
+
   var busy = false;
   var demoSpin = 0;
   var toastTimer = null;
@@ -1871,9 +1897,7 @@
     memberResult: document.getElementById('member-result'),
     searchOn: document.getElementById('search-on'),
     searchWho: document.getElementById('search-who'),
-    searchPickle: document.getElementById('search-pickle'),
-    searchClaude: document.getElementById('search-claude'),
-    searchGroq: document.getElementById('search-groq'),
+    searchWhoChips: document.getElementById('search-who-chips'),
     searchHint: document.getElementById('search-hint'),
     pmSearch: document.getElementById('pm-search'),
     plusBtn: document.getElementById('plus-btn'),
@@ -1969,12 +1993,6 @@
     labelPickle: document.getElementById('label-pickle'),
     labelClaude: document.getElementById('label-claude'),
     labelGroq: document.getElementById('label-groq'),
-    searchLabelPickle: document.getElementById('search-label-pickle'),
-    searchLabelClaude: document.getElementById('search-label-claude'),
-    searchLabelGroq: document.getElementById('search-label-groq'),
-    searchChipPickle: document.getElementById('search-chip-pickle'),
-    searchChipClaude: document.getElementById('search-chip-claude'),
-    searchChipGroq: document.getElementById('search-chip-groq'),
     editPickle: document.getElementById('edit-pickle'),
     editClaude: document.getElementById('edit-claude'),
     editGroq: document.getElementById('edit-groq'),
@@ -2535,7 +2553,7 @@
       if (typeof data.settings.webSearch === 'boolean') state.settings.webSearch = data.settings.webSearch;
       if (typeof data.settings.debateMode === 'boolean') state.settings.debateMode = data.settings.debateMode;
       if (typeof data.settings.deepThink === 'boolean') state.settings.deepThink = data.settings.deepThink;
-      state.settings.searchFor = readFlags(data.settings.searchFor, state.settings.searchFor, false);
+      state.settings.searchFor = readSearchFor(data.settings.searchFor, state.settings.searchFor);
     }
 
     // 🤝 토론·종합을 기본으로 켭니다(2026-11-18). 예전에 자동으로 저장된 「끄기」 값이 있는 기기에도
@@ -5138,11 +5156,12 @@
 
   function wantsSearch(who) {
     if (state.settings.webSearch === false) return false;
+    if (state.settings.searchFor[who] === false) return false;   // 칩에서 끈 답변
     if (isCustomKey(who)) {
       var c = customById(who);
       return !!c && c.engine === 'gemini' && c.webSearch !== false;
     }
-    return state.settings.searchFor[who] !== false;
+    return true;
   }
 
   function syncHeaderSub() {
@@ -5295,32 +5314,90 @@
   }
 
   // 지금 답변에 검색 결과가 실제로 붙는지 보여 줍니다(키가 없거나 꺼져 있으면 숨김).
+  // 지운 기본 AI는 검색 대상에서도 빠지고, 직접 추가한 AI(+ AI 추가)는 전부 칩으로 보입니다.
+  function searchChipKeys() {
+    return MEMBER_KEYS.filter(function (w) { return !isBuiltinHidden(w); });
+  }
+
+  function searchChipWhy(who) {
+    if (!isCustomKey(who)) return '';
+    var c = customById(who);
+    if (!c) return '';
+    if (c.engine !== 'gemini') return '이 AI는 Gemini 엔진일 때만 검색 결과가 붙어요(지금은 ' + engineName(c.engine) + ' 엔진).';
+    if (c.webSearch === false) return '이 AI는 수정 화면에서 「웹 검색」을 꺼 두어 검색 결과가 붙지 않아요.';
+    return '';
+  }
+
+  // 지금 등록된 AI 전체(기본 + 직접 추가)로 칩을 다시 그립니다. 목록이나 이름이 바뀔 때만 새로 그려요.
+  function renderSearchWho() {
+    var box = el.searchWhoChips;
+    if (!box) return;
+    var keys = searchChipKeys();
+    var sig = keys.map(function (w) {
+      var m = AI[w] || {};
+      var c = isCustomKey(w) ? customById(w) : null;
+      return w + '|' + (m.name || '') + '|' + (m.avatar || '') + '|' +
+        (c ? (c.engine || '') + '/' + (c.webSearch !== false ? '1' : '0') : '');
+    }).join(';');
+
+    if (sig !== searchWhoSig) {
+      searchWhoSig = sig;
+      try { box.innerHTML = ''; } catch (e) {}
+      keys.forEach(function (w) {
+        var m = AI[w] || metaFor(w);
+        var chip = document.createElement('label');
+        chip.className = 'chip-check';
+        chip.setAttribute('data-who', w);
+
+        var cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.setAttribute('data-who', w);
+        cb.setAttribute('aria-label', m.name + ' 답변에 검색 결과 붙이기');
+        chip.appendChild(cb);
+
+        var span = document.createElement('span');
+        span.textContent = m.avatar + ' ' + m.name;
+        chip.appendChild(span);
+
+        var why = searchChipWhy(w);
+        if (why) chip.title = why;
+
+        box.appendChild(chip);
+      });
+    }
+
+    Array.prototype.forEach.call(box.querySelectorAll('input[data-who]'), function (cb) {
+      cb.checked = state.settings.searchFor[cb.getAttribute('data-who')] !== false;
+      cb.disabled = state.settings.webSearch === false;
+    });
+  }
+
+  // 지금 답변에 검색 결과가 실제로 붙는지 보여 줍니다(키가 없거나 꺼져 있으면 숨김).
   function syncSearchUI() {
     var on = state.settings.webSearch !== false;
     el.searchOn.checked = on;
 
-    var boxes = { pickle: el.searchPickle, claude: el.searchClaude, groq: el.searchGroq };
-    var labels = { pickle: el.searchLabelPickle, claude: el.searchLabelClaude, groq: el.searchLabelGroq };
-    var chips = { pickle: el.searchChipPickle, claude: el.searchChipClaude, groq: el.searchChipGroq };
-    BASE_KEYS.forEach(function (w) {
-      var box = boxes[w];
-      if (labels[w]) labels[w].textContent = AI[w].avatar + ' ' + AI[w].name;
-      if (chips[w]) chips[w].hidden = isBuiltinHidden(w);   // 지운 AI는 검색 대상에서도 빠짐
-      if (!box) return;
-      box.checked = state.settings.searchFor[w] !== false;
-      box.disabled = !on;
-    });
+    renderSearchWho();
     el.searchWho.className = 'search-who' + (on ? '' : ' off');
 
     var parts = ['Gemini 키로 답할 때 구글 검색 결과와 출처 링크가 붙어요. 끄면 모델이 아는 것만으로 답합니다.'];
+    var able = MEMBER_KEYS.filter(memberOn);
+    var onList = able.filter(function (w) { return state.settings.searchFor[w] !== false; });
+    var noWay = onList.filter(function (w) { return isCustomKey(w) && !wantsSearch(w); });
+    var live = onList.filter(function (w) { return noWay.indexOf(w) < 0; });
+    var names = function (list) { return list.map(function (w) { return AI[w].name; }).join(' · '); };
+
     if (!state.settings.geminiKey.trim()) {
       parts.push('지금은 Gemini 키가 없어서 검색이 붙지 않아요. 위에 키를 넣으면 바로 켜집니다.');
-    } else if (on && !MEMBER_KEYS.some(wantsSearch)) {
-      parts.push('검색을 붙일 답변을 하나도 고르지 않았어요 — 지금은 링크 없이 답합니다.');
-    }
-    var gem = customList().filter(function (c) { return c.engine === 'gemini' && memberOn(c.id) && c.webSearch !== false; });
-    if (gem.length && state.settings.geminiKey.trim()) {
-      parts.push('직접 추가한 ' + gem.map(function (c) { return c.name; }).join(' · ') + ' 도 Gemini 검색을 함께 써요.');
+    } else if (on) {
+      if (live.length) parts.push('검색을 붙이도록 켜 둔 답변: ' + names(live));
+      if (noWay.length) {
+        var lastName = AI[noWay[noWay.length - 1]].name;
+        parts.push(names(noWay) + josa(lastName, '은', '는') +
+          ' Gemini 엔진이 아니거나 「웹 검색」을 꺼 두어 결과가 붙지 않아요.');
+      } else if (!live.length) {
+        parts.push('검색을 붙일 답변을 하나도 고르지 않았어요 — 지금은 링크 없이 답합니다.');
+      }
     }
     el.searchHint.textContent = parts.join(' ');
   }
@@ -5348,10 +5425,16 @@
     });
   }
 
-  function bindSearchWho(box, who) {
-    if (!box) return;
-    box.addEventListener('change', function () {
-      var next = readFlags(state.settings.searchFor, state.settings.searchFor, false);
+  // 칩은 다시 그려지므로 목록 하나에 위임해 두면 새로 추가한 AI도 바로 동작해요.
+  function bindSearchWhoList() {
+    if (!el.searchWho) return;
+    el.searchWho.addEventListener('change', function (ev) {
+      var box = ev.target;
+      if (!box || box.type !== 'checkbox' || !box.getAttribute) return;
+      var who = box.getAttribute('data-who');
+      if (!who) return;
+
+      var next = readSearchFor(state.settings.searchFor, state.settings.searchFor);
       next[who] = box.checked;
       state.settings.searchFor = next;
       save();
@@ -5609,9 +5692,7 @@
   bindMember(el.memberPickle, 'pickle');
   bindMember(el.memberClaude, 'claude');
   bindMember(el.memberGroq, 'groq');
-  bindSearchWho(el.searchPickle, 'pickle');
-  bindSearchWho(el.searchClaude, 'claude');
-  bindSearchWho(el.searchGroq, 'groq');
+  bindSearchWhoList();
 
   if (el.searchOn) {
     el.searchOn.addEventListener('change', function () {
