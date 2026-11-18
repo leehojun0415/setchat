@@ -365,6 +365,44 @@
     white-space:pre-wrap;word-break:break-word;
   }
   .debate .d-name{font-weight:700;color:#111827;}
+  /* 2단계 검토 표시 — 반론·허점·근거 미확인·동의 */
+  .debate .d-flags{display:flex;flex-direction:column;gap:3px;padding:2px 0 1px;}
+  .debate .d-flag{
+    font-size:11.5px;line-height:1.5;letter-spacing:-0.01em;
+    padding:2px 7px;border-radius:7px;border-left:2px solid #E6E8EC;
+    white-space:pre-wrap;word-break:break-word;
+  }
+  .debate .d-flag b{font-weight:700;margin-right:4px;}
+  .debate .d-flag.against{background:#FDF1F1;border-left-color:#E7A6A6;color:#8C2B2B;}
+  .debate .d-flag.hole{background:#FFF8EA;border-left-color:#E8C989;color:#7A5310;}
+  .debate .d-flag.unsure{background:#FFF3EA;border-left-color:#EDB183;color:#8A3F12;}
+  .debate .d-flag.agree{background:#F0F9F3;border-left-color:#A8DBBB;color:#1B5E3A;}
+
+  /* 📌 3단계 신뢰도 종합 카드 — 최종 결론·판단 근거·일치점/차이점·남은 불일치 */
+  .final-card{
+    flex:1 1 auto;min-width:0;max-width:100%;
+    background:#fff;border:1px solid #E1E7EE;border-radius:16px;
+    padding:10px 12px 7px;box-shadow:0 1px 2px rgba(17,24,39,.04);
+  }
+  .final-card .fc-sec{margin:0 0 9px;}
+  .final-card .fc-sec:last-child{margin-bottom:2px;}
+  .final-card .fc-hd{
+    display:inline-flex;align-items:center;gap:4px;
+    font-size:11.5px;font-weight:800;letter-spacing:-0.01em;
+    color:#0F6B41;background:#EDF8F2;border:1px solid #CFEBDC;
+    border-radius:8px;padding:2px 7px;margin:0 0 4px;
+  }
+  .final-card .fc-sec.fc-basis .fc-hd{color:#1D4ED8;background:#EEF3FE;border-color:#D3E0FB;}
+  .final-card .fc-sec.fc-split .fc-hd{color:#8A5A00;background:#FFF7E6;border-color:#F2E2BC;}
+  .final-card .fc-sec.fc-open .fc-hd{color:#9A3412;background:#FFF1EA;border-color:#F7D6C4;}
+  .final-card .fc-bd{font-size:13.5px;line-height:1.6;color:#1F2937;letter-spacing:-0.012em;}
+  .final-card .fc-line{white-space:pre-wrap;overflow-wrap:anywhere;}
+  .final-card .fc-line.warn{
+    color:#9A3412;background:#FFF6F1;border-radius:8px;
+    padding:2px 6px;margin:2px 0;
+  }
+  .final-card .fc-gap{height:4px;}
+  .final-card .fc-line:empty{display:none;}
 
   /* ── 입력창 (흰색 알약) ────────────────── */
   .composer{
@@ -865,7 +903,7 @@
       <div class="pm-sep"></div>
       <button type="button" class="pm-item" id="pm-debate" role="menuitem" aria-pressed="false">
         <span class="pm-ico">🤝</span>
-        <span class="pm-txt"><b>토론·종합</b><small id="pm-debate-state">꺼짐 · AI끼리 검토 후 종합</small></span>
+        <span class="pm-txt"><b>토론·종합</b><small id="pm-debate-state">꺼짐 · AI끼리 반론·검증 후 종합</small></span>
         <span class="pm-check" id="pm-debate-check" hidden>✓</span>
       </button>
       <button type="button" class="pm-item" id="pm-deep" role="menuitem" aria-pressed="false">
@@ -2686,10 +2724,13 @@
     if (!compact) col.appendChild(h('div', 'name', meta.name));
     if (m.final) {
       var nPart = (m.debate && m.debate.participants) ? m.debate.participants.length : 1;
-      col.appendChild(h('div', 'final-tag', DEBATE_TAG + ' · ' + nPart + '명 종합'));
+      var tag = DEBATE_TAG + ' · ' + nPart + '명 종합';
+      var fc = debateFlagCounts(m.debate);
+      if (fc.unsure) tag += ' · ⚠️ 근거 미확인 ' + fc.unsure + '건';
+      col.appendChild(h('div', 'final-tag', tag));
     }
     var line = h('div', 'line');
-    line.appendChild(richText('div', 'bubble', m.text));
+    line.appendChild(m.final ? finalCardEl(m.text) : richText('div', 'bubble', m.text));
     line.appendChild(h('div', 'time', fmtTime(m.ts)));
     col.appendChild(line);
     var chips = linksEl(m.links);
@@ -2729,6 +2770,30 @@
     return wrap;
   }
 
+  // 📌 3단계 최종 종합 카드 — 4개 블록을 제목이 붙은 카드로 나눠 보여 줍니다.
+  //    예전에 저장된(제목 없는) 종합 답변은 말풍선 그대로 보여 줍니다.
+  function finalCardEl(text) {
+    var parsed = parseFinalBlocks(text);
+    if (parsed.found < 2) return richText('div', 'bubble', text);
+
+    var wrap = h('div', 'final-card');
+    DEBATE_BLOCKS.forEach(function (b) {
+      var body = tidyLines(parsed.sections[b.key]);
+      if (!body.length) return;
+      var sec = h('div', 'fc-sec fc-' + b.key);
+      sec.appendChild(h('div', 'fc-hd', b.title));
+      var box = h('div', 'fc-bd');
+      body.forEach(function (ln) {
+        if (!ln.trim()) { box.appendChild(h('div', 'fc-gap')); return; }
+        var warn = /⚠️|⚠/.test(ln);
+        box.appendChild(richText('div', 'fc-line' + (warn ? ' warn' : ''), ln));
+      });
+      sec.appendChild(box);
+      wrap.appendChild(sec);
+    });
+    return wrap;
+  }
+
   // 💬 AI 토론 과정 보기 — 접고 펼 수 있는 박스
   function debateEl(m) {
     var d = m.debate || {};
@@ -2744,8 +2809,26 @@
       (st.items || []).forEach(function (it) {
         var p = h('div', 'd-item');
         p.appendChild(h('span', 'd-name', (it.name || 'AI') + ': '));
-        p.appendChild(document.createTextNode(clipText(it.text, 1200)));
+
+        // 2단계 검토는 [반론]·[허점]·[근거 미확인]·[동의] 별로 색을 달리해 보여 줍니다.
+        var flags = parseReviewFlags(it.text);
+        var nFlag = flags.against.length + flags.hole.length + flags.unsure.length + flags.agree.length;
+        if (!nFlag) {
+          p.appendChild(document.createTextNode(clipText(it.text, 1200)));
+          box.appendChild(p);
+          return;
+        }
         box.appendChild(p);
+        var wrap = h('div', 'd-flags');
+        DEBATE_FLAGS.forEach(function (f) {
+          (flags[f.key] || []).forEach(function (t) {
+            var row = h('div', 'd-flag ' + f.key);
+            row.appendChild(h('b', null, (f.key === 'unsure' ? '⚠️ ' : '') + f.title));
+            row.appendChild(document.createTextNode(t));
+            wrap.appendChild(row);
+          });
+        });
+        box.appendChild(wrap);
       });
     });
     return box;
@@ -3128,26 +3211,234 @@
   }
 
   /* ── 🤝 토론·종합 모드 ─────────────────── */
-  // 1단계: 켜진 AI들이 병렬로 검색·초안 → 2단계: 서로의 초안을 한 라운드 교차 검토
-  // → 3단계: 대표 AI가 하나의 최종 답변으로 종합. 무료 한도를 아끼려고 최대 3명까지만 토론해요.
+  // 1단계: 켜진 AI들이 서로의 초안을 보지 않고 병렬로 독립 초안(근거 표시 포함)
+  // 2단계: 각 AI가 다른 초안을 비판 검토 — 반론·논리적 허점·근거 미확인 주장을 표시
+  // 3단계: 대표 AI가 다수결이 아니라 근거 신뢰도(A 출처 > B 추론 > C 근거 없음)로 종합
+  // 무료 한도를 아끼려고 최대 3명까지만 토론해요.
   var DEBATE_MAX = 3;
   var DEBATE_TAG = '📌 최종 종합 답변';
+
+  // 3단계 최종 카드의 4개 블록(이 제목·순서가 화면과 저장 형식의 기준입니다)
+  var DEBATE_BLOCKS = [
+    { key: 'conclusion', title: '최종 결론', alias: ['결론'] },
+    { key: 'basis', title: '판단 근거', alias: ['근거 판단'] },
+    { key: 'split', title: '일치점 · 차이점', alias: ['일치점과 차이점', '공통점과 차이점', '합의점과 차이점', '일치와 차이'] },
+    { key: 'open', title: '남은 불일치 · 근거 미확인 주의', alias: ['남은 불일치', '남은 쟁점', '근거 미확인 주의', '남은 불일치와 근거 미확인'] }
+  ];
+
+  // 2단계 검토에서 요구하는 표시 4종
+  var DEBATE_FLAGS = [
+    { key: 'against', title: '반론', alias: ['반대', '이견'] },
+    { key: 'hole', title: '허점', alias: ['논리적 허점', '비약'] },
+    { key: 'unsure', title: '근거 미확인', alias: ['근거없음', '출처 없음', '미확인'] },
+    { key: 'agree', title: '동의', alias: ['찬성'] }
+  ];
+
   var DEBATE_DRAFT_RULE = [
-    '지금은 「토론·종합」 1단계예요. 아래 질문에 대한 1차 초안을 쓰세요.',
-    '형식: ① 핵심 결론 2~3줄 ② 근거 2~3개 ③ 확인이 필요한 점 1개.',
-    '300자 안팎으로 짧게, 인사말 없이. 실시간 검색이 되면 출처 링크를 붙이세요.'
+    '지금은 「토론·종합」 1단계, 독립 초안이에요. 다른 AI의 답은 보이지 않으니 이 질문에 혼자 힘으로 답하세요.',
+    '다른 AI의 의견을 추측하거나 “다른 의견도 있다”는 식으로 얼버무리지 마세요.',
+    '형식: ① 핵심 결론 2~3줄',
+    '② 근거 2~3개 — 각 근거 끝에 [출처 있음]·[일반 추론]·[⚠️ 근거 미확인] 중 하나를 꼭 붙이세요.',
+    '③ 확인이 필요한 점 1개.',
+    '300자 안팎으로 짧게, 인사말 없이. 검색해서 확인한 사실에만 출처 링크를 붙이세요.'
   ].join('\n');
+
   var DEBATE_REVIEW_RULE = [
-    '지금은 「토론·종합」 2단계예요. 아래 다른 AI의 초안을 읽고',
-    '빠진 점 · 다른 관점 · 주의할 점만 3~4줄로 짧게 보완하세요.',
-    '동의 인사나 같은 말 반복은 쓰지 마세요.'
+    '지금은 「토론·종합」 2단계, 교차 검증이에요. 아래 [내 초안]과 [다른 AI 초안]을 읽고 비판적으로 검토하세요.',
+    '네 초안을 변호하지 말고, 근거가 약한 곳을 먼저 찾으세요.',
+    '아래 4가지 표시로만 답하세요. 인사·총평·요약은 쓰지 마세요.',
+    '[반론] 다른 AI 주장 중 동의할 수 없는 것 — “누구: 주장 → 반대 이유”',
+    '[허점] 논리적 비약·빠진 조건·근거와 결론이 어긋난 곳 — “누구: 무엇”',
+    '[근거 미확인] ⚠️ 출처·검증 가능한 사실 없이 단정한 주장 — “누구: 주장”',
+    '[동의] 근거가 확인돼 함께 채택해도 되는 주장 — “누구: 주장”',
+    '해당하는 것이 없으면 “[반론] 없음”처럼 쓰세요. 각 줄 40자 안팎, 전체 6줄 이내.'
   ].join('\n');
+
   var DEBATE_FINAL_RULE = [
-    '지금은 「토론·종합」 3단계, 최종 종합이에요. 아래 1차 초안과 교차 검토를 하나로 합치세요.',
-    '형식: ① 결론 2~3문장 ② 핵심 근거 3개(- 로 시작) ③ 주의할 점 1~2개 ④ 다음 행동 1개.',
-    '서로 다른 의견은 「의견 차이」로 표시하고, 확인되지 않은 내용은 추정이라고 밝히세요.',
+    '지금은 「토론·종합」 3단계, 최종 종합이에요. 아래 1단계 독립 초안과 2단계 교차 검증을 근거 신뢰도에 따라 하나로 정리하세요.',
+    '[신뢰도 규칙 — 꼭 지키세요]',
+    '1) 다수결 금지: “AI 2명이 그렇게 말했으니 맞다”는 판단 근거가 될 수 없어요.',
+    '2) 근거 등급: A = 검색 출처 링크·공식 자료처럼 검증 가능한 사실, B = 일반 상식·논리적 추론, C = 근거 없는 단정(⚠️ 근거 미확인).',
+    '3) 같은 쟁점은 A 근거를 가진 쪽을 먼저 채택하고, A가 없을 때만 B를, B도 없으면 “확인 필요”로 남기세요.',
+    '4) 2단계에서 반론·허점이 나온 주장은 근거 등급이 낮으면 결론에서 빼거나 조건을 붙이세요.',
+    '아래 4개 제목을 그대로 쓰고, 각 블록을 2~4줄로 채우세요.',
+    '[최종 결론] 신뢰도 판단을 반영한 답 2~3문장',
+    '[판단 근거] 어떤 근거(A/B 등급, 출처 이름) 때문에 이 결론인지',
+    '[일치점 · 차이점] AI들이 합의한 부분 / 갈린 부분',
+    '[남은 불일치 · 근거 미확인 주의] 끝내 합의되지 않은 쟁점과 ⚠️ 근거 미확인 주장',
     '출처 링크는 본문에 넣지 마세요. 링크는 따로 카드로 보여 줍니다.'
   ].join('\n');
+
+  // 제목 줄 장식([], **, ①, -, >)을 걷어 냅니다.
+  function stripDeco(line) {
+    return String(line === null || line === undefined ? '' : line)
+      .replace(/^\s*>+\s*/, '')
+      .replace(/^\s*[-*•·]\s+/, '')
+      .replace(/^\s*[①-⑳]\s*/, '')
+      .replace(/^\s*\d{1,2}[.)]\s+/, '')
+      .replace(/[*_`#]/g, '')
+      .replace(/[\[\]【】]/g, '')
+      .trim();
+  }
+
+  function canonHead(s) {
+    return String(s || '').replace(/[\s·・\/|ㆍ:：]/g, '');
+  }
+
+  // 한 줄이 지정한 제목들 중 하나로 시작하면 { key, title, rest } 를 돌려줍니다.
+  function pickHead(line, defs) {
+    var t = stripDeco(line);
+    if (!t) return null;
+    var head = t.split(/[:：]/)[0].split(/\s[-–—]\s/)[0];
+    var canon = canonHead(head);
+    if (!canon || canon.length > 26) return null;
+    for (var i = 0; i < defs.length; i++) {
+      var names = [defs[i].title].concat(defs[i].alias || []);
+      for (var j = 0; j < names.length; j++) {
+        if (canon === canonHead(names[j])) {
+          var rest = t.slice(head.length).replace(/^[\s:：\-–—.。]+/, '');
+          return { key: defs[i].key, title: defs[i].title, rest: rest };
+        }
+      }
+    }
+    return null;
+  }
+
+  // 3단계 답변에서 4개 블록을 뽑아냅니다(제목을 안 지켜도 원문은 잃지 않아요).
+  function parseFinalBlocks(text) {
+    var out = {};
+    DEBATE_BLOCKS.forEach(function (b) { out[b.key] = []; });
+    var cur = null, found = 0;
+    String(text || '').split(/\r?\n/).forEach(function (line) {
+      var hit = pickHead(line, DEBATE_BLOCKS);
+      if (hit) {
+        cur = hit.key;
+        found++;
+        if (hit.rest) out[cur].push(hit.rest);
+        return;
+      }
+      if (cur) out[cur].push(line);
+    });
+    return { sections: out, found: found };
+  }
+
+  // 2단계 검토 줄은 표시 이름 뒤에 “누구:”가 바로 붙어요([반론] Groq: …),
+  // 제목과 달리 “반론 Groq”처럼 이름이 붙어 있어도 표시로 인정합니다.
+  function pickFlag(line, defs) {
+    var t = stripDeco(line);
+    if (!t) return null;
+    for (var i = 0; i < defs.length; i++) {
+      var names = [defs[i].title].concat(defs[i].alias || []);
+      for (var j = 0; j < names.length; j++) {
+        var loose = String(names[j]).split('').map(function (ch) {
+          return ch === ' ' ? '\\s*' : escapeRe(ch);
+        }).join('');
+        var m = t.match(new RegExp('^' + loose + '(?=$|[\\s:：\\-–—⚠.·])'));
+        if (!m) continue;
+        var rest = t.slice(m[0].length).replace(/^[\s:：\-–—.·]+/, '');
+        return { key: defs[i].key, title: defs[i].title, rest: rest };
+      }
+    }
+    return null;
+  }
+
+  // 2단계 검토에서 [반론]·[허점]·[근거 미확인]·[동의] 표시를 뽑습니다.
+  function parseReviewFlags(text) {
+    var out = { against: [], hole: [], unsure: [], agree: [] };
+    String(text || '').split(/\r?\n/).forEach(function (line) {
+      var hit = pickFlag(line, DEBATE_FLAGS);
+      if (!hit) return;
+      var rest = String(hit.rest || '').replace(/^(?:⚠️|⚠)\s*/, '').trim();
+      if (!rest) return;
+      if (/^(없음|없다|없습니다|해당\s*없음|특이\s*사항\s*없음)[.!]?$/.test(rest)) return;
+      if (out[hit.key]) out[hit.key].push(rest);
+    });
+    return out;
+  }
+
+  function tidyLines(lines) {
+    var arr = (lines || []).map(function (x) {
+      return String(x === null || x === undefined ? '' : x).replace(/\s+$/, '');
+    });
+    while (arr.length && !arr[0].trim()) arr.shift();
+    while (arr.length && !arr[arr.length - 1].trim()) arr.pop();
+    return arr;
+  }
+
+  // 초안 하나에 실제로 붙은 검색 출처 수 — 신뢰도 A/B/C 판단의 재료
+  function draftEvidenceLabel(d) {
+    var n = (d && d.links) ? d.links.length : 0;
+    return n
+      ? '검색 출처 ' + n + '건 — A 등급 후보'
+      : '검색 출처 없음 — B/C 등급(확인 필요)';
+  }
+
+  // 종합 모델이 비워 둔 블록은 1·2단계에서 실제로 확인된 내용으로만 채웁니다(지어내지 않음).
+  function buildFinalSections(raw, drafts, reviews) {
+    var parsed = parseFinalBlocks(raw);
+    var sec = parsed.sections;
+    var body = String(raw || '').trim();
+
+    if (parsed.found < 2) {
+      sec = { conclusion: body ? body.split(/\r?\n/) : [], basis: [], split: [], open: [] };
+    }
+
+    var agree = [], against = [], holes = [], unsure = [];
+    (reviews || []).forEach(function (r) {
+      var f = parseReviewFlags(r.text);
+      f.agree.forEach(function (t) { agree.push(r.name + ': ' + t); });
+      f.against.forEach(function (t) { against.push(r.name + ': ' + t); });
+      f.hole.forEach(function (t) { holes.push(r.name + ': ' + t); });
+      f.unsure.forEach(function (t) { unsure.push(r.name + ': ' + t); });
+    });
+
+    if (!tidyLines(sec.basis).length) {
+      var lines = ['· 종합 답변에 별도 근거 목록이 없어, 1단계 초안에 붙은 근거만 정리했어요.'];
+      (drafts || []).forEach(function (d) { lines.push('· ' + d.name + ' — ' + draftEvidenceLabel(d)); });
+      agree.slice(0, 4).forEach(function (t) { lines.push('· 검증에서 근거를 인정한 주장 — ' + t); });
+      sec.basis = lines;
+    }
+
+    if (!tidyLines(sec.split).length) {
+      sec.split = [
+        '일치 — ' + (agree.length ? agree.slice(0, 4).join(' / ') : '검증 라운드에 뚜렷한 동의 표시가 없었어요.'),
+        '차이 — ' + (against.length ? against.slice(0, 4).join(' / ') : '검증 라운드에 뚜렷한 반론이 없었어요.')
+      ];
+    }
+
+    if (!tidyLines(sec.open).length) {
+      var left = unsure.slice(0, 4).map(function (t) { return '· ⚠️ 근거 미확인: ' + t; })
+        .concat(against.slice(0, 3).map(function (t) { return '· 반론: ' + t; }))
+        .concat(holes.slice(0, 3).map(function (t) { return '· 허점: ' + t; }));
+      sec.open = left.length
+        ? left
+        : ['· ✅ 끝까지 남은 반론·근거 미확인 표시는 없었어요. 다만 확인되지 않은 값은 그대로 확인이 필요해요.'];
+    }
+
+    return sec;
+  }
+
+  // 화면·복사·저장이 모두 같은 형식을 쓰도록 4개 블록을 하나의 글로 묶습니다.
+  function composeFinal(sections) {
+    return DEBATE_BLOCKS.map(function (b) {
+      var body = tidyLines(sections && sections[b.key]);
+      if (!body.length) body = ['이번 종합에서는 이 항목이 확인되지 않았어요.'];
+      return b.title + '\n' + body.join('\n');
+    }).join('\n\n');
+  }
+
+  // 저장된 토론 기록에서 2단계 표시 개수를 셉니다(최종 카드 배지용).
+  function debateFlagCounts(d) {
+    var out = { against: 0, hole: 0, unsure: 0, agree: 0 };
+    ((d && d.stages) || []).forEach(function (st) {
+      if (!/2단계/.test(String(st.title || ''))) return;
+      (st.items || []).forEach(function (it) {
+        var f = parseReviewFlags(it.text);
+        Object.keys(out).forEach(function (k) { out[k] += (f[k] || []).length; });
+      });
+    });
+    return out;
+  }
 
   function clipText(s, n) {
     var t = String(s || '').replace(/\r/g, '').replace(/\n{3,}/g, '\n\n').trim();
@@ -3172,7 +3463,7 @@
 
     if (el.pmDebate) el.pmDebate.setAttribute('aria-pressed', d ? 'true' : 'false');
     if (el.pmDeep) el.pmDeep.setAttribute('aria-pressed', k ? 'true' : 'false');
-    if (el.pmDebateState) el.pmDebateState.textContent = (d ? '켜짐' : '꺼짐') + ' · AI끼리 검토 후 종합';
+    if (el.pmDebateState) el.pmDebateState.textContent = (d ? '켜짐' : '꺼짐') + ' · AI끼리 반론·검증 후 종합';
     if (el.pmDeepState) el.pmDeepState.textContent = (k ? '켜짐' : '꺼짐') + ' · 단계별 심층 분석';
     if (el.pmDebateCheck) el.pmDebateCheck.hidden = !d;
     if (el.pmDeepCheck) el.pmDeepCheck.hidden = !k;
@@ -3210,12 +3501,12 @@
 
   function debateStages(drafts, reviews) {
     var stages = [{
-      title: '1단계 · 검색·초안',
+      title: '1단계 · 독립 초안',
       items: drafts.map(function (d) { return { name: d.name, text: d.text }; })
     }];
     if (reviews && reviews.length) {
       stages.push({
-        title: '2단계 · AI끼리 교차 검토',
+        title: '2단계 · 반론·근거 검증',
         items: reviews.map(function (r) { return { name: r.name, text: r.text }; })
       });
     }
@@ -3244,7 +3535,7 @@
     render();
     scrollToBottom(true);
 
-    var status = addMessage('system', '🤝 토론·종합 1/3 — ' + names + ' 검색·초안 작성 중...', null, CHANNEL_ALL);
+    var status = addMessage('system', '🤝 토론·종합 1/3 — ' + names + ' 서로 보지 않고 독립 초안 작성 중...', null, CHANNEL_ALL);
 
     // 키가 하나도 없는 데모 상태에서도 흐름이 자연스럽게 보이도록 전용 경로로 보여 줍니다.
     if (!debateLive(list)) return runDebateDemo(question, list, status);
@@ -3282,17 +3573,18 @@
       return;
     }
 
-    // ── 2단계: 서로의 초안을 한 라운드 교차 검토 ──
-    setDebateStatus(status, '🤝 토론·종합 2/3 — AI끼리 서로의 초안을 검토하는 중...');
+    // ── 2단계: 서로의 초안을 비판 검토(반론·허점·근거 미확인 표시) ──
+    setDebateStatus(status, '🤝 토론·종합 2/3 — AI끼리 반론과 근거를 검증하는 중...');
     var reviews = [];
     await Promise.all(drafts.map(function (d) {
       var others = drafts.filter(function (x) { return x.who !== d.who; });
-      var body = '[내 초안]\n' + clipText(d.text, 400);
+      var body = '[내 초안 · ' + d.name + ']\n' + clipText(d.text, 400);
       if (others.length) {
         body += '\n\n' + others.map(function (x) {
-          return '[' + x.name + ' 초안]\n' + clipText(x.text, 600);
+          return '[다른 AI 초안 · ' + x.name + ' · ' + draftEvidenceLabel(x) + ']\n' + clipText(x.text, 600);
         }).join('\n\n');
       }
+      body += '\n\n[검토 지시] 상대 초안에서 출처 표시 없이 단정한 주장과, 근거와 결론이 이어지지 않는 곳을 먼저 찾으세요.';
       return replyFor(d.who, question, [], { channel: CHANNEL_ALL, personaExtra: DEBATE_REVIEW_RULE + '\n\n' + body })
         .then(function (got) {
           if (got && got.text) reviews.push({ who: d.who, name: d.name, text: cleanReply(got.text) });
@@ -3302,20 +3594,34 @@
     reviews.sort(function (a, b) { return list.indexOf(a.who) - list.indexOf(b.who); });
     render();
 
-    // ── 3단계: 대표 AI(피클 우선)가 최종 종합 ──
+    // ── 3단계: 대표 AI(피클 우선)가 근거 신뢰도 기준으로 최종 종합 ──
     var repWho = drafts[0].who;
     for (var i = 0; i < drafts.length; i++) { if (drafts[i].who === 'pickle') repWho = 'pickle'; }
 
-    setDebateStatus(status, '🤝 토론·종합 3/3 — ' + AI[repWho].name + josa(AI[repWho].name, '이', '가') + ' 최종 답변을 종합하는 중...');
+    setDebateStatus(status, '🤝 토론·종합 3/3 — ' + AI[repWho].name + josa(AI[repWho].name, '이', '가') + ' 근거 신뢰도로 종합하는 중...');
+
+    // 1·2단계 기록과, 코드가 직접 센 근거 재료를 함께 넘깁니다.
+    var flagRows = [];
+    reviews.forEach(function (r) {
+      var f = parseReviewFlags(r.text);
+      if (f.against.length) flagRows.push('· ' + r.name + ' 반론 ' + f.against.length + '건: ' + clipText(f.against.join(' / '), 160));
+      if (f.hole.length) flagRows.push('· ' + r.name + ' 허점 ' + f.hole.length + '건: ' + clipText(f.hole.join(' / '), 160));
+      if (f.unsure.length) flagRows.push('· ' + r.name + ' 근거 미확인 ' + f.unsure.length + '건: ' + clipText(f.unsure.join(' / '), 160));
+      if (f.agree.length) flagRows.push('· ' + r.name + ' 동의 ' + f.agree.length + '건: ' + clipText(f.agree.join(' / '), 160));
+    });
+    var noSearch = drafts.filter(function (d) { return !d.links.length; }).map(function (d) { return d.name; });
 
     var block = drafts.map(function (d) {
-      return '[1단계 · ' + d.name + ' 초안]\n' + clipText(d.text, 700);
+      return '[1단계 · ' + d.name + ' 독립 초안 · ' + draftEvidenceLabel(d) + ']\n' + clipText(d.text, 700);
     }).join('\n\n');
     if (reviews.length) {
       block += '\n\n' + reviews.map(function (r) {
         return '[2단계 · ' + r.name + ' 검토]\n' + clipText(r.text, 500);
       }).join('\n\n');
     }
+    block += '\n\n[코드가 센 근거 현황 — 신뢰도 판단에 쓰세요]\n' +
+      (flagRows.length ? flagRows.join('\n') : '· 2단계에서 뚜렷한 반론·근거 미확인 표시는 없었어요.') +
+      (noSearch.length ? '\n· 검색 출처가 없는 초안: ' + noSearch.join(', ') + ' → 그 주장은 A 등급이 아니에요.' : '\n· 모든 초안에 검색 출처가 붙었어요.');
 
     var final = null;
     try {
@@ -3324,11 +3630,12 @@
 
     var finalText;
     if (final && final.text) {
-      finalText = cleanReply(final.text);
+      finalText = composeFinal(buildFinalSections(cleanReply(final.text), drafts, reviews));
     } else {
       // 종합 단계가 한도에 걸리면 대표 초안으로 대신하고, 그 사실을 밝힙니다(가짜 종합 금지).
       var own = drafts.filter(function (d) { return d.who === repWho; })[0] || drafts[0];
-      finalText = '⚠️ 종합 단계가 한도·장애로 끝나지 못해 대표 초안으로 대신했어요.\n\n' + own.text;
+      finalText = composeFinal(buildFinalSections(
+        '⚠️ 종합 단계가 한도·장애로 끝나지 못해 대표 초안으로 대신했어요.\n\n' + own.text, drafts, reviews));
     }
 
     var links = [];
@@ -3354,15 +3661,17 @@
     render();
 
     await sleep(500);
-    setDebateStatus(status, '🤝 토론·종합 2/3 — AI끼리 서로의 초안을 검토하는 중... (데모)');
+    setDebateStatus(status, '🤝 토론·종합 2/3 — AI끼리 반론과 근거를 검증하는 중... (데모)');
 
     var reviews = drafts.map(function (d, i) {
       var other = drafts[(i + 1) % drafts.length] || d;
       return {
         who: d.who,
         name: d.name,
-        text: d.name + ' 관점: ' + other.name + ' 초안의 「' + firstLine(other.text) + '」 방향은 맞아요. ' +
-          '여기에 비용·시간 조건과 최신 가격을 확인하는 항목을 더하고, 결론은 한 문장으로 줄이는 게 좋겠어요.'
+        text: '· [반론] ' + other.name + ': 「' + firstLine(other.text) + '」 방향은 맞지만 가격·소요 시간 비교가 빠져 단정할 수 없어요.\n' +
+          '· [허점] ' + other.name + ': 조건(평일·주말, 예산)이 정해지지 않은 채 결론이 먼저 나왔어요.\n' +
+          '· [근거 미확인] ⚠️ ' + other.name + ': 최신 가격·영업시간을 출처 없이 말했어요.\n' +
+          '· [동의] ' + other.name + ': 결론을 한 문장으로 줄이자는 제안은 그대로 채택해도 돼요.'
       };
     });
 
@@ -3371,24 +3680,21 @@
     for (var i = 0; i < drafts.length; i++) { if (drafts[i].who === 'pickle') repWho = 'pickle'; }
     var rep = drafts.filter(function (d) { return d.who === repWho; })[0] || drafts[0];
 
-    setDebateStatus(status, '🤝 토론·종합 3/3 — ' + rep.name + josa(rep.name, '이', '가') + ' 최종 답변을 종합하는 중... (데모)');
+    setDebateStatus(status, '🤝 토론·종합 3/3 — ' + rep.name + josa(rep.name, '이', '가') + ' 근거 신뢰도로 종합하는 중... (데모)');
     await sleep(350);
 
-    var lines = [
-      '결론',
-      '- ' + firstLine(rep.text),
-      '',
-      '핵심 근거',
-      drafts.slice(0, 3).map(function (d) { return '- ' + d.name + ': ' + firstLine(d.text); }).join('\n'),
-      '',
-      '주의할 점',
-      '- 지금은 데모 모드라 실시간 검색 결과가 아니에요. 가격·영업시간은 직접 확인해 주세요.',
-      reviews.length ? '- AI별 관점 차이: ' + reviews.map(function (r) { return r.name; }).join(' · ') + ' 의견을 함께 봐 주세요.' : null,
-      '',
-      '다음 행동',
-      '- 설정에서 무료 키(Gemini·Groq·OpenRouter) 하나를 넣으면 실제 검색·토론으로 답해요.'
-    ];
-    var finalText = lines.filter(function (x) { return typeof x === 'string'; }).join('\n');
+    var demoRaw = [
+      '[최종 결론]',
+      firstLine(rep.text),
+      '[판단 근거]',
+      '· 지금은 데모 모드라 검색 출처(A 등급)가 없어, AI들의 일반 추론(B 등급)만으로 정리했어요.',
+      '[일치점 · 차이점]',
+      '일치 — 결론을 한 문장으로 줄이고 조건을 먼저 정하자는 데 AI들이 동의했어요.',
+      '차이 — 어떤 조건을 먼저 볼지(가격 vs 이동 시간)는 갈렸어요.',
+      '[남은 불일치 · 근거 미확인 주의]',
+      '· ⚠️ 가격·영업시간은 확인되지 않았어요. 출처가 확인되기 전에는 단정하지 마세요.'
+    ].join('\n');
+    var finalText = composeFinal(buildFinalSections(demoRaw, drafts, reviews));
 
     var links = [];
     var seen = {};
@@ -3409,7 +3715,7 @@
     syncDebateChip();
     if (!silent) {
       if (state.settings.debateMode) {
-        toast('토론·종합 모드를 켰어요 — 검색 → 토론 → 최종 종합');
+        toast('토론·종합 모드를 켰어요 — 독립 초안 → 반론·검증 → 신뢰도 종합');
         if (state.currentChannel !== CHANNEL_ALL) {
           addMessage('system', '🤝 토론·종합은 💬 전체 방에서 동작해요. 위의 💬 전체 탭에서 보내 주세요.');
         }
@@ -3523,7 +3829,7 @@
     var k = !!state.settings.deepThink;
     if (el.pmDebate) el.pmDebate.setAttribute('aria-pressed', d ? 'true' : 'false');
     if (el.pmDeep) el.pmDeep.setAttribute('aria-pressed', k ? 'true' : 'false');
-    if (el.pmDebateState) el.pmDebateState.textContent = d ? '켜짐 · AI끼리 검토 후 종합' : '꺼짐 · AI끼리 검토 후 종합';
+    if (el.pmDebateState) el.pmDebateState.textContent = d ? '켜짐 · AI끼리 반론·검증 후 종합' : '꺼짐 · AI끼리 반론·검증 후 종합';
     if (el.pmDeepState) el.pmDeepState.textContent = k ? '켜짐 · 단계별 심층 분석' : '꺼짐 · 단계별 심층 분석';
     if (el.pmDebateCheck) el.pmDebateCheck.hidden = !d;
     if (el.pmDeepCheck) el.pmDeepCheck.hidden = !k;
