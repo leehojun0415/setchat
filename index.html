@@ -599,7 +599,7 @@
 
     <section class="sec" id="sec-members">
       <div class="sec-title with-btn"><span>👥 대화에 부를 AI</span><button type="button" class="mini" id="add-ai-inline">+ 새 AI 추가</button></div>
-      <p class="hint">끈 AI는 이름을 부르지 않는 한 답하지 않고, 위쪽 이름 표시에서도 빠집니다. 최소 한 명은 켜 둘게요. <b>이름</b>을 누르면 부르는 이름을 바꿀 수 있어요.</p>
+      <p class="hint">끈 AI는 이름을 부르지 않는 한 답하지 않고, 위쪽 이름 표시에서도 빠집니다. 최소 한 명은 켜 둘게요. <b>수정</b>을 누르면 이름·아이콘·성격·엔진을 바꿀 수 있어요(피클은 고정 멤버).</p>
 
       <div class="member-row" id="row-pickle">
         <div class="m-avatar" id="avatar-member-pickle" style="background:#DFF3C6">🥒</div>
@@ -3424,6 +3424,8 @@
     var rows = { pickle: el.rowPickle, claude: el.rowClaude, groq: el.rowGroq };
     var labels = { pickle: el.labelMemberPickle, claude: el.labelMemberClaude, groq: el.labelMemberGroq };
     var avatars = { pickle: el.avatarMemberPickle, claude: el.avatarMemberClaude, groq: el.avatarMemberGroq };
+    var editBtns = { pickle: el.editPickle, claude: el.editClaude, groq: el.editGroq };
+    var delBtns = { claude: el.deleteClaude, groq: el.deleteGroq };
     BASE_KEYS.forEach(function (w) {
       var on = memberOn(w);
       var hidden = isBuiltinHidden(w);
@@ -3437,6 +3439,8 @@
       }
       if (labels[w]) labels[w].textContent = AI[w].name;
       if (avatars[w]) avatars[w].textContent = AI[w].avatar;
+      if (editBtns[w]) editBtns[w].setAttribute('aria-label', AI[w].name + ' 수정');
+      if (delBtns[w]) delBtns[w].setAttribute('aria-label', AI[w].name + ' 삭제');
     });
 
     // 르 퀵 칩: 이름·멘션을 지금 이름으로 맞추고, 끈 AI의 칩은 숨깁니다.
