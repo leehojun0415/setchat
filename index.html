@@ -359,6 +359,8 @@
   }
   .debate[open] > summary::before{transform:rotate(90deg);}
   .debate .d-stage{font-size:11.5px;font-weight:700;color:var(--brand);margin:8px 0 5px;}
+  .debate[open]{max-height:62vh;overflow-y:auto;overscroll-behavior:contain;}
+  .debate .d-who{font-size:11px;font-weight:700;color:#6B7280;letter-spacing:-0.01em;margin:6px 0 3px;}
   .debate .d-item{
     font-size:12px;line-height:1.55;color:#374151;letter-spacing:-0.01em;
     margin:0 0 8px;padding-left:9px;border-left:2px solid #E6E8EC;
@@ -2818,7 +2820,7 @@
           box.appendChild(p);
           return;
         }
-        box.appendChild(p);
+        box.appendChild(h('div', 'd-who', (it.name || 'AI') + ' · 검토'));
         var wrap = h('div', 'd-flags');
         DEBATE_FLAGS.forEach(function (f) {
           (flags[f.key] || []).forEach(function (t) {
@@ -3451,6 +3453,15 @@
     return cut.length > 70 ? cut.slice(0, 70) + '…' : cut;
   }
 
+  // 데모 종합처럼 한 문장이 필요할 때 — 단어 경계에서 끊어 읽기 쉽게 남깁니다.
+  function headText(s, n) {
+    var t = String(s || '').replace(/\s+/g, ' ').trim();
+    if (t.length <= n) return t;
+    var cut = t.slice(0, n);
+    var sp = cut.lastIndexOf(' ');
+    return (sp > n * 0.6 ? cut.slice(0, sp) : cut) + '…';
+  }
+
   // 켜진 모드·첨부만 입력창 위에 작은 배지로 보여 줍니다(화면 정리).
   function syncBadges() {
     var d = !!state.settings.debateMode;
@@ -3685,7 +3696,7 @@
 
     var demoRaw = [
       '[최종 결론]',
-      firstLine(rep.text),
+      headText(rep.text, 150),
       '[판단 근거]',
       '· 지금은 데모 모드라 검색 출처(A 등급)가 없어, AI들의 일반 추론(B 등급)만으로 정리했어요.',
       '[일치점 · 차이점]',
