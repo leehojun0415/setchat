@@ -2404,10 +2404,6 @@
   }
 
   // 지금 답변에 검색 결과가 실제로 붙는지 보여 줍니다(키가 없거나 꺼져 있으면 숨김).
-  function searchLive() {
-    return state.settings.webSearch !== false && !!state.settings.geminiKey.trim();
-  }
-
   function syncSearchUI() {
     var on = state.settings.webSearch !== false;
     el.searchOn.checked = on;
