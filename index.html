@@ -382,6 +382,7 @@
     border-radius:999px;padding:3px 9px;margin:0 0 6px;
   }
   .debate{
+    flex:none;                     /* 피드(flex 열)에서 눌려 0px로 줄지 않게 */
     align-self:flex-start;max-width:100%;
     border:1px solid var(--line);border-radius:14px;background:#FAFBFC;
     margin:4px 0 2px;padding:0 12px 2px;
@@ -1141,6 +1142,7 @@
 
   /* ⚠️ 근거 미확인으로 표시된 주장 — 노란/주황 하이라이트 */
   .unverified-box{
+    flex:none;                     /* 피드에서 눌려 줄지 않게 */
     align-self:stretch;margin:6px 0 2px;
     border:1px solid var(--unv-line);background:var(--soft2);
     border-radius:14px;padding:9px 10px 8px;
