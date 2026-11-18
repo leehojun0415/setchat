@@ -2689,15 +2689,18 @@
   async function replyFor(who, userText, spoken, ctx) {
     var provider = providerFor(who);
     var base = workerEndpoint(state.settings.workerUrl);
-    var engine = engineFor(who);
 
     // Worker 주소가 있으면 키가 없어도 Worker가 대신 불러 줍니다(임의 주소 커스텀 API는 직접).
-    if (base && engine !== 'custom') {
-      try {
-        return await callWorker(who, base, engine, userText, ctx);
-      } catch (err) {
-        // Worker가 안 되면 브라우저 키가 있을 때만 기존 경로로 한 번 더 시도합니다.
-        if (!hasBrowserKey(provider)) throw err;
+    if (base) {
+      var engines = await workerEngines(base);
+      var wEngine = engineFor(who, engines);
+      if (wEngine !== 'custom') {
+        try {
+          return await callWorker(who, base, wEngine, userText, ctx);
+        } catch (err) {
+          // Worker가 안 되면 브라우저 키가 있을 때만 기존 경로로 한 번 더 시도합니다.
+          if (!hasBrowserKey(provider)) throw err;
+        }
       }
     }
 
@@ -4313,18 +4316,48 @@
   }
 
   // 키가 없어도 Worker에 보낼 엔진을 정합니다.
-  function engineFor(who) {
-    var p = providerFor(who);
-    if (p !== 'demo' && p !== 'custom') return p;
+  // Worker가 알려 준 쓸 수 있는 엔진(engines)이 있으면 그 안에서 우선순위대로 고릅니다.
+  function enginePrefs(who) {
     if (isCustomKey(who)) {
       var c = customById(who);
-      return c ? c.engine : 'gemini';
+      return c ? [c.engine] : ['gemini'];
     }
     var ov = builtinPref(who).engine;
-    if (ov && ov !== 'custom') return ov;
-    if (who === 'claude') return 'gemini';
-    if (who === 'groq') return 'groq';
-    return 'openai';
+    if (ov && ov !== 'custom') return [ov];
+    if (who === 'claude') return ['gemini', 'anthropic', 'openrouter'];
+    if (who === 'groq') return ['groq', 'gemini', 'openrouter'];
+    return ['openai', 'groq', 'gemini', 'openrouter'];
+  }
+
+  function engineFor(who, engines) {
+    var prefs = enginePrefs(who);
+    if (engines) {
+      for (var i = 0; i < prefs.length; i++) {
+        if (engines[prefs[i]]) return prefs[i];
+      }
+    }
+    var p = providerFor(who);
+    if (p !== 'demo' && p !== 'custom') return p;
+    return prefs[0];
+  }
+
+  // Worker에게 어떤 엔진 키가 있는지 한 번 물어보고 10분 동안 기억합니다.
+  var workerInfo = { url: '', engines: null, at: 0 };
+
+  async function workerEngines(base) {
+    var now = Date.now();
+    if (workerInfo.url === base && workerInfo.at && now - workerInfo.at < 10 * 60 * 1000) return workerInfo.engines;
+    try {
+      var res = await fetch(base, { method: 'GET' });
+      var data = null;
+      try { data = await res.json(); } catch (e) { data = null; }
+      if (res.ok && data && data.engines && typeof data.engines === 'object') {
+        workerInfo = { url: base, engines: data.engines, at: now };
+        return data.engines;
+      }
+    } catch (e) {}
+    workerInfo = { url: base, engines: null, at: now };
+    return null;
   }
 
   function modelForEngine(engine, who) {
@@ -4546,6 +4579,7 @@
       return;
     }
     state.settings.workerUrl = raw;
+    workerInfo = { url: '', engines: null, at: 0 };
     save();
     syncStatus();
     toast(raw ? 'Worker 주소를 저장했어요' : 'Worker 주소를 비웠어요');
