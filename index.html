@@ -2,9 +2,13 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
+<meta name="theme-color" content="#F7F8FA">
+<meta name="apple-mobile-web-app-title" content="AI비서">
 <meta name="theme-color" content="#FFFFFF">
-<title>ai비서 — 이호준 · 피클 · Gemini · Groq</title>
+<title>AI비서 — 이호준 · 피클 · Gemini · Groq</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
 <style>
   /* ── 피클 앱 스타일 테마 (2026-11) ──────────────────────
@@ -26,6 +30,14 @@
     --warn-soft:#FFF3F1;
   }
   *{box-sizing:border-box;}
+  /* 갤럭시(Android Chrome·삼성 인터넷) 터치 최적화 */
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+  body{overscroll-behavior-y:contain;}
+  button,.tab,.quick-chip,.m-act,.mini,.btn,.icon-btn,.add-btn,.send,.pm-item,.attach-chip button,.copy-btn{
+    touch-action:manipulation;
+    -webkit-tap-highlight-color:transparent;
+  }
+  a{-webkit-tap-highlight-color:transparent;}
   /* hidden 속성이 display 규칙(.btn-row 등)을 이깁니다 */
   [hidden]{display:none !important;}
   html,body{height:100%;}
@@ -33,7 +45,8 @@
     margin:0;
     background:var(--bg);
     color:var(--ink);
-    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",
+      "Noto Sans KR","Roboto","Malgun Gothic","Helvetica Neue",Arial,sans-serif;
     font-size:15px;line-height:1.48;letter-spacing:-0.015em;
     -webkit-font-smoothing:antialiased;
     -webkit-text-size-adjust:100%;
@@ -45,10 +58,11 @@
   .app{
     position:relative;
     width:100%;max-width:460px;
-    height:100vh;height:100dvh;
+    height:100vh;height:100dvh;      /* 100vh 폴백 → 100dvh */
     background:var(--bg);
     display:flex;flex-direction:column;
     overflow:hidden;
+    overscroll-behavior-y:contain;
   }
   @media (min-width:641px){
     body{background:var(--soft2);}
@@ -78,8 +92,9 @@
   .hd .logo{
     width:38px;height:38px;border-radius:50%;flex:none;
     display:grid;place-items:center;font-size:19px;line-height:1;
-    background:var(--soft);
+    background:var(--soft);overflow:hidden;
   }
+  .hd .logo img{width:100%;height:100%;object-fit:contain;background:#fff;display:block;border-radius:50%;}
   .hd .titles{display:flex;flex-direction:column;gap:1px;flex:1;min-width:0;}
   .hd h1{margin:0;font-size:17px;font-weight:700;letter-spacing:-0.02em;color:var(--ink);}
   .hd .sub{
@@ -150,6 +165,8 @@
     display:flex;flex-direction:column;
     background:var(--bg);
     overscroll-behavior:contain;
+    overscroll-behavior-y:contain;
+    touch-action:pan-y;
     -webkit-overflow-scrolling:touch;
   }
   .feed::-webkit-scrollbar{width:6px;}
@@ -634,6 +651,80 @@
   #hidden-member-list .hidden-lead{font-size:11.5px;color:var(--faint);font-weight:600;}
 
   #ai-modal{z-index:66;}
+  /* ── 첨부 칩 · 모드 칩 ───────────────── */
+  .attach-bar{flex:none;display:flex;gap:6px;flex-wrap:wrap;padding:0 12px 6px;background:var(--bg);}
+  .attach-chip,.mode-chip{
+    display:inline-flex;align-items:center;gap:6px;max-width:100%;
+    background:#fff;border:1px solid var(--line);border-radius:999px;
+    padding:4px 6px 4px 10px;font-size:12.5px;color:#374151;letter-spacing:-0.01em;
+  }
+  .attach-chip img{width:26px;height:26px;object-fit:cover;border-radius:9px;flex:none;}
+  .attach-chip .attach-ico{font-size:13px;flex:none;}
+  .attach-name{max-width:46vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .attach-chip button,.mode-chip button{
+    border:0;background:transparent;color:var(--faint);font-size:13px;
+    cursor:pointer;padding:4px 6px;line-height:1;border-radius:8px;
+  }
+  .mode-chip.on{background:#EEF4FF;border-color:#CFE0FF;color:#1D4ED8;}
+  .mode-chip.debate{background:#EAF9EE;border-color:#CBEBD5;color:#0F6B41;}
+  .mode-chip.debate button{color:#5FA97F;}
+  .mode-chip.on button{color:#60A5FA;}
+
+  /* ── + 팝업 메뉴 (입력창 위) ───────────── */
+  .plus-menu{
+    position:absolute;left:12px;z-index:70;
+    bottom:calc(76px + env(safe-area-inset-bottom,0px));
+    width:min(286px, calc(100vw - 24px));
+    max-height:min(68dvh, 430px);overflow-y:auto;
+    background:#fff;border-radius:20px;padding:8px;
+    box-shadow:0 18px 50px rgba(17,24,39,.20), 0 0 0 1px rgba(17,24,39,.06);
+    animation:pmIn .14s ease-out;
+  }
+  @keyframes pmIn{from{opacity:0;transform:translateY(6px) scale(.985);}to{opacity:1;transform:none;}}
+  .pm-item{
+    width:100%;display:flex;align-items:center;gap:10px;
+    border:0;background:transparent;padding:9px 10px;border-radius:14px;
+    text-align:left;cursor:pointer;min-height:48px;color:var(--ink);
+  }
+  .pm-item:hover,.pm-item:active{background:var(--soft2);}
+  .pm-ico{
+    width:34px;height:34px;border-radius:50%;background:#F1F3F6;
+    display:grid;place-items:center;font-size:16px;flex:none;
+  }
+  .pm-txt{display:flex;flex-direction:column;min-width:0;line-height:1.3;}
+  .pm-txt b{font-size:14px;font-weight:700;letter-spacing:-0.01em;}
+  .pm-txt small{font-size:11.5px;color:var(--muted);}
+  .pm-check{margin-left:auto;color:var(--brand);font-weight:800;}
+  .pm-sep{height:1px;background:var(--line);margin:6px 10px;}
+
+  /* ── iOS 자동 확대 방지: 입력 글자 16px 이상 ── */
+  input,textarea,select{font-size:16px;}
+  html,body{overflow-x:hidden;}
+  .app{overflow-x:hidden;-webkit-text-size-adjust:100%;}
+
+  /* ── 모바일(아이폰 375~430px) 최적화 ──── */
+  @media (max-width:600px){
+    .backdrop{align-items:flex-end;padding:0;}
+    .sheet{
+      max-width:none;width:100%;max-height:88dvh;
+      border-radius:22px 22px 0 0;
+      padding:14px 14px calc(14px + env(safe-area-inset-bottom,0px));
+      scroll-padding-bottom:120px;
+    }
+    .sheet-hd{position:sticky;top:0;z-index:3;background:#fff;padding:2px 0 8px;}
+    .plus-menu{left:10px;width:min(272px, calc(100vw - 20px));bottom:calc(80px + env(safe-area-inset-bottom,0px));}
+    .pm-item{min-height:50px;}
+    .quick-chip{min-height:34px;padding:6px 12px;font-size:12.5px;}
+    .tab{min-height:40px;}
+    .btn-row .btn,.btn{min-height:42px;}
+    .composer .add-btn,.composer .send{width:40px;height:40px;}
+    .composer{margin-left:10px;margin-right:10px;}
+    .attach-bar{padding-left:10px;padding-right:10px;}
+    .field input,.field select,.field textarea{font-size:16px;}
+    .member-row{flex-wrap:nowrap;}
+    .status-row{flex-wrap:wrap;}
+    .status-row .status{margin-left:auto;max-width:60%;text-align:right;}
+  }
 </style>
 </head>
 <body>
@@ -641,9 +732,9 @@
   <div class="app" id="app">
 
     <header class="hd">
-      <div class="logo" aria-hidden="true">💬</div>
+      <div class="logo"><img src="logo.png" alt="AI비서 로고" width="38" height="38"></div>
       <div class="titles">
-        <h1>ai비서</h1>
+        <h1>AI비서</h1>
         <div class="sub" id="hd-sub">이호준 · 피클 · Gemini · Groq</div>
       </div>
       <button class="icon-btn add" id="open-add-ai" type="button" aria-label="AI 추가" title="AI 추가">+</button>
@@ -652,20 +743,61 @@
 
     <nav class="tabs" id="tabs" role="tablist" aria-label="대화방"></nav>
 
-    <div class="notice">🔒 비밀번호·인증코드는 올리지 마세요 · 30일 뒤 지워져요</div>
-
     <main class="feed" id="feed" aria-live="polite"></main>
 
-    <div class="quick" id="quick-chips" role="toolbar" aria-label="빠른 입력">
-      <button type="button" class="quick-chip" data-member="pickle" data-mention="@피클 ">🥒 피클</button>
-      <button type="button" class="quick-chip" data-member="claude" data-mention="@Gemini ">🤖 Gemini</button>
-      <button type="button" class="quick-chip" data-member="groq" data-mention="@Groq ">⚡ Groq</button>
-      <button type="button" class="quick-chip debate" id="debate-chip" aria-pressed="false" title="검색 → AI끼리 토론 → 최종 종합">🤝 토론·종합</button>
-      <button type="button" class="quick-chip search" id="quick-search">🔍 검색·추천</button>
+    <div class="attach-bar" id="attach-bar" hidden>
+      <div class="attach-chip" id="attach-chip" hidden>
+        <img id="attach-thumb" alt="첨부 사진 미리보기" hidden>
+        <span class="attach-ico" id="attach-ico">📎</span>
+        <span class="attach-name" id="attach-name"></span>
+        <button type="button" id="attach-x" aria-label="첨부 지우기">✕</button>
+      </div>
+      <div class="mode-chip debate" id="debate-badge" hidden>
+        🤝 토론·종합
+        <button type="button" id="debate-x" aria-label="토론·종합 끄기">✕</button>
+      </div>
+      <div class="mode-chip" id="deep-chip" hidden>
+        🧠 심층 분석
+        <button type="button" id="deep-x" aria-label="심층 분석 끄기">✕</button>
+      </div>
     </div>
 
+    <div class="plus-menu" id="plus-menu" role="menu" aria-label="첨부와 모드" hidden>
+      <button type="button" class="pm-item" id="pm-camera" role="menuitem">
+        <span class="pm-ico">📷</span>
+        <span class="pm-txt"><b>카메라</b><small>사진을 찍어서 묻기</small></span>
+      </button>
+      <button type="button" class="pm-item" id="pm-photo" role="menuitem">
+        <span class="pm-ico">🖼️</span>
+        <span class="pm-txt"><b>사진</b><small>앨범에서 고르기</small></span>
+      </button>
+      <button type="button" class="pm-item" id="pm-file" role="menuitem">
+        <span class="pm-ico">📎</span>
+        <span class="pm-txt"><b>파일</b><small>txt · md · csv · json · log</small></span>
+      </button>
+      <button type="button" class="pm-item" id="pm-search" role="menuitem">
+        <span class="pm-ico">🔍</span>
+        <span class="pm-txt"><b>검색해서 추천</b><small>질문 앞에 검색 요청을 붙여요</small></span>
+      </button>
+      <div class="pm-sep"></div>
+      <button type="button" class="pm-item" id="pm-debate" role="menuitem" aria-pressed="false">
+        <span class="pm-ico">🤝</span>
+        <span class="pm-txt"><b>토론·종합</b><small id="pm-debate-state">꺼짐 · AI끼리 검토 후 종합</small></span>
+        <span class="pm-check" id="pm-debate-check" hidden>✓</span>
+      </button>
+      <button type="button" class="pm-item" id="pm-deep" role="menuitem" aria-pressed="false">
+        <span class="pm-ico">🧠</span>
+        <span class="pm-txt"><b>더 깊이 생각하기</b><small id="pm-deep-state">꺼짐 · 단계별 심층 분석</small></span>
+        <span class="pm-check" id="pm-deep-check" hidden>✓</span>
+      </button>
+    </div>
+
+    <input type="file" id="file-camera" accept="image/*" capture="environment" hidden>
+    <input type="file" id="file-photo" accept="image/*" hidden>
+    <input type="file" id="file-doc" accept=".txt,.md,.csv,.json,.log,text/plain,application/json" hidden>
+
     <form class="composer" id="composer" autocomplete="off">
-      <button class="add-btn" id="open-add-ai-2" type="button" aria-label="AI 추가" title="AI 추가">+</button>
+      <button class="add-btn" id="plus-btn" type="button" aria-label="첨부와 모드" aria-haspopup="menu" aria-expanded="false" title="첨부와 모드">+</button>
       <textarea id="input" rows="1" placeholder="메시지 보내기" aria-label="메시지 입력"></textarea>
       <button class="send" id="send" type="submit" aria-label="보내기" title="보내기">↑</button>
     </form>
@@ -770,8 +902,7 @@
       <p class="hint">기본 모델은 무료·빠른 <b>openai/gpt-oss-120b</b> 예요. Llama 계열은 2026년 8월 이후 무료 티어에서 빠져서 기본값으로 쓰지 않아요. 모델이 내려가면 <b>openai/gpt-oss-20b</b> → <b>qwen/qwen3.8-27b</b> 순서로 자동으로 바꿔 답해요.</p>
 
       <div class="btn-row">
-        <button type="button" class="btn primary" id="test-groq">연결 테스트</button>
-        <button type="button" class="btn" id="save-groq">저장</button>
+        <button type="button" class="btn" id="test-groq">Groq 연결 테스트</button>
       </div>
       <p class="test-result" id="groq-result" hidden></p>
 
@@ -800,8 +931,7 @@
       <p class="hint">기본 모델은 무료·빠른 <b>gemini-3.5-flash-lite</b>, 더 똑똑한 답을 원하면 <b>gemini-3.8-flash</b>(역시 무료)를 넣으세요. gemini-2.5-flash는 새 키에서는 더 이상 열리지 않고, 무료 한도를 넘기면 잠시 뒤 다시 시도해 주세요.</p>
 
       <div class="btn-row">
-        <button type="button" class="btn primary" id="test-gemini">연결 테스트</button>
-        <button type="button" class="btn" id="save-gemini">저장</button>
+        <button type="button" class="btn" id="test-gemini">Gemini 연결 테스트</button>
       </div>
       <p class="test-result" id="gemini-result" hidden></p>
 
@@ -828,8 +958,7 @@
       </p>
 
       <div class="btn-row">
-        <button type="button" class="btn primary" id="test-conn">전체 연결 테스트</button>
-        <button type="button" class="btn" id="save-settings">무료 키 저장</button>
+        <button type="button" class="btn" id="test-conn">전체 연결 테스트</button>
         <button type="button" class="btn ghost" id="clear-keys">키 지우기</button>
       </div>
       <p class="test-result" id="test-result" hidden></p>
@@ -894,8 +1023,7 @@
         <input id="worker-url" type="text" placeholder="https://your-worker.workers.dev" autocomplete="off" spellcheck="false">
       </label>
       <div class="btn-row">
-        <button type="button" class="btn primary" id="test-worker">Worker 연결 테스트</button>
-        <button type="button" class="btn" id="save-worker">저장</button>
+        <button type="button" class="btn" id="test-worker">Worker 연결 테스트</button>
       </div>
       <p class="test-result" id="worker-result" hidden></p>
     </section>
@@ -1245,6 +1373,7 @@
       members: { pickle: true, claude: true, groq: true },      // 대화에 부를 AI
       webSearch: true,                                          // Gemini 실시간 구글 검색
       debateMode: false,                                        // 🤝 검색 → 토론 → 종합 모드
+      deepThink: false,                                         // 🧠 단계별 심층 분석 모드
       searchFor: { pickle: true, claude: true, groq: true },    // 검색 결과를 붙일 답변
       names: { pickle: '', claude: '', groq: '' },              // 비우면 기본 이름
       builtins: {                                               // 기본 AI의 아이콘·성격·엔진 바꾸기
@@ -1545,12 +1674,10 @@
     keyGemini: document.getElementById('key-gemini'),
     modelGemini: document.getElementById('model-gemini'),
     testGemini: document.getElementById('test-gemini'),
-    saveGemini: document.getElementById('save-gemini'),
     geminiResult: document.getElementById('gemini-result'),
     keyGroq: document.getElementById('key-groq'),
     modelGroq: document.getElementById('model-groq'),
     testGroq: document.getElementById('test-groq'),
-    saveGroq: document.getElementById('save-groq'),
     groqResult: document.getElementById('groq-result'),
     keyAnthropic: document.getElementById('key-anthropic'),
     keyOpenai: document.getElementById('key-openai'),
@@ -1559,7 +1686,6 @@
     modelOpenrouter: document.getElementById('model-openrouter'),
     workerUrl: document.getElementById('worker-url'),
     testWorker: document.getElementById('test-worker'),
-    saveWorker: document.getElementById('save-worker'),
     workerResult: document.getElementById('worker-result'),
     modelClaude: document.getElementById('model-claude'),
     modelPickle: document.getElementById('model-pickle'),
@@ -1569,7 +1695,6 @@
     dotClaude: document.getElementById('dot-claude'),
     dotPickle: document.getElementById('dot-pickle'),
     dotGroq: document.getElementById('dot-groq'),
-    saveSettings: document.getElementById('save-settings'),
     saveAll: document.getElementById('save-all'),
     saveAllNote: document.getElementById('save-all-note'),
     pickGroq: document.getElementById('pick-groq'),
@@ -1601,9 +1726,31 @@
     searchClaude: document.getElementById('search-claude'),
     searchGroq: document.getElementById('search-groq'),
     searchHint: document.getElementById('search-hint'),
-    quickChips: document.getElementById('quick-chips'),
-    debateChip: document.getElementById('debate-chip'),
-    quickSearch: document.getElementById('quick-search'),
+    pmSearch: document.getElementById('pm-search'),
+    plusBtn: document.getElementById('plus-btn'),
+    plusMenu: document.getElementById('plus-menu'),
+    pmCamera: document.getElementById('pm-camera'),
+    pmPhoto: document.getElementById('pm-photo'),
+    pmFile: document.getElementById('pm-file'),
+    pmDebate: document.getElementById('pm-debate'),
+    pmDeep: document.getElementById('pm-deep'),
+    pmDebateState: document.getElementById('pm-debate-state'),
+    pmDeepState: document.getElementById('pm-deep-state'),
+    pmDebateCheck: document.getElementById('pm-debate-check'),
+    pmDeepCheck: document.getElementById('pm-deep-check'),
+    fileCamera: document.getElementById('file-camera'),
+    filePhoto: document.getElementById('file-photo'),
+    fileDoc: document.getElementById('file-doc'),
+    attachBar: document.getElementById('attach-bar'),
+    attachChip: document.getElementById('attach-chip'),
+    attachThumb: document.getElementById('attach-thumb'),
+    attachIco: document.getElementById('attach-ico'),
+    attachName: document.getElementById('attach-name'),
+    attachX: document.getElementById('attach-x'),
+    deepChip: document.getElementById('deep-chip'),
+    deepX: document.getElementById('deep-x'),
+    debateBadge: document.getElementById('debate-badge'),
+    debateX: document.getElementById('debate-x'),
     toast: document.getElementById('toast'),
     lock: document.getElementById('lock'),
     lockForm: document.getElementById('lock-form'),
@@ -1621,7 +1768,6 @@
     lockResult: document.getElementById('lock-result'),
 
     openAddAi: document.getElementById('open-add-ai'),
-    openAddAi2: document.getElementById('open-add-ai-2'),
     addAiInline: document.getElementById('add-ai-inline'),
     aiModal: document.getElementById('ai-modal'),
     aiTitle: document.getElementById('ai-modal-title'),
@@ -2230,6 +2376,7 @@
       state.settings.members = readFlags(data.settings.members, state.settings.members, true);
       if (typeof data.settings.webSearch === 'boolean') state.settings.webSearch = data.settings.webSearch;
       if (typeof data.settings.debateMode === 'boolean') state.settings.debateMode = data.settings.debateMode;
+      if (typeof data.settings.deepThink === 'boolean') state.settings.deepThink = data.settings.deepThink;
       state.settings.searchFor = readFlags(data.settings.searchFor, state.settings.searchFor, false);
     }
 
@@ -2583,30 +2730,6 @@
     try { t.setSelectionRange(pos, pos); } catch (e) {}
   }
 
-  function quickSearchFill() {
-    var t = el.input;
-    var prefix = '검색해서 추천해줘: ';
-    var v = String(t.value || '');
-    if (v.indexOf(prefix) !== 0) t.value = prefix + v;
-    autoResize();
-    try { t.focus(); } catch (e) {}
-    try { var p = t.value.length; t.setSelectionRange(p, p); } catch (e) {}
-
-    if (state.settings.webSearch === false) {
-      toast('실시간 검색이 꺼져 있어요 — 설정에서 켜면 최신 정보로 답해요');
-    } else if (!state.settings.geminiKey.trim()) {
-      toast('Gemini 키를 넣으면 실시간 검색 결과까지 붙여요');
-    }
-  }
-
-  Array.prototype.forEach.call(document.querySelectorAll('.quick-chip[data-mention]'), function (btn) {
-    btn.addEventListener('click', function () {
-      insertAtCaret(btn.getAttribute('data-mention') || '');
-    });
-  });
-
-  if (el.quickSearch) el.quickSearch.addEventListener('click', quickSearchFill);
-
   /* ── 복사: 답변 + 참고 링크 ──────────── */
   function plainify(t) {
     var s = String(t || '');
@@ -2657,12 +2780,18 @@
   function submit() {
     if (busy) { toast('지금 답하는 중이에요'); return; }
     var text = el.input.value.trim();
-    if (!text) return;
+    var attach = pendingAttach;
+    if (!text && !attach) return;
+    if (!text && attach) text = attach.kind === 'image' ? '이 사진을 보고 알려줘.' : '첨부한 파일을 참고해서 알려줘.';
+    if (attach) {
+      text += attach.kind === 'image' ? '\n\n📷 사진 첨부' : '\n\n📎 파일 첨부: ' + attach.name;
+    }
 
     el.input.value = '';
     autoResize();
+    clearAttach();
     addMessage('user', text);
-    respond(text);
+    respond(text, attach);
   }
 
   /* ── 응답 흐름 ─────────────────────────── */
@@ -2699,13 +2828,13 @@
   }
 
   // 한 AI의 답을 받아 그 방에 말풍선으로 붙입니다. 여러 AI가 동시에 돌아도 서로 기다리지 않아요.
-  async function runReply(who, text, room) {
+  async function runReply(who, text, room, attach) {
     await sleep(delayFor(who));
 
     var got = null;
     var err = null;
     try {
-      got = await replyFor(who, text, [], { channel: room });
+      got = await replyFor(who, text, [], { channel: room, attach: attach });
     } catch (e) {
       err = e;
     }
@@ -2725,7 +2854,7 @@
     return who;
   }
 
-  async function respond(text) {
+  async function respond(text, attach) {
     var room = state.currentChannel;
     var targets = pickTargets(text, room);
     var off = offMentions(text);
@@ -2750,7 +2879,7 @@
     }
 
     if (state.settings.debateMode) {
-      if (room === CHANNEL_ALL) { await runDebate(text, targets); return; }
+      if (room === CHANNEL_ALL) { await runDebate(text, targets, attach); return; }
       addMessage('system', '🤝 토론·종합은 💬 전체 방에서 동작해요. 여기서는 ' + AI[room].name + '만 답해요.', null, room);
     }
 
@@ -2760,7 +2889,7 @@
     scrollToBottom(true);
 
     // 순차 for-await 대신 병렬 호출 — 먼저 도착한 AI 답부터 바로 말풍선으로 붙습니다.
-    await Promise.all(targets.map(function (who) { return runReply(who, text, room); }));
+    await Promise.all(targets.map(function (who) { return runReply(who, text, room, attach); }));
 
     Object.keys(typing).forEach(function (w) { if (typing[w] === room) delete typing[w]; });
     setBusy(false);
@@ -2801,14 +2930,26 @@
     return cut.length > 70 ? cut.slice(0, 70) + '…' : cut;
   }
 
-  function syncDebateChip() {
-    if (!el.debateChip) return;
-    var on = !!state.settings.debateMode;
-    if (on) el.debateChip.classList.add('on');
-    else el.debateChip.classList.remove('on');
-    el.debateChip.setAttribute('aria-pressed', on ? 'true' : 'false');
-    el.debateChip.textContent = on ? '🤝 토론·종합 켜짐' : '🤝 토론·종합';
+  // 켜진 모드·첨부만 입력창 위에 작은 배지로 보여 줍니다(화면 정리).
+  function syncBadges() {
+    var d = !!state.settings.debateMode;
+    var k = !!state.settings.deepThink;
+    var a = !!pendingAttach;
+    if (el.debateBadge) el.debateBadge.hidden = !d;
+    if (el.deepChip) el.deepChip.hidden = !k;
+    if (el.attachChip) el.attachChip.hidden = !a;
+    if (el.attachBar) el.attachBar.hidden = !(d || k || a);
+
+    if (el.pmDebate) el.pmDebate.setAttribute('aria-pressed', d ? 'true' : 'false');
+    if (el.pmDeep) el.pmDeep.setAttribute('aria-pressed', k ? 'true' : 'false');
+    if (el.pmDebateState) el.pmDebateState.textContent = (d ? '켜짐' : '꺼짐') + ' · AI끼리 검토 후 종합';
+    if (el.pmDeepState) el.pmDeepState.textContent = (k ? '켜짐' : '꺼짐') + ' · 단계별 심층 분석';
+    if (el.pmDebateCheck) el.pmDebateCheck.hidden = !d;
+    if (el.pmDeepCheck) el.pmDeepCheck.hidden = !k;
   }
+
+  function syncDebateChip() { syncBadges(); }
+  function syncDeep() { syncBadges(); }
 
   // 실제 키가 하나라도 있어 AI끼리 진짜로 토론할 수 있는지
   function debateLive(list) {
@@ -2864,7 +3005,7 @@
     toast('토론·종합 완료 — ' + names.length + '명 참여');
   }
 
-  async function runDebate(question, targets) {
+  async function runDebate(question, targets, attach) {
     var list = targets.slice(0, DEBATE_MAX);
     var names = list.map(function (w) { return AI[w].name; }).join(' · ');
 
@@ -2878,11 +3019,19 @@
     // 키가 하나도 없는 데모 상태에서도 흐름이 자연스럽게 보이도록 전용 경로로 보여 줍니다.
     if (!debateLive(list)) return runDebateDemo(question, list, status);
 
+    var image = attach && attach.kind === 'image' ? attach : null;
+    if (image) list = list.filter(function (w) { return hasBrowserKey('gemini'); }).slice(0, 1);
+    if (image && !list.length) {
+      setDebateStatus(status, '⚠️ 사진은 Gemini 엔진에서만 보낼 수 있어요. 설정에 Gemini 무료 키를 넣어 주세요.');
+      setBusy(false);
+      return;
+    }
+
     // ── 1단계: 병렬 초안 + 실시간 검색 ──
     var drafts = [];
     var lastErr = null;
     await Promise.all(list.map(function (w) {
-      return replyFor(w, question, [], { channel: CHANNEL_ALL, personaExtra: DEBATE_DRAFT_RULE })
+      return replyFor(w, question, [], { channel: CHANNEL_ALL, personaExtra: DEBATE_DRAFT_RULE, attach: attach })
         .then(function (got) {
           if (got && got.text) {
             drafts.push({ who: w, name: AI[w].name, text: cleanReply(got.text), links: (got && got.links) || [] });
@@ -2940,7 +3089,7 @@
 
     var final = null;
     try {
-      final = await replyFor(repWho, question, [], { channel: CHANNEL_ALL, personaExtra: DEBATE_FINAL_RULE + '\n\n' + block });
+      final = await replyFor(repWho, question, [], { channel: CHANNEL_ALL, personaExtra: DEBATE_FINAL_RULE + '\n\n' + block, attach: attach });
     } catch (e) { final = null; }
 
     var finalText;
@@ -3024,11 +3173,11 @@
     finishDebate(repWho, finalText, links.slice(0, 6), drafts, reviews, status);
   }
 
-  if (el.debateChip) {
-    el.debateChip.addEventListener('click', function () {
-      state.settings.debateMode = !state.settings.debateMode;
-      save();
-      syncDebateChip();
+  function toggleDebateMode(silent) {
+    state.settings.debateMode = !state.settings.debateMode;
+    save();
+    syncDebateChip();
+    if (!silent) {
       if (state.settings.debateMode) {
         toast('토론·종합 모드를 켰어요 — 검색 → 토론 → 최종 종합');
         if (state.currentChannel !== CHANNEL_ALL) {
@@ -3037,8 +3186,164 @@
       } else {
         toast('토론·종합 모드를 껐어요');
       }
+    }
+  }
+
+  /* ── 🧠 더 깊이 생각하기 ─────────────── */
+  var DEEP_RULE = [
+    '🧠 심층 분석 모드: 바로 결론을 말하기 전에',
+    '(1) 질문을 작은 단계로 나눠 무엇을 확인해야 하는지 정리하고',
+    '(2) 각 단계의 근거와 반대 가능성·예외를 따져 보고',
+    '(3) 마지막에 결론 → 핵심 근거 → 주의할 점 → 다음 행동 순서로 짧게 정리하세요.',
+    '숫자·기간·비용이 나오면 어떤 가정인지 밝히고, 확인하지 못한 것은 추정이라고 쓰세요.'
+  ].join('\n');
+
+
+  function toggleDeep(silent) {
+    state.settings.deepThink = !state.settings.deepThink;
+    save();
+    syncDeep();
+    if (!silent) toast(state.settings.deepThink ? '🧠 심층 분석을 켰어요 — 단계별로 따져서 답해요' : '심층 분석을 껐어요');
+  }
+
+  if (el.deepX) {
+    el.deepX.addEventListener('click', function () { if (state.settings.deepThink) toggleDeep(false); });
+  }
+  if (el.debateX) {
+    el.debateX.addEventListener('click', function () { if (state.settings.debateMode) toggleDebateMode(false); });
+  }
+
+  /* ── 📷🖼️📎 첨부 ───────────────────── */
+  var pendingAttach = null;          // { kind:'image'|'file', name, mime, dataUrl, dataB64, text }
+  var IMAGE_MAX = 4 * 1024 * 1024;   // 4MB
+  var FILE_MAX = 120000;             // 읽어 들일 글자 수
+
+  function renderAttach() {
+    if (!el.attachChip) return;
+    var a = pendingAttach;
+    el.attachChip.hidden = !a;
+    if (a) {
+      var img = a.kind === 'image' && a.dataUrl;
+      el.attachThumb.hidden = !img;
+      if (img) el.attachThumb.src = a.dataUrl;
+      el.attachIco.textContent = a.kind === 'image' ? '📷' : '📎';
+      el.attachName.textContent = a.name + (a.kind === 'file' ? ' · ' + Math.round((a.text || '').length / 100) / 10 + '천 자' : '');
+      if (el.attachChip.setAttribute) el.attachChip.setAttribute('title', a.name);
+    }
+    syncBadges();
+  }
+
+  function clearAttach() {
+    pendingAttach = null;
+    if (el.attachThumb) el.attachThumb.removeAttribute('src');
+    renderAttach();
+  }
+
+  function readImage(file) {
+    if (!file) return;
+    if (!/^image\//.test(file.type || '')) { toast('이미지 파일만 붙일 수 있어요'); return; }
+    if (file.size > IMAGE_MAX) { toast('사진은 4MB 이하로 올려 주세요'); return; }
+    var fr = new FileReader();
+    fr.onload = function () {
+      var url = String(fr.result || '');
+      var b64 = url.indexOf(',') >= 0 ? url.split(',')[1] : '';
+      if (!b64) { toast('사진을 읽지 못했어요'); return; }
+      pendingAttach = { kind: 'image', name: file.name || '사진', mime: file.type || 'image/jpeg', dataUrl: url, dataB64: b64 };
+      renderAttach();
+      toast('사진을 붙였어요 — Gemini 엔진으로 보내요');
+    };
+    fr.onerror = function () { toast('사진을 읽지 못했어요'); };
+    fr.readAsDataURL(file);
+  }
+
+  function readDoc(file) {
+    if (!file) return;
+    var name = file.name || '첨부파일';
+    if (file.size > 3 * 1024 * 1024) { toast('파일은 3MB 이하로 올려 주세요'); return; }
+    var fr = new FileReader();
+    fr.onload = function () {
+      var text = String(fr.result || '').replace(/\u0000/g, '');
+      var cut = text.length > FILE_MAX;
+      if (cut) text = text.slice(0, FILE_MAX);
+      pendingAttach = { kind: 'file', name: name, text: text + (cut ? '\n\n…(파일이 길어 앞부분만 넣었어요)' : '') };
+      renderAttach();
+      toast('파일 내용을 붙였어요 — 질문의 참고 자료로 보내요');
+    };
+    fr.onerror = function () { toast('파일을 읽지 못했어요'); };
+    fr.readAsText(file, 'utf-8');
+  }
+
+  if (el.fileCamera) el.fileCamera.addEventListener('change', function () {
+    readImage(el.fileCamera.files && el.fileCamera.files[0]);
+    try { el.fileCamera.value = ''; } catch (e) {}
+  });
+  if (el.filePhoto) el.filePhoto.addEventListener('change', function () {
+    readImage(el.filePhoto.files && el.filePhoto.files[0]);
+    try { el.filePhoto.value = ''; } catch (e) {}
+  });
+  if (el.fileDoc) el.fileDoc.addEventListener('change', function () {
+    readDoc(el.fileDoc.files && el.fileDoc.files[0]);
+    try { el.fileDoc.value = ''; } catch (e) {}
+  });
+  if (el.attachX) el.attachX.addEventListener('click', function () { clearAttach(); toast('첨부를 지웠어요'); });
+
+  /* ── + 팝업 메뉴 ─────────────────────── */
+  function syncPlusMenu() {
+    var d = !!state.settings.debateMode;
+    var k = !!state.settings.deepThink;
+    if (el.pmDebate) el.pmDebate.setAttribute('aria-pressed', d ? 'true' : 'false');
+    if (el.pmDeep) el.pmDeep.setAttribute('aria-pressed', k ? 'true' : 'false');
+    if (el.pmDebateState) el.pmDebateState.textContent = d ? '켜짐 · AI끼리 검토 후 종합' : '꺼짐 · AI끼리 검토 후 종합';
+    if (el.pmDeepState) el.pmDeepState.textContent = k ? '켜짐 · 단계별 심층 분석' : '꺼짐 · 단계별 심층 분석';
+    if (el.pmDebateCheck) el.pmDebateCheck.hidden = !d;
+    if (el.pmDeepCheck) el.pmDeepCheck.hidden = !k;
+  }
+
+  function closePlus() {
+    if (!el.plusMenu || el.plusMenu.hidden) return;
+    el.plusMenu.hidden = true;
+    if (el.plusBtn) el.plusBtn.setAttribute('aria-expanded', 'false');
+    document.removeEventListener('click', onDocClickPlus, true);
+    document.removeEventListener('keydown', onKeyPlus);
+  }
+
+  function onDocClickPlus(e) {
+    if (!el.plusMenu || el.plusMenu.hidden) return;
+    if (el.plusMenu.contains(e.target) || (el.plusBtn && el.plusBtn.contains(e.target))) return;
+    closePlus();
+  }
+
+  function onKeyPlus(e) {
+    if (e.key === 'Escape') closePlus();
+  }
+
+  function openPlus() {
+    if (!el.plusMenu) return;
+    syncPlusMenu();
+    el.plusMenu.hidden = false;
+    if (el.plusBtn) el.plusBtn.setAttribute('aria-expanded', 'true');
+    setTimeout(function () {
+      document.addEventListener('click', onDocClickPlus, true);
+      document.addEventListener('keydown', onKeyPlus);
+    }, 0);
+  }
+
+  if (el.plusBtn) {
+    el.plusBtn.addEventListener('click', function (e) {
+      if (e && e.preventDefault) e.preventDefault();
+      if (el.plusMenu.hidden) openPlus(); else closePlus();
     });
   }
+  if (el.pmCamera) el.pmCamera.addEventListener('click', function () { closePlus(); try { el.fileCamera.click(); } catch (e) {} });
+  if (el.pmPhoto) el.pmPhoto.addEventListener('click', function () { closePlus(); try { el.filePhoto.click(); } catch (e) {} });
+  if (el.pmFile) el.pmFile.addEventListener('click', function () { closePlus(); try { el.fileDoc.click(); } catch (e) {} });
+  if (el.pmSearch) el.pmSearch.addEventListener('click', function () {
+    closePlus();
+    insertAtCaret('검색해서 추천해줘: ');
+    toast('검색 요청을 앞에 붙였어요');
+  });
+  if (el.pmDebate) el.pmDebate.addEventListener('click', function () { toggleDebateMode(false); closePlus(); });
+  if (el.pmDeep) el.pmDeep.addEventListener('click', function () { toggleDeep(false); closePlus(); });
 
   /* ── ↻ 다시 생성 ──────────────────────── */
   // 이 말풍선을 만든 직전 사용자 질문 (같은 방 안에서).
@@ -3111,6 +3416,30 @@
     var lastErr = null;
     var attempts = 0;
 
+    var attach = ctx && ctx.attach;
+    var image = attach && attach.kind === 'image' ? attach : null;
+    var fileText = attach && attach.kind === 'file' && attach.text ? attach : null;
+
+    // 사진은 Gemini 만 받습니다(inlineData). 키가 없으면 가짜 답 대신 안내합니다.
+    if (image) {
+      chain = chain.filter(function (e) { return e === 'gemini'; });
+      if (!hasBrowserKey('gemini')) {
+        throw new Error('사진은 Gemini 엔진에서만 보낼 수 있어요. 설정에 Gemini 무료 키를 넣어 주세요.');
+      }
+    }
+
+    // 🧠 심층 분석 + 📎 파일 내용 + 🤝 단계 지시문을 이번 호출에만 덧붙입니다.
+    var extraBits = [];
+    if (fileText) extraBits.push('[첨부 파일: ' + fileText.name + ']\n' + fileText.text);
+    if (ctx && ctx.personaExtra) extraBits.push(String(ctx.personaExtra));
+    if (state.settings.deepThink) extraBits.push(DEEP_RULE);
+    var callCtx = {
+      channel: ctx && ctx.channel,
+      beforeId: ctx && ctx.beforeId,
+      image: image,
+      personaExtra: extraBits.join('\n\n')
+    };
+
     for (var i = 0; i < chain.length; i++) {
       var engine = chain[i];
       var viaWorker = !!(base && engine !== 'custom' && workerMap && workerMap[engine]);
@@ -3120,7 +3449,7 @@
       if (viaWorker) {
         attempts++;
         try {
-          var out = await callWorker(who, base, engine, userText, ctx);
+          var out = await callWorker(who, base, engine, userText, callCtx);
           lastEngine[who] = engine;
           syncStatus();
           return out;
@@ -3132,7 +3461,7 @@
       if (direct) {
         attempts++;
         try {
-          var got = await callEngineDirect(engine, who, ctx);
+          var got = await callEngineDirect(engine, who, callCtx);
           lastEngine[who] = engine;
           syncStatus();
           return got;
@@ -3363,6 +3692,18 @@
     });
     while (out.length && out[0].role !== 'user') out.shift();
     if (!out.length) out.push({ role: 'user', parts: [{ text: '안녕하세요' }] });
+
+    // 📷 사진 첨부 — 마지막 사용자 메시지에 inlineData 로 붙입니다.
+    var img = ctx && ctx.image;
+    if (img && img.dataB64) {
+      var lastUser = null;
+      for (var i = out.length - 1; i >= 0; i--) {
+        if (out[i].role === 'user') { lastUser = out[i]; break; }
+      }
+      if (lastUser) {
+        lastUser.parts.push({ inlineData: { mimeType: img.mime || 'image/jpeg', data: img.dataB64 } });
+      }
+    }
     return out;
   }
 
@@ -4462,23 +4803,10 @@
     return state.settings.searchFor[who] !== false;
   }
 
-  // 퀵 칩을 DOM 순서대로 돌며 처리합니다(동적으로 붙인 커스텀 AI 칩까지 같이).
-  function eachChip(fn) {
-    var q = el.quickChips;
-    var kids = (q && q.childNodes) || [];
-    for (var i = 0; i < kids.length; i++) {
-      var k = kids[i];
-      if (!k || typeof k.getAttribute !== 'function') continue;
-      if (!k.getAttribute('data-member')) continue;
-      fn(k);
-    }
-  }
-
   function syncHeaderSub() {
     if (!el.hdSub) return;
     if (state.currentChannel === CHANNEL_ALL) {
-      var names = memberList().map(function (w) { return AI[w].name; });
-      el.hdSub.textContent = '이호준 · ' + (names.join(' · ') || 'AI 없음');
+      el.hdSub.textContent = '이호준';
     } else {
       el.hdSub.textContent = '이호준 · ' + channelName(state.currentChannel) + ' 1:1 대화';
     }
@@ -4510,19 +4838,6 @@
       if (avatars[w]) avatars[w].textContent = AI[w].avatar;
       if (editBtns[w]) editBtns[w].setAttribute('aria-label', AI[w].name + ' 수정');
       if (delBtns[w]) delBtns[w].setAttribute('aria-label', AI[w].name + ' 삭제');
-    });
-
-    // 르 퀵 칩: 이름·멘션을 지금 이름으로 맞추고, 끈 AI의 칩은 숨깁니다.
-    eachChip(function (btn) {
-      var w = btn.getAttribute('data-member');
-      var meta = AI[w];
-      if (!meta) return;
-      var hide = !memberOn(w);
-      btn.style.display = hide ? 'none' : '';
-      btn.setAttribute('aria-hidden', hide ? 'true' : 'false');
-      btn.textContent = meta.avatar + ' ' + meta.name;
-      btn.setAttribute('data-mention', '@' + meta.name + ' ');
-      btn.setAttribute('aria-label', meta.name + ' 부르기');
     });
 
     renderCustomRows();
@@ -4557,14 +4872,6 @@
     var box = el.customMemberList;
     if (box) {
       try { box.innerHTML = ''; } catch (e) {}
-    }
-
-    var q = el.quickChips;
-    if (q && q.childNodes) {
-      for (var i = q.childNodes.length - 1; i >= 0; i--) {
-        var n = q.childNodes[i];
-        if (n && typeof n.getAttribute === 'function' && n.getAttribute('data-custom') === '1') q.removeChild(n);
-      }
     }
 
     customList().forEach(function (c) {
@@ -4634,21 +4941,6 @@
         row.appendChild(sw);
 
         box.appendChild(row);
-      }
-
-      if (q) {
-        var chip = document.createElement('button');
-        chip.type = 'button';
-        chip.className = 'quick-chip';
-        chip.setAttribute('data-member', c.id);
-        chip.setAttribute('data-custom', '1');
-        chip.setAttribute('data-mention', '@' + meta.name + ' ');
-        chip.setAttribute('aria-label', meta.name + ' 부르기');
-        chip.textContent = meta.avatar + ' ' + meta.name;
-        chip.style.display = on ? '' : 'none';
-        chip.addEventListener('click', function () { insertAtCaret('@' + meta.name + ' '); });
-        if (el.quickSearch && el.quickSearch.parentNode === q && q.insertBefore) q.insertBefore(chip, el.quickSearch);
-        else q.appendChild(chip);
       }
     });
   }
@@ -4828,8 +5120,11 @@
   function providerLabel(who) {
     var chain = chainFor(who);
     var last = lastEngine[who];
+    // 키를 지웠거나 엔진을 바꿨으면 예전 엔진 표시는 쓰지 않습니다.
+    var lastOk = !!last && (hasDirectKey(last, who) ||
+      (workerEndpoint(state.settings.workerUrl) && last !== 'custom'));
 
-    if (last) {
+    if (lastOk) {
       var model = modelForEngine(last, who);
       return engineName(last) + (model ? ' · ' + model : '') +
         (last === 'gemini' && wantsSearch(who) ? ' 🔍' : '');
@@ -4881,7 +5176,7 @@
   });
 
   /* ── AI 추가·이름 버튼 연결 ───────────── */
-  [el.openAddAi, el.openAddAi2, el.addAiInline].forEach(function (b) {
+  [el.openAddAi, el.addAiInline].forEach(function (b) {
     if (!b) return;
     b.addEventListener('click', function (e) {
       if (e && e.preventDefault) e.preventDefault();
@@ -5028,12 +5323,6 @@
     el.saveAllNote.textContent = '저장했어요 · ' + hh + ':' + mm + ' · 키·모델·워커 주소 모두 반영';
   }
 
-  el.saveSettings.addEventListener('click', function () {
-    if (!saveAllSettings()) return;
-    markSaved();
-    toast('모든 설정을 저장했어요');
-  });
-
   if (el.saveAll) {
     el.saveAll.addEventListener('click', function () {
       if (!saveAllSettings()) return;
@@ -5041,24 +5330,6 @@
       toast('모든 설정을 한 번에 저장했어요');
     });
   }
-
-  el.saveGroq.addEventListener('click', function () {
-    if (!saveAllSettings()) return;
-    markSaved();
-    toast(state.settings.groqKey ? '저장했어요 · Groq 키로 답해요' : 'Groq 키를 비웠어요');
-  });
-
-  el.saveGemini.addEventListener('click', function () {
-    if (!saveAllSettings()) return;
-    markSaved();
-    toast(state.settings.geminiKey ? '저장했어요 · Gemini 키로 답해요' : 'Gemini 키를 비웠어요');
-  });
-
-  el.saveWorker.addEventListener('click', function () {
-    if (!saveAllSettings()) return;
-    markSaved();
-    toast(state.settings.workerUrl ? '저장했어요 · Worker 주소를 씁니다' : 'Worker 주소를 비웠어요');
-  });
 
   el.testWorker.addEventListener('click', async function () {
     var base = workerEndpoint(el.workerUrl.value);
@@ -5111,6 +5382,7 @@
     state.settings.anthropicKey = '';
     state.settings.openaiKey = '';
     state.settings.openrouterKey = '';
+    lastEngine = {};
     save();
     syncStatus();
     syncSearchUI();
@@ -5291,7 +5563,7 @@
     var ch = state.currentChannel;
     var names = memberList().map(function (w) { return AI[w].name; }).join(' · ');
     var who = ch === CHANNEL_ALL ? (names || 'AI') : channelName(ch) + ' 1:1';
-    var lines = ['# ai비서 — 이호준 · ' + who, '', '내보낸 시각: ' + fmtFull(new Date()), ''];
+    var lines = ['# AI비서 — 이호준 · ' + who, '', '내보낸 시각: ' + fmtFull(new Date()), ''];
     var lastDay = '';
     roomMessages(ch).forEach(function (m) {
       var k = dayKey(m.ts);
@@ -5414,6 +5686,7 @@
     syncMembers();
     syncSearchUI();
     syncDebateChip();
+    syncDeep();
     refreshLockSection();    if (hasLock()) showLock();
     if (removed > 0) {
       addMessage('system', '30일이 지난 메시지 ' + removed + '개를 정리했어요.');
