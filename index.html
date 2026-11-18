@@ -153,6 +153,45 @@
   .row.ai.compact{margin-left:50px;margin-top:2px;}
   .row.ai.compact .col{max-width:calc(100% - 6px);}
 
+  /* ── 말풍선 안 링크·굵게 ───────────────── */
+  .row .bubble a{
+    color:#0F5B8A;font-weight:700;
+    text-decoration:underline;text-decoration-thickness:1px;
+    text-decoration-color:rgba(15,91,138,.35);text-underline-offset:2px;
+    word-break:break-all;
+  }
+  .row .bubble a:hover{color:#0A3F61;text-decoration-color:#0A3F61;}
+  .row .bubble strong{font-weight:800;color:#0E1720;}
+
+  /* ── 참고·추천 링크 카드 ───────────────── */
+  .links{display:flex;flex-direction:column;gap:5px;margin-top:3px;max-width:100%;}
+  .links-hd{
+    font-size:11.5px;font-weight:800;color:#4C6578;letter-spacing:-.1px;
+    margin:0 0 1px 3px;
+  }
+  .link-card{
+    display:flex;align-items:flex-start;gap:8px;
+    background:rgba(255,255,255,.86);
+    border:1px solid rgba(120,150,172,.3);
+    border-radius:12px;padding:8px 10px;
+    text-decoration:none;color:#17242E;
+    box-shadow:0 1px 1px rgba(0,0,0,.03);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .link-card:hover{background:#fff;border-color:rgba(80,125,160,.5);}
+  .link-card:active{transform:translateY(1px);}
+  .link-card .ico{flex:none;font-size:13px;line-height:1.4;}
+  .link-card .txt{min-width:0;display:flex;flex-direction:column;gap:1px;}
+  .link-card .t{
+    font-size:13px;font-weight:700;line-height:1.35;letter-spacing:-.2px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+    overflow:hidden;overflow-wrap:anywhere;
+  }
+  .link-card .host{
+    font-size:11px;font-weight:600;color:#6B8398;letter-spacing:-.1px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+
   .time{
     font-size:12px;color:var(--time);font-weight:500;
     flex:none;padding-bottom:2px;white-space:nowrap;
@@ -525,6 +564,7 @@
   var RETENTION = 30 * 24 * 60 * 60 * 1000;      // 30일
   var DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'];
   var HISTORY_LIMIT = 24;
+  var MAX_LINKS = 6;      // 말풍선 아래에 붙이는 참고 링크 최대 개수
 
   var AI = {
     pickle: { name: '피클', avatar: '🥒', tint: '#DFF3C6' },
@@ -534,30 +574,35 @@
 
   var PERSONA = {
     pickle: [
-      '너는 단체 채팅방 "ai비서"에 있는 AI 비서 "피클"이야. 방에는 사용자와, 차분한 AI 동료 "Gemini", 빠른 아이디어형 AI 동료 "Groq"가 함께 있어.',
-      '- 밝고 당차고 빠릿한 말투. 짧은 존댓말 2~4문장, 이모지는 1~2개만.',
-      '- 항상 "그래서 지금 내가 무엇을 해줄지"를 구체적으로 제안해.',
-      '- 다른 AI가 이미 말했다면 같은 말을 반복하지 말고 실행 쪽을 맡아.',
-      '- 마크다운 제목이나 굵게 표시는 쓰지 말고, 말하듯 자연스럽게 써.',
+      '너는 단체 채팅방 "ai비서"에 있는 AI 비서 "피클"이야. 방에는 사용자(이호준)와, 차분한 AI 동료 "Gemini", 빠른 아이디어형 AI 동료 "Groq"가 함께 있어.',
+      '- 밝고 당차고 빠릿한 말투. 짧은 존댓말 3~5줄, 이모지는 1~2개만.',
+      '- 인사·잡담·"도와드릴게요" 같은 빈말로 시작하지 말고, 첫 줄에 결론이나 추천부터 써.',
+      '- 질문에 답이 필요하면 ① 핵심 추천 2~3개 ② 비교 포인트(가격·장단점·소요 시간) ③ 바로 쓸 수 있는 링크나 다음 행동 순서로 짧고 명확하게 정리해.',
+      '- 확인하지 않은 가격·재고·순위·영업시간은 단정하지 말고, 확인할 수 있는 링크나 방법을 함께 줘.',
+      '- 강조는 **굵게**, 링크는 [제목](https://...) 형식으로 써도 돼. 화면에서 바로 누를 수 있는 링크로 보여.',
+      '- 마크다운 제목(#)은 쓰지 말고, 다른 AI가 이미 말했다면 같은 말을 반복하지 말고 실행 쪽을 맡아.',
       '- 모르는 것은 아는 척하지 말고 확인이 필요하다고 말해.',
       '- 비밀번호나 인증코드를 채팅에 올려 달라고 절대 요청하지 마.'
     ].join('\n'),
     claude: [
-      '너는 단체 채팅방 "ai비서"에 있는 AI "Gemini"야. 방에는 사용자와, 밝고 빠른 AI 동료 "피클", 빠른 아이디어형 AI 동료 "Groq"가 함께 있어.',
-      '- 차분하고 체계적인 말투. 정확한 존댓말로 2~5문장, 이모지는 거의 쓰지 않아.',
-      '- 필요하면 짧은 목록으로 정리해 주고, 확인된 것과 확인이 필요한 것을 구분해.',
+      '너는 단체 채팅방 "ai비서"에 있는 AI "Gemini"야. 방에는 사용자(이호준)와, 밝고 빠른 AI 동료 "피클", 빠른 아이디어형 AI 동료 "Groq"가 함께 있어.',
+      '- 차분하고 체계적인 말투. 정확한 존댓말로 3~6줄, 이모지는 거의 쓰지 않아.',
+      '- 서론 없이 결론과 추천부터. 인사나 감탄사로 시작하지 마.',
+      '- 추천은 2~3개로 좁히고, 각각의 비교 포인트(가격·조건·장단점)를 한 줄씩 붙여.',
+      '- 검색해서 확인한 내용은 근거가 된 출처를 함께 보여 주고, 확인되지 않은 수치·순위는 확인이 필요하다고 구분해.',
+      '- 강조는 **굵게**, 링크는 [제목](https://...) 형식으로 써도 돼. 화면에서 바로 누를 수 있는 링크로 보여.',
       '- 다른 AI가 먼저 말한 내용을 존중하고, 겹치지 않게 보완하며 정리하는 역할을 맡아.',
-      '- 마크다운 제목이나 굵게 표시는 쓰지 말고, 말하듯 자연스럽게 써.',
       '- 모르는 것은 모른다고 말하고, 추측이면 추측이라고 밝혀.',
       '- 비밀번호나 인증코드를 채팅에 올려 달라고 절대 요청하지 마.'
     ].join('\n'),
     groq: [
-      '너는 단체 채팅방 "ai비서"에 있는 AI "Groq"야. 방에는 사용자와, 밝고 빠른 AI 비서 "피클", 차분한 AI "Gemini"가 함께 있어.',
-      '- 빠르고 직관적인 아이디어형. 짧은 존댓말 1~2문장으로 핵심만 짚어.',
-      '- 브레인스토밍 파트너처럼 바로 써먹을 수 있는 발상이나 다음 수를 하나씩 던져.',
-      '- 팩트는 짧게 확인해 주고, 모르면 모른다고 말해.',
+      '너는 단체 채팅방 "ai비서"에 있는 AI "Groq"야. 방에는 사용자(이호준)와, 밝고 빠른 AI 비서 "피클", 차분한 AI "Gemini"가 함께 있어.',
+      '- 빠르고 직관적인 아이디어형. 짧은 존댓말 2~4줄로 핵심만 짚어.',
+      '- 결론·추천을 먼저 한 줄로 던지고, 왜 그게 나은지(가격·속도·편함) 한 줄만 붙여.',
+      '- 바로 할 수 있는 다음 행동 하나를 콕 집어 줘. 확인이 필요한 값은 확인 방법이나 링크로 넘겨.',
+      '- 강조는 **굵게**, 링크는 [제목](https://...) 형식으로 써도 돼.',
       '- 다른 AI가 이미 말한 내용을 반복하지 말고 한 발 앞선 관점을 보태.',
-      '- 마크다운 제목이나 굵게 표시는 쓰지 말고, 말하듯 짧게 써.',
+      '- 마크다운 제목(#)은 쓰지 말고, 모르면 모른다고 말해.',
       '- 비밀번호나 인증코드를 채팅에 올려 달라고 절대 요청하지 마.'
     ].join('\n')
   };
@@ -678,6 +723,158 @@
     if (cls) e.className = cls;
     if (text !== undefined && text !== null) e.textContent = text;
     return e;
+  }
+
+  /* ── 링크·서식 안전 처리 ──────────────── */
+  // http(s)만 통과시킵니다. javascript:, data:, 따옴표·공백이 낀 주소는 링크로 만들지 않아요.
+  function safeUrl(raw) {
+    var u = String(raw === null || raw === undefined ? '' : raw).trim();
+    if (!u || u.length > 600) return '';
+    if (!/^https?:\/\//i.test(u)) return '';
+    if (/[\s<>"'`]/.test(u)) return '';
+    return u;
+  }
+
+  function hostOf(url) {
+    var m = String(url || '').match(/^https?:\/\/([^\/?#]+)/i);
+    return m ? m[1].replace(/^www\./i, '') : '';
+  }
+
+  // 출처 제목에 섞여 오는 태그를 걷어내고 한 줄로 다듬습니다.
+  function cleanTitle(raw, url) {
+    var t = String(raw === null || raw === undefined ? '' : raw).replace(/<[^>]*>/g, ' ');
+    t = t.replace(/\s+/g, ' ').trim();
+    if (!t) t = hostOf(url) || '링크';
+    if (t.length > 90) t = t.slice(0, 90) + '…';
+    return t;
+  }
+
+  // {title, url} 목록을 안전한 형태로만 남깁니다(중복 제거·최대 개수·http(s)만).
+  function normalizeLinks(list) {
+    if (!Array.isArray(list)) return [];
+    var out = [], seen = {};
+    for (var i = 0; i < list.length && out.length < MAX_LINKS; i++) {
+      var it = list[i];
+      if (!it || typeof it !== 'object') continue;
+      var url = safeUrl(it.url);
+      if (!url) continue;
+      var k = url.toLowerCase();
+      if (seen[k]) continue;
+      seen[k] = 1;
+      out.push({ title: cleanTitle(it.title, url), url: url });
+    }
+    return out;
+  }
+
+  function shortUrlLabel(url) {
+    var s = String(url).replace(/^https?:\/\//i, '').replace(/[\/#?]+$/, '');
+    if (s.length > 44) s = s.slice(0, 44) + '…';
+    return s;
+  }
+
+  function anchorEl(label, url, cls) {
+    var a = document.createElement('a');
+    a.className = cls || 'inline-link';
+    a.setAttribute('href', url);
+    a.setAttribute('target', '_blank');
+    a.setAttribute('rel', 'noopener noreferrer');
+    a.setAttribute('referrerpolicy', 'no-referrer');
+    a.textContent = label;
+    return a;
+  }
+
+  // **굵게**, [제목](https://...), 맨몸 https://... 세 가지만 DOM으로 만들어 넣습니다.
+  // 모델 응답은 전부 textContent로만 넣기 때문에 HTML을 흥내 낸 문장도 글자로만 보입니다(XSS 방어).
+  var RICH_RE = /\[([^\]\n]{1,140})\]\(\s*(https?:\/\/[^\s)]{1,600})\s*\)|\*\*([^*\n]{1,200})\*\*|(https?:\/\/[^\s<>"'`]{1,600})/g;
+
+  function appendRich(parent, text) {
+    var s = String(text === null || text === undefined ? '' : text);
+    var last = 0, m;
+    RICH_RE.lastIndex = 0;
+    while ((m = RICH_RE.exec(s)) !== null) {
+      if (m.index > last) parent.appendChild(document.createTextNode(s.slice(last, m.index)));
+
+      if (m[1] !== undefined) {
+        var u1 = safeUrl(m[2]);
+        if (u1) {
+          var label = m[1].replace(/\s+/g, ' ').trim();
+          parent.appendChild(anchorEl(label || hostOf(u1), u1));
+        } else {
+          parent.appendChild(document.createTextNode(m[0]));
+        }
+      } else if (m[3] !== undefined) {
+        var st = document.createElement('strong');
+        st.textContent = m[3];
+        parent.appendChild(st);
+      } else {
+        var raw = m[4], tail = '';
+        var tm = raw.match(/[)\]}>,.;:!?'"”’」…]+$/);
+        if (tm) { tail = tm[0]; raw = raw.slice(0, raw.length - tail.length); }
+        var u2 = safeUrl(raw);
+        if (u2) parent.appendChild(anchorEl(shortUrlLabel(u2), u2));
+        else parent.appendChild(document.createTextNode(raw));
+        if (tail) parent.appendChild(document.createTextNode(tail));
+      }
+
+      last = RICH_RE.lastIndex;
+    }
+    if (last < s.length) parent.appendChild(document.createTextNode(s.slice(last)));
+  }
+
+  function richText(tag, cls, text) {
+    var node = h(tag, cls);
+    appendRich(node, text);
+    return node;
+  }
+
+  function linkCardEl(link) {
+    var url = safeUrl(link && link.url);
+    if (!url) return null;
+    var a = document.createElement('a');
+    a.className = 'link-card';
+    a.setAttribute('href', url);
+    a.setAttribute('target', '_blank');
+    a.setAttribute('rel', 'noopener noreferrer');
+    a.setAttribute('referrerpolicy', 'no-referrer');
+    a.appendChild(h('span', 'ico', '🔗'));
+    var box = h('span', 'txt');
+    box.appendChild(h('span', 't', cleanTitle(link.title, url)));
+    var host = hostOf(url);
+    if (host) box.appendChild(h('span', 'host', host));
+    a.appendChild(box);
+    return a;
+  }
+
+  // 말풍선 아래에 붙는 "🔗 참고·추천 링크" 카드 묶음. 링크가 없으면 null.
+  function linksEl(links) {
+    var list = normalizeLinks(links);
+    if (!list.length) return null;
+    var wrap = h('div', 'links');
+    wrap.appendChild(h('div', 'links-hd', '🔗 참고·추천 링크'));
+    var n = 0;
+    for (var i = 0; i < list.length; i++) {
+      var card = linkCardEl(list[i]);
+      if (card) { wrap.appendChild(card); n++; }
+    }
+    return n ? wrap : null;
+  }
+
+  /* ── Gemini 응답의 출처(groundingChunks) 읽기 ── */
+  function geminiLinks(data) {
+    var cand = data && Array.isArray(data.candidates) ? data.candidates[0] : null;
+    var gm = cand && cand.groundingMetadata;
+    var chunks = gm && Array.isArray(gm.groundingChunks) ? gm.groundingChunks : [];
+    var links = [], seen = {};
+    for (var i = 0; i < chunks.length && links.length < MAX_LINKS; i++) {
+      var web = chunks[i] && chunks[i].web;
+      var url = web && safeUrl(web.uri);
+      if (!url) continue;
+      var k = url.toLowerCase();
+      if (seen[k]) continue;
+      seen[k] = 1;
+      links.push({ title: cleanTitle(web.title, url), url: url });
+    }
+    return links;
   }
 
   /* ── 화면 잠금 (SHA-256) ──────────────── */
@@ -852,8 +1049,13 @@
     }
 
     if (data && Array.isArray(data.messages)) {
-      state.messages = data.messages.filter(function (m) {
-        return m && typeof m.who === 'string' && typeof m.text === 'string' && typeof m.ts === 'number';
+      state.messages = [];
+      data.messages.forEach(function (m) {
+        if (!m || typeof m.who !== 'string' || typeof m.text !== 'string' || typeof m.ts !== 'number') return;
+        var kept = { id: typeof m.id === 'string' ? m.id : uid(), who: m.who, text: m.text, ts: m.ts };
+        var links = normalizeLinks(m.links);   // 저장된 링크도 다시 검사합니다
+        if (links.length) kept.links = links;
+        state.messages.push(kept);
       });
     }
     if (data && data.settings && typeof data.settings === 'object') {
@@ -933,9 +1135,11 @@
     var col = h('div', 'col');
     if (!compact) col.appendChild(h('div', 'name', meta.name));
     var line = h('div', 'line');
-    line.appendChild(h('div', 'bubble', m.text));
+    line.appendChild(richText('div', 'bubble', m.text));
     line.appendChild(h('div', 'time', fmtTime(m.ts)));
     col.appendChild(line);
+    var chips = linksEl(m.links);
+    if (chips) col.appendChild(chips);
     row.appendChild(col);
     return row;
   }
@@ -964,7 +1168,7 @@
   function emptyEl() {
     var d = h('div', 'empty');
     d.appendChild(h('b', null, '새 대화'));
-    d.appendChild(document.createTextNode('메시지를 보내면 피클·Gemini·Groq가 함께 답해요. @피클 · @Gemini · @Groq로 한 명만 부를 수 있어요.'));
+    d.appendChild(document.createTextNode('메시지를 보내면 피클·Gemini·Groq가 함께 답해요. Gemini 키가 있으면 구글 실시간 검색 결과와 참고 링크까지 붙여 드려요.'));
     return d;
   }
 
@@ -1002,8 +1206,11 @@
     scrollToBottom(false);
   }
 
-  function addMessage(who, text) {
-    state.messages.push({ id: uid(), who: who, text: text, ts: Date.now() });
+  function addMessage(who, text, links) {
+    var m = { id: uid(), who: who, text: text, ts: Date.now() };
+    var safeLinks = normalizeLinks(links);
+    if (safeLinks.length) m.links = safeLinks;
+    state.messages.push(m);
     prune();
     save();
     render();
@@ -1085,24 +1292,29 @@
 
       await sleep(delayFor(who));
 
-      var reply = '';
+      var got = null;
       try {
-        reply = await replyFor(who, text, spoken);
+        got = await replyFor(who, text, spoken);
       } catch (err) {
         typingWho = null;
         addMessage('system', '⚠️ ' + AI[who].name + ' 실시간 응답 실패: ' + shortErr(err, 120) + ' — 데모 응답으로 대신했어요.');
         try {
-          reply = demoReply(who, text, spoken);
+          got = demoReply(who, text, spoken);
         } catch (e2) {
-          reply = '지금은 답하기 어려워요. 잠시 뒤 다시 불러 주세요.';
+          got = { text: '지금은 답하기 어려워요. 잠시 뒤 다시 불러 주세요.', links: [] };
         }
       }
 
-      if (!reply) reply = demoReply(who, text, spoken);
-      reply = cleanReply(reply);
+      if (!got || !got.text) {
+        try { got = demoReply(who, text, spoken); } catch (e3) { got = null; }
+      }
+      if (!got || !got.text) got = { text: '지금은 답하기 어려워요. 잠시 뒤 다시 불러 주세요.', links: [] };
+
+      var reply = cleanReply(got.text);
+      var links = normalizeLinks(got.links);
 
       typingWho = null;
-      addMessage(who, reply);
+      addMessage(who, reply, links);
       spoken.push({ who: who, text: reply });
       await sleep(220);
     }
@@ -1113,11 +1325,12 @@
     el.input.focus();
   }
 
+  // 모든 응답은 { text, links } 형태로 돌려줍니다.
   async function replyFor(who, userText, spoken) {
     var provider = providerFor(who);
-    if (provider === 'anthropic') return await callClaude();
-    if (provider === 'openai') return await callOpenAI();
-    if (provider === 'groq') return await callGroq(who);
+    if (provider === 'anthropic') return { text: await callClaude(), links: [] };
+    if (provider === 'openai') return { text: await callOpenAI(), links: [] };
+    if (provider === 'groq') return { text: await callGroq(who), links: [] };
     if (provider === 'gemini') return await callGemini(who);
     await sleep(220);
     return demoReply(who, userText, spoken);
@@ -1125,9 +1338,8 @@
 
   function cleanReply(t) {
     var s = String(t || '').trim();
-    s = s.replace(/\*\*([^*]+)\*\*/g, '$1');
-    s = s.replace(/^#{1,6}\s*/gm, '');
-    s = s.replace(/^\s*[-*]\s+/gm, '· ');
+    s = s.replace(/^#{1,6}\s*/gm, '');            // 제목 표시는 빼고 글자만
+    s = s.replace(/^\s*[-*]\s+/gm, '· ');         // 목록 기호 정리
     s = s.replace(/\n{3,}/g, '\n\n');
     return s.trim();
   }
@@ -1291,8 +1503,13 @@
     return out;
   }
 
-  function geminiPayload(who) {
-    return {
+  // 실시간 검색(grounding)에 붙이는 도구 이름. REST JSON은 google_search(프로토 필드명)를 받고,
+  // 게이트웨이가 camelCase만 받는 경우가 있어 googleSearch로도 한 번 더 시도합니다.
+  var GEMINI_TOOL_STYLES = ['google_search', 'googleSearch'];
+  var searchNoteShown = false;   // 검색 미지원 안내는 한 번만
+
+  function geminiPayload(who, toolStyle) {
+    var body = {
       systemInstruction: { parts: [{ text: PERSONA[who] }] },
       contents: geminiContents(who),
       generationConfig: geminiGenConfig({
@@ -1300,6 +1517,12 @@
         maxOutputTokens: 2048
       })
     };
+    if (toolStyle) {
+      var tool = {};
+      tool[toolStyle] = {};
+      body.tools = [tool];
+    }
+    return body;
   }
 
   async function geminiRequest(model, key, body) {
@@ -1313,15 +1536,54 @@
     return { res: res, data: data, model: model };
   }
 
+  // google_search 도구를 모델이 받지 못할 때(400·403·404·422 + 도구 관련 문구)만 true.
+  // 키 오류(API key not valid)나 사용량 한도는 검색 탓이 아니므로 재시도하지 않습니다.
+  function googleSearchUnsupported(status, data) {
+    if (status !== 400 && status !== 403 && status !== 404 && status !== 422) return false;
+    var e = data && data.error;
+    var txt = '';
+    if (e) {
+      ['message', 'status', 'type', 'reason', 'details'].forEach(function (k) {
+        var v = e[k];
+        if (typeof v === 'string' && v) txt += ' ' + v;
+        else if (Array.isArray(v)) {
+          v.forEach(function (x) {
+            if (x && typeof x.message === 'string') txt += ' ' + x.message;
+            if (x && typeof x.reason === 'string') txt += ' ' + x.reason;
+          });
+        }
+      });
+    }
+    if (/api key not valid|api_key_invalid|permission_denied|quota|billing/i.test(txt)) return false;
+    if (!/google[_ ]?search|grounding|tool|function calling|unknown name|unknown field|invalid json payload/i.test(txt)) return false;
+    return /not supported|unsupported|unknown|invalid|cannot|not allowed|not available|does not support|not enabled/i.test(txt);
+  }
+
+  // 검색 도구를 붙여 먼저 시도하고, 모델이 안 받으면 도구를 빼고 한 번 더 시도합니다.
+  async function geminiTryModel(key, who, model) {
+    for (var i = 0; i < GEMINI_TOOL_STYLES.length; i++) {
+      var withTool = await geminiRequest(model, key, geminiPayload(who, GEMINI_TOOL_STYLES[i]));
+      if (withTool.res.ok) { withTool.searched = true; return withTool; }
+      if (!googleSearchUnsupported(withTool.res.status, withTool.data)) {
+        withTool.searched = false;
+        return withTool;
+      }
+    }
+    var plain = await geminiRequest(model, key, geminiPayload(who, null));
+    plain.searched = false;
+    if (plain.res.ok) plain.searchDropped = true;
+    return plain;
+  }
+
   // 지워졌거나 새 키에 닫힌 모델(404)이면 지금 무료로 열려 있는 모델로 한 번만 바꿔 답합니다.
-  async function geminiAttempt(key, body, model) {
-    var first = await geminiRequest(model, key, body);
+  async function geminiAttempt(key, who, model) {
+    var first = await geminiTryModel(key, who, model);
     if (first.res.ok || first.res.status !== 404) return first;
 
     for (var i = 0; i < GEMINI_FALLBACKS.length; i++) {
       var alt = GEMINI_FALLBACKS[i];
       if (alt === model) continue;
-      var next = await geminiRequest(alt, key, body);
+      var next = await geminiTryModel(key, who, alt);
       if (next.res.ok || next.res.status !== 404) return next;
     }
     return first;
@@ -1344,7 +1606,7 @@
     var key = state.settings.geminiKey.trim();
     var model = geminiModel();
 
-    var got = await geminiAttempt(key, geminiPayload(who), model);
+    var got = await geminiAttempt(key, who, model);
 
     if (!got.res.ok) throw new Error('Gemini ' + httpErrText(got.res.status, got.data));
 
@@ -1363,7 +1625,13 @@
       syncStatus();
       addMessage('system', 'Gemini 모델 ' + model + '은(는) 지금 새 키로 쓸 수 없어서 ' + got.model + '로 답했어요. 설정에 이 모델로 저장했어요.');
     }
-    return out;
+
+    if (got.searchDropped && !searchNoteShown) {
+      searchNoteShown = true;
+      addMessage('system', '🔎 ' + got.model + ' 모델은 Google 실시간 검색(google_search)을 지원하지 않아 검색 없이 답했어요. 설정의 Gemini 모델을 gemini-3.8-flash로 바꾸면 검색 결과와 출처 링크까지 받을 수 있어요.');
+    }
+
+    return { text: out, links: geminiLinks(got.data) };
   }
 
   async function testGeminiKey(key, model) {
@@ -1516,6 +1784,10 @@
         '{topic} — 근처에서 평 좋은 데 몇 개 골라 볼게요 🍽️',
         '배고프시죠! {topic} 쪽으로 후보 세 개만 빠르게 추려 드릴게요 😋'
       ],
+      recommend: [
+        '{topic} — 데모 모드라 실시간 확인은 못 했지만, 고르는 기준은 이렇게 잡으면 빨라요 🔍\n1) 바로 되는 조건: 거리·영업시간이 지금 맞는 것\n2) 가성비: 같은 조건에서 가격 낮은 쪽\n3) 설패 확률이 낮은 쪽: 최근 후기가 많은 기본\n비교 포인트는 가격·대기·이동 시간이에요. 아래 링크에서 지금 값과 영업시간을 바로 확인해 보세요.',
+        '{topic} — 세 갈래로 좁혀 볼게요 🔍\n· 빠른 선택: 지금 바로 되는 곳\n· 가성비: 가격 먼저 보는 쪽\n· 안전한 선택: 후기 많은 기본\n아래 링크에서 {topic} 후기·가격을 보고 하나 골라 주시면, 제가 예약·주문까지 해 둘게요.'
+      ],
       ask: [
         '네, 가능해요! {topic} 쪽은 제가 바로 확인해서 알려드릴게요 🔍',
         '{topic} — 확인되는 대로 바로 말씀드릴게요 🥒'
@@ -1554,6 +1826,9 @@
       food: [
         '{topic} 쪽은 이동 시간과 영업시간을 함께 보는 게 좋습니다. 후보를 정리해 드리겠습니다.',
         '가까운 순서와 평이 좋은 순서, 두 가지로 나눠 보겠습니다. {topic} 쪽으로요.'
+      ],
+      recommend: [
+        '{topic} — 데모 모드이고 실시간 검색은 붙지 않았습니다. 추천 기준을 세 가지로 정리했습니다.\n1) 조건 우선: 거리·영업시간·결제 수단이 맞는지\n2) 가격 비교: 같은 조건 두 곳 이상의 금액 차이\n3) 설패 확률: 최근 3개월 후기와 영업 상태\n아래 링크에서 실제 값과 후기를 확인하시고 두 곳만 남겨 주시면 비교표로 정리해 드리겠습니다.'
       ],
       ask: [
         '{topic} 쪽은 조건에 따라 결과가 달라질 수 있습니다. 확인 가능한 범위부터 정리하겠습니다.',
@@ -1594,6 +1869,10 @@
         '{topic}, 지금 끌리는 한 가지로 바로 정해요. 고민이 더 비싸요 😄',
         '{topic} — 두 후보만 남기고 바로 골라요. 맛은 비슷해요.'
       ],
+      recommend: [
+        '{topic} ⚡ 고민 길게 하지 말고 이 셋만 보세요: 1) 지금 바로 되는 곳 2) 가격 낮은 쪽 3) 후기 많은 기본. 비교는 가격·대기·이동 시간만. 아래 링크에서 바로 확인하고 하나 골라요.',
+        '{topic} — 5분 안에 정하려면 ⚡ 가까운 곳 · 가격 낮은 곳 · 후기 많은 곳, 이 셋만 비교하면 답 나와요. 링크에서 지금 상태 보고 바로 결정해요.'
+      ],
       ask: [
         '{topic}, 지금 가진 정보로는 이렇게 보여요. 하나만 확인하면 확실해져요.',
         '{topic}은 빠르게 확인 가능해 보여요. 제가 먼저 찾아 볼까요?'
@@ -1630,6 +1909,7 @@
     var s = String(t || '');
     if (/(안녕|하이|반가|좋은 아침|ㅎㅇ)/.test(s)) return 'greet';
     if (/(고마워|고맙|감사|땡큐|완료했|굿)/.test(s)) return 'thanks';
+    if (/(추천|비교|순위|가성비|알아봐|어디가\s*좋|어디\s*좋|뭐가\s*좋|요즘|최신|트렌드|베스트)/.test(s)) return 'recommend';
     if (/(일정|스케줄|미팅|회의|약속|캘린더|오후 \d|오전 \d)/.test(s)) return 'schedule';
     if (/(카드|결제|입금|잔액|보험|세금|환급|포인트|요금|월세|관리비)/.test(s)) return 'money';
     if (/(메일|메일함|답장|발송|수신|스팸)/.test(s)) return 'mail';
@@ -1637,6 +1917,38 @@
     if (/(정리|작성|요약|만들|확인|조회|신청|예약|주문|찾아|알아봐)/.test(s)) return 'work';
     if (/\?|까요|할까|될까|어때|가능|되나/.test(s)) return 'ask';
     return 'plain';
+  }
+
+  // 데모 모드에서도 "어디서 확인할지"를 바로 누를 수 있게 검색·지도 링크를 붙입니다.
+  // (데모는 실시간 검색을 하지 않으므로 특정 업체를 추천하는 척하지 않고 검색 링크만 줍니다.)
+  function demoQuery(t) {
+    var s = String(t || '')
+      .replace(/@\s*(피클|Gemini|제미나이|클로드|Groq|그록)\S*/gi, ' ')
+      .replace(/(추천해\s*줘|추천|알아봐\s*줘|알아봐|검색해\s*줘|검색|찾아\s*줘|찾아줘|비교해\s*줘|비교|순위|리스트|좀|해\s*줘|해줘|주세요|줘|어때|베스트)/g, ' ')
+      .replace(/[\[\]()"'<>]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (!s) s = '요즘 인기';
+    if (s.length > 40) s = s.slice(0, 40).trim();
+    return s;
+  }
+
+  function demoPlaceQuery(t) {
+    return /(맛집|식당|카페|점심|저녁|커피|밥|배달|술|고기|국수|분식|브런치|야식|회식|놀곳|놀\s*곳|데이트|숙소|호텔)/.test(String(t || ''));
+  }
+
+  function searchLinks(query, place) {
+    var q = String(query || '').trim();
+    if (!q) return [];
+    var enc = encodeURIComponent(q);
+    var list = [];
+    if (place) {
+      list.push({ title: q + ' — 네이버 지도', url: 'https://map.naver.com/p/search/' + enc });
+      list.push({ title: q + ' — 카카오맵', url: 'https://map.kakao.com/?q=' + enc });
+    }
+    list.push({ title: q + ' — Google 검색', url: 'https://www.google.com/search?q=' + enc });
+    list.push({ title: q + ' — 네이버 검색', url: 'https://search.naver.com/search.naver?query=' + enc });
+    return list;
   }
 
   function demoReply(who, userText, spoken) {
@@ -1659,7 +1971,12 @@
       else if (who === 'groq') out += ' 다음 아이디어도 바로 하나 더 드릴게요 ⚡';
       else out += ' 피클이 맡은 실행 부분은 제가 정리해서 옆에 붙여 두겠습니다.';
     }
-    return out;
+
+    var links = [];
+    if (cat === 'recommend' || cat === 'food') {
+      links = searchLinks(demoQuery(userText), cat === 'food' || demoPlaceQuery(userText));
+    }
+    return { text: out, links: links };
   }
 
   /* ── 설정 모달 ─────────────────────────── */
@@ -2068,6 +2385,8 @@
       }
       var name = m.who === 'user' ? '이호준' : (m.who === 'system' ? '(안내)' : AI[m.who].name);
       lines.push('[' + fmtTime(m.ts) + '] ' + name + ': ' + m.text);
+      var ls = normalizeLinks(m.links);
+      for (var i = 0; i < ls.length; i++) lines.push('    🔗 ' + ls[i].title + ' — ' + ls[i].url);
     });
     return lines.join('\n') + '\n';
   }
