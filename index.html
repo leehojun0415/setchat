@@ -988,9 +988,14 @@
                 <label class="field">
                   <span>Groq 모델</span>
                   <select id="pick-groq" aria-label="Groq 모델 선택">
-                    <option value="openai/gpt-oss-120b">openai/gpt-oss-120b (기본·무료)</option>
-                    <option value="openai/gpt-oss-20b">openai/gpt-oss-20b (무료)</option>
-                    <option value="qwen/qwen3.8-27b">qwen/qwen3.8-27b (무료)</option>
+                    <optgroup label="🆓 무료">
+                      <option value="openai/gpt-oss-120b">openai/gpt-oss-120b (기본·무료)</option>
+                      <option value="openai/gpt-oss-20b">openai/gpt-oss-20b (무료)</option>
+                      <option value="qwen/qwen3.8-27b">qwen/qwen3.8-27b (무료)</option>
+                    </optgroup>
+                    <optgroup label="💳 유료 (직접 고를 때만)">
+                      <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile (유료·고성능)</option>
+                    </optgroup>
                     <option value="__custom">직접 입력…</option>
                   </select>
                   <input id="model-groq" type="text" placeholder="openai/gpt-oss-120b" autocomplete="off" spellcheck="false" hidden>
@@ -1016,8 +1021,14 @@
                 <label class="field">
                   <span>Gemini 모델</span>
                   <select id="pick-gemini" aria-label="Gemini 모델 선택">
-                    <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (기본·무료)</option>
-                    <option value="gemini-3.8-flash">gemini-3.8-flash (무료)</option>
+                    <optgroup label="🆓 무료">
+                      <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (기본·무료)</option>
+                      <option value="gemini-3.8-flash">gemini-3.8-flash (무료)</option>
+                    </optgroup>
+                    <optgroup label="💳 유료 (직접 고를 때만)">
+                      <option value="gemini-2.5-flash">gemini-2.5-flash (유료·표준)</option>
+                      <option value="gemini-2.5-pro">gemini-2.5-pro (유료·고성능)</option>
+                    </optgroup>
                     <option value="__custom">직접 입력…</option>
                   </select>
                   <input id="model-gemini" type="text" placeholder="gemini-3.5-flash-lite" autocomplete="off" spellcheck="false" hidden>
@@ -1078,8 +1089,9 @@
                 <label class="field">
                   <span>Anthropic 모델</span>
                   <select id="pick-claude" aria-label="Anthropic 모델 선택">
-                    <option value="claude-sonnet-4-5">claude-sonnet-4-5</option>
-                    <option value="claude-haiku-4-5">claude-haiku-4-5</option>
+                    <option value="claude-sonnet-4-5">claude-sonnet-4-5 (유료·추천)</option>
+                    <option value="claude-haiku-4-5">claude-haiku-4-5 (유료·빠름)</option>
+                    <option value="claude-opus-4-1">claude-opus-4-1 (유료·최고성능)</option>
                     <option value="__custom">직접 입력…</option>
                   </select>
                   <input id="model-claude" type="text" placeholder="claude-sonnet-4-5" autocomplete="off" spellcheck="false" hidden>
@@ -1097,8 +1109,10 @@
                 <label class="field">
                   <span>피클 모델 <em>OpenAI 키를 쓸 때</em></span>
                   <select id="pick-pickle" aria-label="OpenAI 모델 선택">
-                    <option value="gpt-4o-mini">gpt-4o-mini</option>
-                    <option value="gpt-4o">gpt-4o</option>
+                    <option value="gpt-4o-mini">gpt-4o-mini (유료·가성비)</option>
+                    <option value="gpt-4o">gpt-4o (유료·고성능)</option>
+                    <option value="gpt-4.1">gpt-4.1 (유료·최신)</option>
+                    <option value="o3-mini">o3-mini (유료·추론)</option>
                     <option value="__custom">직접 입력…</option>
                   </select>
                   <input id="model-pickle" type="text" placeholder="gpt-4o-mini" autocomplete="off" spellcheck="false" hidden>
@@ -1233,8 +1247,14 @@
       <label class="field">
         <span>Gemini 모델</span>
         <select id="pick-ai-gemini" aria-label="Gemini 모델 선택">
-          <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (기본·무료)</option>
-          <option value="gemini-3.8-flash">gemini-3.8-flash (무료)</option>
+          <optgroup label="🆓 무료">
+            <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (기본·무료)</option>
+            <option value="gemini-3.8-flash">gemini-3.8-flash (무료)</option>
+          </optgroup>
+          <optgroup label="💳 유료 (직접 고를 때만)">
+            <option value="gemini-2.5-flash">gemini-2.5-flash (유료·표준)</option>
+            <option value="gemini-2.5-pro">gemini-2.5-pro (유료·고성능)</option>
+          </optgroup>
           <option value="__custom">직접 입력…</option>
         </select>
         <input id="ai-gemini-model" type="text" placeholder="gemini-3.5-flash-lite" autocomplete="off" spellcheck="false" hidden>
@@ -1250,9 +1270,14 @@
       <label class="field">
         <span>Groq 모델</span>
         <select id="pick-ai-groq" aria-label="Groq 모델 선택">
-          <option value="openai/gpt-oss-120b">openai/gpt-oss-120b (기본·무료)</option>
-          <option value="openai/gpt-oss-20b">openai/gpt-oss-20b (무료)</option>
-          <option value="qwen/qwen3.8-27b">qwen/qwen3.8-27b (무료)</option>
+          <optgroup label="🆓 무료">
+            <option value="openai/gpt-oss-120b">openai/gpt-oss-120b (기본·무료)</option>
+            <option value="openai/gpt-oss-20b">openai/gpt-oss-20b (무료)</option>
+            <option value="qwen/qwen3.8-27b">qwen/qwen3.8-27b (무료)</option>
+          </optgroup>
+          <optgroup label="💳 유료 (직접 고를 때만)">
+            <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile (유료·고성능)</option>
+          </optgroup>
           <option value="__custom">직접 입력…</option>
         </select>
         <input id="ai-groq-model" type="text" placeholder="openai/gpt-oss-120b" autocomplete="off" spellcheck="false" hidden>
@@ -1288,8 +1313,10 @@
       <label class="field">
         <span>모델</span>
         <select id="pick-ai-openai" aria-label="OpenAI 모델 선택">
-          <option value="gpt-4o-mini">gpt-4o-mini</option>
-          <option value="gpt-4o">gpt-4o</option>
+          <option value="gpt-4o-mini">gpt-4o-mini (유료·가성비)</option>
+          <option value="gpt-4o">gpt-4o (유료·고성능)</option>
+          <option value="gpt-4.1">gpt-4.1 (유료·최신)</option>
+          <option value="o3-mini">o3-mini (유료·추론)</option>
           <option value="__custom">직접 입력…</option>
         </select>
         <input id="ai-openai-model" type="text" placeholder="gpt-4o-mini" autocomplete="off" spellcheck="false" hidden>
@@ -1307,8 +1334,9 @@
       <label class="field">
         <span>모델</span>
         <select id="pick-ai-anthropic" aria-label="Anthropic 모델 선택">
-          <option value="claude-sonnet-4-5">claude-sonnet-4-5</option>
-          <option value="claude-haiku-4-5">claude-haiku-4-5</option>
+          <option value="claude-sonnet-4-5">claude-sonnet-4-5 (유료·추천)</option>
+          <option value="claude-haiku-4-5">claude-haiku-4-5 (유료·빠름)</option>
+          <option value="claude-opus-4-1">claude-opus-4-1 (유료·최고성능)</option>
           <option value="__custom">직접 입력…</option>
         </select>
         <input id="ai-anthropic-model" type="text" placeholder="claude-sonnet-4-5" autocomplete="off" spellcheck="false" hidden>
@@ -3784,6 +3812,11 @@
     return out;
   }
 
+  // OpenAI 추론 모델(o1·o3·o4 …)은 max_tokens·temperature 대신 max_completion_tokens 를 씁니다.
+  function isReasoningModel(m) {
+    return /^o\d/i.test(String(m || '').trim());
+  }
+
   async function callOpenAI(who, ctx) {
     var c = isCustomKey(who) ? customById(who) : null;
     var key = (c && c.apiKey.trim() ? c.apiKey.trim() : state.settings.openaiKey.trim());
@@ -3797,12 +3830,9 @@
         'content-type': 'application/json',
         'authorization': 'Bearer ' + key
       },
-      body: JSON.stringify({
-        model: model,
-        temperature: 0.7,
-        max_tokens: 800,
-        messages: msgs
-      })
+      body: JSON.stringify(isReasoningModel(model)
+        ? { model: model, max_completion_tokens: 1200, messages: msgs }
+        : { model: model, temperature: 0.7, max_tokens: 800, messages: msgs })
     });
 
     var data = null;
@@ -3851,6 +3881,40 @@
   function geminiUrl(model, key) {
     return 'https://generativelanguage.googleapis.com/v1beta/models/' +
       encodeURIComponent(model) + ':generateContent?key=' + encodeURIComponent(key);
+  }
+
+  /* ── AQ. 유료 키(Google/Vertex Express) ────────────────────────────────
+     AI Studio(v1beta)는 AQ. 키를 401/403(API_KEY_SERVICE_BLOCKED)로 막는 경우가 있어,
+     그때는 Vertex Express(aiplatform) 주소로 한 번 더 시도합니다. */
+  function isVertexKey(key) {
+    return /^AQ\./i.test(String(key || '').trim());
+  }
+
+  function vertexUrl(model, key) {
+    return 'https://aiplatform.googleapis.com/v1/publishers/google/models/' +
+      encodeURIComponent(model) + ':generateContent?key=' + encodeURIComponent(key);
+  }
+
+  // Vertex Express 는 contents 마다 role(user/model)이 꼭 있어야 하고, google_search 도구는 떼고 보냅니다.
+  function vertexBody(body) {
+    var out = {};
+    Object.keys(body || {}).forEach(function (k) {
+      if (k === 'tools' || k === 'toolConfig') return;
+      out[k] = body[k];
+    });
+    if (Array.isArray(out.contents)) {
+      out.contents = out.contents.map(function (c) {
+        return { role: (c && c.role === 'model') ? 'model' : 'user', parts: (c && c.parts) || [] };
+      });
+    }
+    return out;
+  }
+
+  function vertexAuthFailed(status, data) {
+    if (status === 401 || status === 403) return true;
+    var e = data && data.error;
+    var code = String((e && (e.status || e.message)) || '');
+    return status === 400 && /SERVICE_BLOCKED|API_KEY_INVALID|API key not valid/i.test(code);
   }
 
   // 2026-11 기준 gemini-2.5-flash는 새 키에서 더 이상 열리지 않아(404) 3.5-flash-lite를 기본으로 씁니다.
@@ -3921,7 +3985,20 @@
     });
     var data = null;
     try { data = await res.json(); } catch (e) { data = null; }
-    return { res: res, data: data, model: model };
+    var out = { res: res, data: data, model: model, route: 'aistudio' };
+
+    // AQ. 키가 AI Studio 에서 막히면 Vertex Express 로 자동 재시도
+    if (!res.ok && isVertexKey(key) && vertexAuthFailed(res.status, data)) {
+      var vres = await fetch(vertexUrl(model, key), {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(vertexBody(body))
+      });
+      var vdata = null;
+      try { vdata = await vres.json(); } catch (e2) { vdata = null; }
+      out = { res: vres, data: vdata, model: model, route: 'vertex', studio: { status: res.status, data: data } };
+    }
+    return out;
   }
 
   // google_search 도구를 모델이 받지 못할 때(400·403·404·422 + 도구 관련 문구)만 true.
@@ -4042,7 +4119,7 @@
       err.model = model;
       throw err;
     }
-    return { data: got.data, model: model };
+    return { data: got.data, model: model, route: got.route || 'aistudio' };
   }
 
   /* ── Groq (무료 기본 경로) ─────────────── */
@@ -4211,12 +4288,9 @@
         'HTTP-Referer': 'https://leehojun0415.github.io/setchat/',
         'X-Title': 'ai-biseo'
       },
-      body: JSON.stringify({
-        model: model,
-        temperature: 0.7,
-        max_tokens: 800,
-        messages: msgs
-      })
+      body: JSON.stringify(isReasoningModel(model)
+        ? { model: model, max_completion_tokens: 1200, messages: msgs }
+        : { model: model, temperature: 0.7, max_tokens: 800, messages: msgs })
     });
 
     var data = null;
@@ -5759,8 +5833,8 @@
 
     if (gk) {
       try {
-        await testGeminiKey(gk, gm);
-        lines.push('Gemini ✅ 연결됨 (' + gm + ')');
+        var tg = await testGeminiKey(gk, gm);
+        lines.push('Gemini ✅ 연결됨 (' + gm + (tg && tg.route === 'vertex' ? ' · Vertex Express' : '') + ')');
       } catch (e0) {
         lines.push('Gemini ❌ ' + shortErr(e0, 180));
       }
@@ -5804,11 +5878,9 @@
             'content-type': 'application/json',
             'authorization': 'Bearer ' + ok
           },
-          body: JSON.stringify({
-            model: pm,
-            max_tokens: 16,
-            messages: [{ role: 'user', content: '연결 확인' }]
-          })
+          body: JSON.stringify(isReasoningModel(pm)
+            ? { model: pm, max_completion_tokens: 64, messages: [{ role: 'user', content: '연결 확인' }] }
+            : { model: pm, max_tokens: 16, messages: [{ role: 'user', content: '연결 확인' }] })
         });
         if (!r2.ok) {
           var d2 = null;
