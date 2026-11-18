@@ -348,6 +348,94 @@
   .lock .btn{width:100%;margin-top:10px;padding:13px 12px;font-size:15px;border-radius:13px;}
   .lock-msg{min-height:18px;margin:10px 2px 0;font-size:12.5px;font-weight:700;color:#8A3B2E;letter-spacing:-.1px;}
 
+  /* ── 참여 AI·검색 토글 ───────────────── */
+  .member-row{
+    display:flex;align-items:center;gap:10px;padding:9px 2px;
+    border-bottom:1px dashed #E2EAF0;
+  }
+  .member-row:last-of-type{border-bottom:0;}
+  .member-row .m-avatar{
+    width:30px;height:30px;border-radius:10px;flex:none;
+    display:grid;place-items:center;font-size:15px;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.7);
+  }
+  .member-row .m-name{font-size:14px;font-weight:700;color:#22303C;flex:1;min-width:0;letter-spacing:-.2px;}
+  .member-row .m-name small{
+    display:block;font-size:11.5px;font-weight:600;color:#7A8D9E;
+    margin-top:2px;letter-spacing:-.1px;
+  }
+  .member-row.off .m-name{color:#8A9AA8;}
+  .switch{position:relative;width:46px;height:27px;flex:none;}
+  .switch input{
+    position:absolute;inset:0;width:100%;height:100%;margin:0;
+    opacity:0;cursor:pointer;z-index:2;
+  }
+  .switch .track{
+    position:absolute;inset:0;border-radius:999px;background:#C7D4DF;
+    transition:background .16s ease;pointer-events:none;
+  }
+  .switch .track::after{
+    content:'';position:absolute;top:3px;left:3px;width:21px;height:21px;
+    border-radius:50%;background:#fff;
+    box-shadow:0 1px 2px rgba(0,0,0,.22);
+    transition:transform .16s ease;
+  }
+  .switch input:checked + .track{background:#33B36B;}
+  .switch input:checked + .track::after{transform:translateX(19px);}
+  .switch input:focus-visible + .track{box-shadow:0 0 0 3px rgba(51,179,107,.3);}
+  .switch input:disabled + .track{opacity:.55;}
+
+  .search-who{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 2px;}
+  .search-who.off{opacity:.5;}
+  .search-who .sec-sub{
+    width:100%;font-size:11.5px;font-weight:800;color:#40566A;
+    letter-spacing:-.1px;margin-bottom:2px;
+  }
+  .chip-check{
+    display:inline-flex;align-items:center;gap:5px;
+    border:1px solid #D5E0E9;background:#fff;border-radius:999px;
+    padding:6px 11px;font-size:12.5px;font-weight:700;color:#2A3A48;
+    cursor:pointer;letter-spacing:-.1px;
+  }
+  .chip-check input{margin:0;width:14px;height:14px;accent-color:#1E8A4F;cursor:pointer;}
+  .chip-check:has(input:checked){border-color:#9FD3B4;background:#F1FAF4;color:#1D6B3F;}
+  .chip-check:has(input:disabled){opacity:.6;cursor:default;}
+
+  /* ── 실시간 검색 카드·복사 버튼 ─────────── */
+  .row.ai .tools{display:flex;justify-content:flex-end;gap:6px;margin-top:1px;}
+  .copy-btn{
+    border:1px solid rgba(120,150,172,.34);background:rgba(255,255,255,.5);
+    color:#5B7387;font-size:11.5px;font-weight:700;letter-spacing:-.1px;
+    padding:4px 10px;border-radius:999px;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .copy-btn:hover{background:#fff;color:#22303C;border-color:rgba(80,125,160,.5);}
+  .copy-btn:active{transform:translateY(1px);}
+
+  /* ── 입력창 앞 퀵 칩 ───────────────────── */
+  .quick{
+    flex:none;display:flex;gap:6px;align-items:center;
+    overflow-x:auto;overflow-y:hidden;
+    padding:8px 10px 2px;background:var(--composer);
+    scrollbar-width:none;-webkit-overflow-scrolling:touch;
+  }
+  .quick::-webkit-scrollbar{display:none;}
+  .quick-chip{
+    flex:none;border:1px solid rgba(255,255,255,.8);
+    background:rgba(255,255,255,.62);color:#26374a;
+    border-radius:999px;padding:6px 12px;
+    font-size:12.5px;font-weight:700;letter-spacing:-.2px;
+    cursor:pointer;white-space:nowrap;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .quick-chip:hover{background:#fff;}
+  .quick-chip:active{transform:translateY(1px);}
+  .quick-chip.search{
+    background:rgba(254,229,0,.58);
+    border-color:rgba(210,186,0,.45);
+    margin-left:auto;
+  }
+
   .toast{
     position:absolute;left:50%;bottom:88px;transform:translate(-50%,10px);
     background:rgba(28,36,44,.92);color:#fff;
@@ -369,7 +457,7 @@
       <div class="logo" aria-hidden="true">💬</div>
       <div class="titles">
         <h1>ai비서</h1>
-        <div class="sub">이호준 · 피클 · Gemini · Groq</div>
+        <div class="sub" id="hd-sub">이호준 · 피클 · Gemini · Groq</div>
       </div>
       <button class="icon-btn" id="open-settings" aria-label="설정">⋯</button>
     </header>
@@ -377,6 +465,13 @@
     <div class="notice">🔒 비밀번호·인증코드는 올리지 마세요 · 30일 뒤 지워져요</div>
 
     <main class="feed" id="feed" aria-live="polite"></main>
+
+    <div class="quick" id="quick-chips" role="toolbar" aria-label="빠른 입력">
+      <button type="button" class="quick-chip" data-member="pickle" data-mention="@피클 ">🥒 피클</button>
+      <button type="button" class="quick-chip" data-member="claude" data-mention="@Gemini ">🤖 Gemini</button>
+      <button type="button" class="quick-chip" data-member="groq" data-mention="@Groq ">⚡ Groq</button>
+      <button type="button" class="quick-chip search" id="quick-search">🔍 검색·추천</button>
+    </div>
 
     <form class="composer" id="composer" autocomplete="off">
       <textarea id="input" rows="1" placeholder="메시지 입력" aria-label="메시지 입력"></textarea>
@@ -406,6 +501,45 @@
       <h2 id="modal-title">설정</h2>
       <button class="icon-btn" id="close-settings" aria-label="닫기">✕</button>
     </div>
+
+    <section class="sec" id="sec-members">
+      <div class="sec-title">👥 대화에 부를 AI</div>
+      <p class="hint">끈 AI는 이름을 부르지 않는 한 답하지 않고, 위쪽 이름 표시에서도 빠집니다. 최소 한 명은 켜 둘게요.</p>
+
+      <div class="member-row" id="row-pickle">
+        <div class="m-avatar" style="background:#DFF3C6">🥒</div>
+        <div class="m-name">피클<small>빠른 실행·생활 정리</small></div>
+        <label class="switch"><input type="checkbox" id="member-pickle" aria-label="피클 대화 참여"><span class="track"></span></label>
+      </div>
+      <div class="member-row" id="row-claude">
+        <div class="m-avatar" style="background:#FFE1CB">🤖</div>
+        <div class="m-name">Gemini<small>차분한 정리·비교</small></div>
+        <label class="switch"><input type="checkbox" id="member-claude" aria-label="Gemini 대화 참여"><span class="track"></span></label>
+      </div>
+      <div class="member-row" id="row-groq">
+        <div class="m-avatar" style="background:#E3E6FF">⚡</div>
+        <div class="m-name">Groq<small>빠른 아이디어</small></div>
+        <label class="switch"><input type="checkbox" id="member-groq" aria-label="Groq 대화 참여"><span class="track"></span></label>
+      </div>
+      <p class="test-result" id="member-result" hidden></p>
+    </section>
+
+    <section class="sec">
+      <div class="sec-title">🔍 실시간 웹 검색</div>
+      <div class="member-row">
+        <div class="m-avatar" style="background:#E3F1FB">🔍</div>
+        <div class="m-name">구글 실시간 검색 (Google Search)<small>최신 정보와 출처 링크를 답변에 붙여요</small></div>
+        <label class="switch"><input type="checkbox" id="search-on" aria-label="실시간 웹 검색 사용"><span class="track"></span></label>
+      </div>
+
+      <div class="search-who" id="search-who">
+        <div class="sec-sub">검색 결과를 붙일 답변</div>
+        <label class="chip-check"><input type="checkbox" id="search-pickle"> 🥒 피클</label>
+        <label class="chip-check"><input type="checkbox" id="search-claude"> 🤖 Gemini</label>
+        <label class="chip-check"><input type="checkbox" id="search-groq"> ⚡ Groq</label>
+      </div>
+      <p class="hint" id="search-hint"></p>
+    </section>
 
     <section class="sec free">
       <div class="sec-title">🆓 무료로 시작하기 (Groq ⚡ · Google Gemini)</div>
@@ -626,9 +760,30 @@
       anthropicKey: '',
       openaiKey: '',
       claudeModel: 'claude-sonnet-4-5',
-      pickleModel: 'gpt-4o-mini'
+      pickleModel: 'gpt-4o-mini',
+      members: { pickle: true, claude: true, groq: true },      // 대화에 부를 AI
+      webSearch: true,                                          // Gemini 실시간 구글 검색
+      searchFor: { pickle: true, claude: true, groq: true }     // 검색 결과를 붙일 답변
     }
   };
+
+  var MEMBER_KEYS = ['pickle', 'claude', 'groq'];
+
+  // 저장값이 깨져 있어도 쓸 수 있게 불리언만 골라 담습니다.
+  // atLeastOne이면 모두 꺼진 상태는 허용하지 않습니다(대화 상대가 사라지니까요).
+  function readFlags(src, base, atLeastOne) {
+    var out = {};
+    MEMBER_KEYS.forEach(function (w) { out[w] = !base || base[w] !== false; });
+    if (src && typeof src === 'object') {
+      MEMBER_KEYS.forEach(function (w) {
+        if (typeof src[w] === 'boolean') out[w] = src[w];
+      });
+    }
+    if (atLeastOne && !out.pickle && !out.claude && !out.groq) {
+      MEMBER_KEYS.forEach(function (w) { out[w] = true; });
+    }
+    return out;
+  }
 
   var typingWho = null;
   var busy = false;
@@ -675,6 +830,22 @@
     copyChat: document.getElementById('copy-chat'),
     resetChat: document.getElementById('reset-chat'),
     restoreExample: document.getElementById('restore-example'),
+    hdSub: document.getElementById('hd-sub'),
+    memberPickle: document.getElementById('member-pickle'),
+    memberClaude: document.getElementById('member-claude'),
+    memberGroq: document.getElementById('member-groq'),
+    rowPickle: document.getElementById('row-pickle'),
+    rowClaude: document.getElementById('row-claude'),
+    rowGroq: document.getElementById('row-groq'),
+    memberResult: document.getElementById('member-result'),
+    searchOn: document.getElementById('search-on'),
+    searchWho: document.getElementById('search-who'),
+    searchPickle: document.getElementById('search-pickle'),
+    searchClaude: document.getElementById('search-claude'),
+    searchGroq: document.getElementById('search-groq'),
+    searchHint: document.getElementById('search-hint'),
+    quickChips: document.getElementById('quick-chips'),
+    quickSearch: document.getElementById('quick-search'),
     toast: document.getElementById('toast'),
     lock: document.getElementById('lock'),
     lockForm: document.getElementById('lock-form'),
@@ -1067,6 +1238,9 @@
       if (typeof data.settings.openaiKey === 'string') state.settings.openaiKey = data.settings.openaiKey;
       if (typeof data.settings.claudeModel === 'string' && data.settings.claudeModel) state.settings.claudeModel = data.settings.claudeModel;
       if (typeof data.settings.pickleModel === 'string' && data.settings.pickleModel) state.settings.pickleModel = data.settings.pickleModel;
+      state.settings.members = readFlags(data.settings.members, state.settings.members, true);
+      if (typeof data.settings.webSearch === 'boolean') state.settings.webSearch = data.settings.webSearch;
+      state.settings.searchFor = readFlags(data.settings.searchFor, state.settings.searchFor, false);
     }
 
     // 새 버전 첫 실행: 예전에 자동으로 심어 둔 예시 대화와 지난 메시지는 한 번만 비우고,
@@ -1140,8 +1314,24 @@
     col.appendChild(line);
     var chips = linksEl(m.links);
     if (chips) col.appendChild(chips);
+    col.appendChild(toolsEl(m));
     row.appendChild(col);
     return row;
+  }
+
+  function toolsEl(m) {
+    var wrap = h('div', 'tools');
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'copy-btn';
+    b.textContent = '복사';
+    b.setAttribute('aria-label', (AI[m.who] ? AI[m.who].name : 'AI') + ' 답변과 링크 복사');
+    b.addEventListener('click', function (e) {
+      if (e && e.preventDefault) e.preventDefault();
+      copyMessage(m);
+    });
+    wrap.appendChild(b);
+    return wrap;
   }
 
   function typingEl(who) {
@@ -1168,7 +1358,8 @@
   function emptyEl() {
     var d = h('div', 'empty');
     d.appendChild(h('b', null, '새 대화'));
-    d.appendChild(document.createTextNode('메시지를 보내면 피클·Gemini·Groq가 함께 답해요. Gemini 키가 있으면 구글 실시간 검색 결과와 참고 링크까지 붙여 드려요.'));
+    var names = memberList().map(function (w) { return AI[w].name; }).join(' · ');
+    d.appendChild(document.createTextNode('메시지를 보내면 ' + (names || 'AI') + '가 답해요. 아래 칩을 누르면 @이름이나 검색 요청이 바로 들어가요.'));
     return d;
   }
 
@@ -1249,6 +1440,94 @@
     submit();
   });
 
+  /* ── 퀵 칩: 멘션·검색 요청 바로 넣기 ──── */
+  function insertAtCaret(text) {
+    var t = el.input;
+    var v = String(t.value || '');
+    var start = typeof t.selectionStart === 'number' ? t.selectionStart : v.length;
+    var end = typeof t.selectionEnd === 'number' ? t.selectionEnd : v.length;
+    if (end < start) end = start;
+    var before = v.slice(0, start);
+    var after = v.slice(end);
+    var glue = (before && !/\s$/.test(before)) ? ' ' : '';
+    t.value = before + glue + text + after;
+    autoResize();
+    try { t.focus(); } catch (e) {}
+    var pos = (before + glue + text).length;
+    try { t.setSelectionRange(pos, pos); } catch (e) {}
+  }
+
+  function quickSearchFill() {
+    var t = el.input;
+    var prefix = '검색해서 추천해줘: ';
+    var v = String(t.value || '');
+    if (v.indexOf(prefix) !== 0) t.value = prefix + v;
+    autoResize();
+    try { t.focus(); } catch (e) {}
+    try { var p = t.value.length; t.setSelectionRange(p, p); } catch (e) {}
+
+    if (state.settings.webSearch === false) {
+      toast('실시간 검색이 꺼져 있어요 — 설정에서 켜면 최신 정보로 답해요');
+    } else if (!state.settings.geminiKey.trim()) {
+      toast('Gemini 키를 넣으면 실시간 검색 결과까지 붙여요');
+    }
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.quick-chip[data-mention]'), function (btn) {
+    btn.addEventListener('click', function () {
+      insertAtCaret(btn.getAttribute('data-mention') || '');
+    });
+  });
+
+  if (el.quickSearch) el.quickSearch.addEventListener('click', quickSearchFill);
+
+  /* ── 복사: 답변 + 참고 링크 ──────────── */
+  function plainify(t) {
+    var s = String(t || '');
+    s = s.replace(/\[([^\]\n]{1,140})\]\(\s*(https?:\/\/[^\s)]{1,600})\s*\)/g, '$1 ($2)');
+    s = s.replace(/\*\*([^*\n]{1,200})\*\*/g, '$1');
+    return s.trim();
+  }
+
+  function messageAsText(m) {
+    var lines = [plainify(m.text)];
+    var ls = normalizeLinks(m.links);
+    if (ls.length) {
+      lines.push('');
+      lines.push('🔗 참고 링크');
+      for (var i = 0; i < ls.length; i++) lines.push('- ' + ls[i].title + ': ' + ls[i].url);
+    }
+    return lines.join('\n');
+  }
+
+  function writeClipboard(text, done) {
+    function fallback() {
+      var ok = false;
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.top = '0';
+      ta.style.left = '0';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      try { ta.select(); ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      if (ta.parentNode) ta.parentNode.removeChild(ta);
+      done(ok);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { done(true); }).catch(fallback);
+    } else {
+      fallback();
+    }
+  }
+
+  function copyMessage(m) {
+    writeClipboard(messageAsText(m), function (ok) {
+      toast(ok ? '복사했어요' : '복사하지 못했어요');
+    });
+  }
+
   function submit() {
     if (busy) { toast('지금 답하는 중이에요'); return; }
     var text = el.input.value.trim();
@@ -1262,15 +1541,17 @@
 
   /* ── 응답 흐름 ─────────────────────────── */
   function pickTargets(text) {
-    var hasPickle = /@\s*피클|피클\s*[야아]/.test(text);
-    var hasClaude = /@\s*(gemini|제미나이|클로드)|제미나이|(gemini|클로드)\s*[야아]/i.test(text);
-    var hasGroq = /@\s*(groq|그록)|(groq|그록)\s*[야아]/i.test(text);
-    var picked = [];
-    if (hasPickle) picked.push('pickle');
-    if (hasClaude) picked.push('claude');
-    if (hasGroq) picked.push('groq');
-    if (picked.length) return picked;
-    return ['pickle', 'claude', 'groq'];
+    // 이름을 부르면 그 AI만(꺼져 있으면 아무도) 답하고, 부르지 않으면 켜 둔 AI 전부가 답합니다.
+    var mentioned = MEMBER_KEYS.filter(function (w) { return MENTION[w].test(text); });
+    if (mentioned.length) return mentioned.filter(memberOn);
+    return memberList();
+  }
+
+  // 꺼 둔 AI를 콕 집어 불렀는지 — 그럴 때만 안내합니다.
+  function offMentions(text) {
+    return MEMBER_KEYS.filter(function (w) {
+      return !memberOn(w) && MENTION[w].test(text);
+    });
   }
 
   function delayFor(who) {
@@ -1280,8 +1561,20 @@
   }
 
   async function respond(text) {
-    setBusy(true);
     var targets = pickTargets(text);
+    var off = offMentions(text);
+
+    if (off.length) {
+      addMessage('system', off.map(function (w) {
+        return AI[w].avatar + ' ' + AI[w].name + '는 설정에서 꺼져 있어요.';
+      }).join(' ') + ' 설정에서 다시 켜면 답합니다.');
+    }
+    if (!targets.length) {
+      if (!off.length) addMessage('system', '켜 둔 AI가 없어요. 설정에서 하나 이상 켜 주세요.');
+      return;
+    }
+
+    setBusy(true);
     var spoken = [];
 
     for (var i = 0; i < targets.length; i++) {
@@ -1560,7 +1853,14 @@
   }
 
   // 검색 도구를 붙여 먼저 시도하고, 모델이 안 받으면 도구를 빼고 한 번 더 시도합니다.
-  async function geminiTryModel(key, who, model) {
+  // search가 꺼져 있으면 처음부터 도구 없이 보냅니다.
+  async function geminiTryModel(key, who, model, search) {
+    if (search === false) {
+      var plainOnly = await geminiRequest(model, key, geminiPayload(who, null));
+      plainOnly.searched = false;
+      return plainOnly;
+    }
+
     for (var i = 0; i < GEMINI_TOOL_STYLES.length; i++) {
       var withTool = await geminiRequest(model, key, geminiPayload(who, GEMINI_TOOL_STYLES[i]));
       if (withTool.res.ok) { withTool.searched = true; return withTool; }
@@ -1576,14 +1876,14 @@
   }
 
   // 지워졌거나 새 키에 닫힌 모델(404)이면 지금 무료로 열려 있는 모델로 한 번만 바꿔 답합니다.
-  async function geminiAttempt(key, who, model) {
-    var first = await geminiTryModel(key, who, model);
+  async function geminiAttempt(key, who, model, search) {
+    var first = await geminiTryModel(key, who, model, search);
     if (first.res.ok || first.res.status !== 404) return first;
 
     for (var i = 0; i < GEMINI_FALLBACKS.length; i++) {
       var alt = GEMINI_FALLBACKS[i];
       if (alt === model) continue;
-      var next = await geminiTryModel(key, who, alt);
+      var next = await geminiTryModel(key, who, alt, search);
       if (next.res.ok || next.res.status !== 404) return next;
     }
     return first;
@@ -1606,7 +1906,7 @@
     var key = state.settings.geminiKey.trim();
     var model = geminiModel();
 
-    var got = await geminiAttempt(key, who, model);
+    var got = await geminiAttempt(key, who, model, wantsSearch(who));
 
     if (!got.res.ok) throw new Error('Gemini ' + httpErrText(got.res.status, got.data));
 
@@ -1993,6 +2293,8 @@
     el.geminiResult.hidden = true;
     el.testResult.hidden = true;
     refreshLockSection();
+    syncMembers();
+    syncSearchUI();
     syncStatus();
     el.modal.classList.add('open');
     setTimeout(function () {
@@ -2056,6 +2358,112 @@
     el.lockResult.textContent = '';
   }
 
+  /* ── 참여 AI·검색 설정 ───────────────── */
+  var MENTION = {
+    pickle: /@\s*피클|피클\s*[야아]/,
+    claude: /@\s*(gemini|제미나이|클로드)|제미나이|(gemini|클로드)\s*[야아]/i,
+    groq: /@\s*(groq|그록)|(groq|그록)\s*[야아]/i
+  };
+
+  function memberOn(who) { return state.settings.members[who] !== false; }
+
+  function memberList() {
+    return MEMBER_KEYS.filter(memberOn);
+  }
+
+  function wantsSearch(who) {
+    return state.settings.webSearch !== false && state.settings.searchFor[who] !== false;
+  }
+
+  function syncMembers() {
+    var names = memberList().map(function (w) { return AI[w].name; });
+    el.hdSub.textContent = '이호준 · ' + (names.join(' · ') || 'AI 없음');
+
+    var boxes = { pickle: el.memberPickle, claude: el.memberClaude, groq: el.memberGroq };
+    var rows = { pickle: el.rowPickle, claude: el.rowClaude, groq: el.rowGroq };
+    MEMBER_KEYS.forEach(function (w) {
+      var on = memberOn(w);
+      if (boxes[w]) boxes[w].checked = on;
+      if (rows[w]) rows[w].className = 'member-row' + (on ? '' : ' off');
+    });
+
+    // 끈 AI의 멘션 칩은 숨깁니다.
+    Array.prototype.forEach.call(document.querySelectorAll('.quick-chip[data-member]'), function (btn) {
+      var w = btn.getAttribute('data-member');
+      var hide = !memberOn(w);
+      btn.style.display = hide ? 'none' : '';
+      btn.setAttribute('aria-hidden', hide ? 'true' : 'false');
+    });
+  }
+
+  function setMemberResult(text, isErr) {
+    if (!el.memberResult) return;
+    el.memberResult.hidden = false;
+    el.memberResult.className = 'test-result' + (isErr ? ' err' : '');
+    el.memberResult.textContent = text;
+  }
+
+  // 지금 답변에 검색 결과가 실제로 붙는지 보여 줍니다(키가 없거나 꺼져 있으면 숨김).
+  function searchLive() {
+    return state.settings.webSearch !== false && !!state.settings.geminiKey.trim();
+  }
+
+  function syncSearchUI() {
+    var on = state.settings.webSearch !== false;
+    el.searchOn.checked = on;
+
+    var boxes = { pickle: el.searchPickle, claude: el.searchClaude, groq: el.searchGroq };
+    MEMBER_KEYS.forEach(function (w) {
+      var box = boxes[w];
+      if (!box) return;
+      box.checked = state.settings.searchFor[w] !== false;
+      box.disabled = !on;
+    });
+    el.searchWho.className = 'search-who' + (on ? '' : ' off');
+
+    var parts = ['Gemini 키로 답할 때 구글 검색 결과와 출처 링크가 붙어요. 끄면 모델이 아는 것만으로 답합니다.'];
+    if (!state.settings.geminiKey.trim()) {
+      parts.push('지금은 Gemini 키가 없어서 검색이 붙지 않아요. 위에 키를 넣으면 바로 켜집니다.');
+    } else if (on && !MEMBER_KEYS.some(wantsSearch)) {
+      parts.push('검색을 붙일 답변을 하나도 고르지 않았어요 — 지금은 링크 없이 답합니다.');
+    }
+    el.searchHint.textContent = parts.join(' ');
+  }
+
+  function bindMember(box, who) {
+    if (!box) return;
+    box.addEventListener('change', function () {
+      var next = readFlags(state.settings.members, state.settings.members, false);
+      next[who] = box.checked;
+
+      if (!next.pickle && !next.claude && !next.groq) {
+        box.checked = true;
+        setMemberResult('AI는 최소 한 명은 켜 두어야 해요. 마지막 한 명은 끌 수 없어요.', true);
+        return;
+      }
+
+      state.settings.members = next;
+      save();
+      syncMembers();
+      syncStatus();
+      setMemberResult(AI[who].name + '를 ' + (box.checked
+        ? '켰어요. 이제 답변에 함께합니다.'
+        : '껐어요. 이름을 부르지 않으면 답하지 않아요.'), false);
+      toast(AI[who].name + (box.checked ? ' 켰어요' : ' 껐어요'));
+    });
+  }
+
+  function bindSearchWho(box, who) {
+    if (!box) return;
+    box.addEventListener('change', function () {
+      var next = readFlags(state.settings.searchFor, state.settings.searchFor, false);
+      next[who] = box.checked;
+      state.settings.searchFor = next;
+      save();
+      syncSearchUI();
+      syncStatus();
+    });
+  }
   /* ── 어느 키로 답할지 ─────────────────── */
   // Groq 키 → Gemini 키 → 데모 모드. AI별 전용 키(Anthropic·OpenAI)는 그 AI에서만 먼저 씁니다.
   function providerFor(who) {
@@ -2084,17 +2492,17 @@
     if (p === 'anthropic') return '실시간 · ' + (state.settings.claudeModel.trim() || 'claude-sonnet-4-5');
     if (p === 'openai') return '실시간 · ' + (state.settings.pickleModel.trim() || 'gpt-4o-mini');
     if (p === 'groq') return 'Groq · ' + groqModel();
-    if (p === 'gemini') return 'Gemini · ' + geminiModel();
+    if (p === 'gemini') return 'Gemini · ' + geminiModel() + (wantsSearch(who) ? ' 🔍' : '');
     return '데모 모드';
   }
 
   function syncStatus() {
-    el.statusGroq.textContent = providerLabel('groq');
-    el.dotGroq.className = 'dot' + (providerFor('groq') !== 'demo' ? ' on' : '');
-    el.statusClaude.textContent = providerLabel('claude');
-    el.dotClaude.className = 'dot' + (providerFor('claude') !== 'demo' ? ' on' : '');
-    el.statusPickle.textContent = providerLabel('pickle');
-    el.dotPickle.className = 'dot' + (providerFor('pickle') !== 'demo' ? ' on' : '');
+    el.statusGroq.textContent = memberOn('groq') ? providerLabel('groq') : '꺼짐';
+    el.dotGroq.className = 'dot' + (memberOn('groq') && providerFor('groq') !== 'demo' ? ' on' : '');
+    el.statusClaude.textContent = memberOn('claude') ? providerLabel('claude') : '꺼짐';
+    el.dotClaude.className = 'dot' + (memberOn('claude') && providerFor('claude') !== 'demo' ? ' on' : '');
+    el.statusPickle.textContent = memberOn('pickle') ? providerLabel('pickle') : '꺼짐';
+    el.dotPickle.className = 'dot' + (memberOn('pickle') && providerFor('pickle') !== 'demo' ? ' on' : '');
 
     var n = state.messages.length;
     el.retentionInfo.textContent = '지금 ' + n + '개 보관 중이에요. 보낸 지 30일이 지난 메시지는 자동으로 지워져요.';
@@ -2158,6 +2566,24 @@
     });
   });
 
+  /* ── 참여 AI·검색 토글 연결 ───────────── */
+  bindMember(el.memberPickle, 'pickle');
+  bindMember(el.memberClaude, 'claude');
+  bindMember(el.memberGroq, 'groq');
+  bindSearchWho(el.searchPickle, 'pickle');
+  bindSearchWho(el.searchClaude, 'claude');
+  bindSearchWho(el.searchGroq, 'groq');
+
+  if (el.searchOn) {
+    el.searchOn.addEventListener('change', function () {
+      state.settings.webSearch = el.searchOn.checked;
+      save();
+      syncSearchUI();
+      syncStatus();
+      toast(state.settings.webSearch ? '실시간 검색을 켰어요' : '실시간 검색을 껐어요');
+    });
+  }
+
   function saveAllSettings() {
     state.settings.groqKey = el.keyGroq.value.trim();
     state.settings.groqModel = el.modelGroq.value.trim() || GROQ_DEFAULT_MODEL;
@@ -2171,6 +2597,7 @@
     el.modelGemini.value = state.settings.geminiModel;
     save();
     syncStatus();
+    syncSearchUI();
   }
 
   el.saveSettings.addEventListener('click', function () {
@@ -2199,6 +2626,7 @@
     state.settings.openaiKey = '';
     save();
     syncStatus();
+    syncSearchUI();
     toast('저장된 키를 지웠어요');
   });
 
@@ -2473,6 +2901,8 @@
 
     render();
     syncStatus();
+    syncMembers();
+    syncSearchUI();
     refreshLockSection();
     if (hasLock()) showLock();
     if (removed > 0) {
