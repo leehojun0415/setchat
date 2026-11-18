@@ -31,8 +31,10 @@
   }
   *{box-sizing:border-box;}
   /* 갤럭시(Android Chrome·삼성 인터넷) 터치 최적화 */
-  html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior:none;}
   body{overscroll-behavior-y:contain;}
+  /* 설정 모달이 열린 동안 뒤쪽 문서는 스크롤·바운스 금지 (아이폰 사파리 출렁임 차단) */
+  body.modal-open{position:fixed;top:0;right:0;bottom:0;left:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none;}
   button,.tab,.quick-chip,.m-act,.mini,.btn,.icon-btn,.add-btn,.send,.pm-item,.attach-chip button,.copy-btn{
     touch-action:manipulation;
     -webkit-tap-highlight-color:transparent;
@@ -404,25 +406,94 @@
   .composer .send:hover{background:#1F2937;}
   .composer .send:disabled{opacity:.45;cursor:default;}
 
-  /* ── 설정 모달 ─────────────────────────── */
+  /* ── 설정 모달 (아이폰 사파리 스크롤 흔들림 방지) ─────────────
+     · 바깥 배경(.backdrop)은 스크롤되지 않고, 스크롤이 페이지로 넘어가지 않습니다(overscroll-behavior).
+     · 시트는 세로 flex(머리·본문·저장바) 구조 — 스크롤은 가운데 본문(.sheet-body) 한 곳에서만 일어나
+       머리·저장바가 흔들리지 않습니다(sticky 제거).
+     · 시트 안 모든 요소를 폭 안에 가둬 가로 흔들림(rubber-band)을 0px로 만듭니다. */
   .backdrop{
     position:fixed;inset:0;z-index:60;
     background:rgba(17,24,39,.28);
     display:none;align-items:center;justify-content:center;
     padding:16px;
+    overflow:hidden;                /* 바깥 배경은 스크롤 없음 */
+    overscroll-behavior:contain;    /* 끝에서 스크롤이 페이지로 넘어가지 않음 */
     -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
   }
   .backdrop.open{display:flex;}
   .sheet{
-    width:100%;max-width:420px;max-height:88vh;overflow-y:auto;
+    width:100%;max-width:420px;max-height:88vh;max-height:88dvh;
+    display:flex;flex-direction:column;
+    overflow:hidden;                 /* 시트 자체는 스크롤하지 않음 */
     background:#fff;border-radius:22px;
-    padding:16px 16px 20px;
-    scroll-padding-bottom:104px;   /* 하단 고정 저장 바에 가려지지 않게 */
+    box-sizing:border-box;
+    overscroll-behavior:contain;
+    touch-action:pan-y;              /* 세로 이동만 허용(가로 흔들림 차단) */
     box-shadow:0 24px 70px rgba(17,24,39,.28);
   }
-  .sheet-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .sheet-hd{
+    flex:none;position:relative;z-index:2;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 16px 6px;background:#fff;
+    border-radius:22px 22px 0 0;
+  }
   .sheet-hd h2{margin:0;font-size:17px;font-weight:700;letter-spacing:-0.02em;}
   .sheet-hd .icon-btn{font-size:16px;width:32px;height:32px;}
+  /* 설정 탭 — AI·검색 / API·연결 / 대화·잠금 (스크롤해도 위에 붙어 있음) */
+  .sheet-tabs{
+    flex:none;display:flex;gap:6px;
+    padding:2px 12px 10px;background:#fff;
+    border-bottom:1px solid var(--line);
+  }
+  .stab{
+    flex:1 1 0;min-width:0;
+    padding:9px 2px;border:1px solid transparent;border-radius:11px;
+    background:transparent;color:var(--muted);
+    font-size:12.5px;font-weight:700;letter-spacing:-0.02em;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    cursor:pointer;touch-action:manipulation;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .stab.on{background:var(--soft);color:var(--ink);border-color:#E6E8EC;}
+  .stab:active{opacity:.75;}
+  .tab-panel{min-width:0;}
+  .tab-panel > .sec:first-child{border-top:0;padding-top:6px;}
+
+  /* ⚙️ 고급 설정 접기(유료 키 · Worker) */
+  .adv{margin:12px 0 2px;border:1px solid var(--line);border-radius:14px;background:var(--soft2);}
+  .adv > summary{
+    list-style:none;cursor:pointer;padding:11px 13px;
+    font-size:12.5px;font-weight:700;color:#374151;letter-spacing:-0.01em;
+    display:flex;align-items:center;gap:6px;
+    touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+  }
+  .adv > summary::-webkit-details-marker{display:none;}
+  .adv > summary .adv-arrow{margin-left:auto;color:var(--faint);font-size:11px;line-height:1;}
+  .adv[open] > summary .adv-arrow{transform:rotate(180deg);}
+  .adv > .sec{border-top:1px solid var(--line);padding:12px 12px 6px;margin:0;}
+  .adv > .sec .sec-title{font-size:12.5px;}
+
+  /* 시트 안에서 유일하게 스크롤되는 영역 — 세로 한 방향만, 끝에서 배경으로 넘어가지 않음 */
+  .sheet-body{
+    flex:1 1 auto;min-height:0;min-width:0;
+    width:100%;max-width:100%;box-sizing:border-box;
+    overflow-x:hidden;overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+    touch-action:pan-y;
+    padding:0 16px 20px;
+    scroll-padding-bottom:104px;   /* 하단 저장 바에 가려지지 않게 */
+  }
+  /* 시트 안 모든 요소가 시트 폭을 넘지 않게 — 가로 흔들림 0px */
+  .sheet-body > *,
+  .sheet-body .sec, .sheet-body .field, .sheet-body .row, .sheet-body .btn-row,
+  .sheet-body .status-row, .sheet-body .member-row, .sheet-body .input-row,
+  .sheet-body .sec-title, .sheet-body .hint, .sheet-body .emoji-chips{
+    max-width:100%;box-sizing:border-box;
+  }
+  .sheet-body input, .sheet-body select, .sheet-body textarea, .sheet-body button{
+    max-width:100%;box-sizing:border-box;
+  }
 
   .sec{padding:14px 0 4px;border-top:1px solid var(--line);}
   .sec:first-of-type{border-top:0;}
@@ -502,10 +573,11 @@
 
   /* 설정 하단 고정 저장 바 — 키·모델·Worker 주소를 한 번에 저장해요 */
   .sheet-ft{
-    position:sticky;bottom:0;z-index:2;
-    margin:14px -16px -20px;
+    flex:none;position:relative;z-index:2;
+    margin:0;width:100%;max-width:100%;box-sizing:border-box;
     padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));
     background:#fff;border-top:1px solid var(--line);
+    border-radius:0 0 22px 22px;
     display:flex;flex-direction:column;gap:6px;
   }
   .sheet-ft .btn{width:100%;flex:none;}
@@ -709,10 +781,13 @@
     .sheet{
       max-width:none;width:100%;max-height:88dvh;
       border-radius:22px 22px 0 0;
-      padding:14px 14px calc(14px + env(safe-area-inset-bottom,0px));
-      scroll-padding-bottom:120px;
+      padding:0;
     }
-    .sheet-hd{position:sticky;top:0;z-index:3;background:#fff;padding:2px 0 8px;}
+    .sheet-hd{padding:12px 14px 6px;border-radius:22px 22px 0 0;}
+    .sheet-tabs{padding:0 8px 8px;gap:4px;}
+    .stab{font-size:12px;padding:8px 2px;}
+    .sheet-body{padding:0 14px 16px;scroll-padding-bottom:120px;}
+    .sheet-ft{padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));border-radius:0;}
     .plus-menu{left:10px;width:min(272px, calc(100vw - 20px));bottom:calc(80px + env(safe-area-inset-bottom,0px));}
     .pm-item{min-height:50px;}
     .quick-chip{min-height:34px;padding:6px 12px;font-size:12.5px;}
@@ -827,257 +902,270 @@
       <button class="icon-btn" id="close-settings" aria-label="닫기">✕</button>
     </div>
 
-    <section class="sec" id="sec-members">
-      <div class="sec-title with-btn"><span>👥 대화에 부를 AI</span><button type="button" class="mini" id="add-ai-inline">+ 새 AI 추가</button></div>
-      <p class="hint">끈 AI는 이름을 부르지 않는 한 답하지 않고, 위쪽 이름 표시에서도 빠집니다. 최소 한 명은 켜 둘게요. <b>수정</b>을 누르면 이름·아이콘·성격·엔진을 바꿀 수 있어요(피클은 고정 멤버).</p>
+    <div class="sheet-tabs" id="sheet-tabs" role="tablist" aria-label="설정 탭">
+      <button type="button" class="stab on" id="tab-ai" role="tab" data-tab="ai" aria-selected="true" aria-controls="panel-ai">🤖 AI · 검색</button>
+      <button type="button" class="stab" id="tab-api" role="tab" data-tab="api" aria-selected="false" aria-controls="panel-api" tabindex="-1">🔑 API · 연결</button>
+      <button type="button" class="stab" id="tab-chat" role="tab" data-tab="chat" aria-selected="false" aria-controls="panel-chat" tabindex="-1">🔒 대화 · 잠금</button>
+    </div>
 
-      <div class="member-row" id="row-pickle">
-        <div class="m-avatar" id="avatar-member-pickle" style="background:#DFF3C6">🥒</div>
-        <div class="m-name"><span class="m-label" id="label-member-pickle">피클</span><small>빠른 실행·생활 정리 · 고정 멤버</small></div>
-        <button type="button" class="m-act" id="edit-pickle" aria-label="피클 수정">수정</button>
-        <label class="switch"><input type="checkbox" id="member-pickle" aria-label="피클 대화 참여"><span class="track"></span></label>
-      </div>
-      <div class="member-row" id="row-claude">
-        <div class="m-avatar" id="avatar-member-claude" style="background:#FFE1CB">🤖</div>
-        <div class="m-name"><span class="m-label" id="label-member-claude">Gemini</span><small>차분한 정리·비교</small></div>
-        <button type="button" class="m-act" id="edit-claude" aria-label="Gemini 수정">수정</button>
-        <button type="button" class="m-act del" id="delete-claude" aria-label="Gemini 삭제">삭제</button>
-        <label class="switch"><input type="checkbox" id="member-claude" aria-label="Gemini 대화 참여"><span class="track"></span></label>
-      </div>
-      <div class="member-row" id="row-groq">
-        <div class="m-avatar" id="avatar-member-groq" style="background:#E3E6FF">⚡</div>
-        <div class="m-name"><span class="m-label" id="label-member-groq">Groq</span><small>빠른 아이디어</small></div>
-        <button type="button" class="m-act" id="edit-groq" aria-label="Groq 수정">수정</button>
-        <button type="button" class="m-act del" id="delete-groq" aria-label="Groq 삭제">삭제</button>
-        <label class="switch"><input type="checkbox" id="member-groq" aria-label="Groq 대화 참여"><span class="track"></span></label>
-      </div>
-      <div id="custom-member-list"></div>
-      <div id="hidden-member-list" hidden></div>
-      <p class="test-result" id="member-result" hidden></p>
-    </section>
+    <div class="sheet-body" id="settings-body">
+      <div class="tab-panel on" id="panel-ai" role="tabpanel" aria-labelledby="tab-ai">
+        <section class="sec" id="sec-members">
+          <div class="sec-title with-btn"><span>👥 대화에 부를 AI</span><button type="button" class="mini" id="add-ai-inline">+ 새 AI 추가</button></div>
+          <p class="hint">끈 AI는 부르기 전엔 답하지 않아요. <b>수정</b>으로 이름·성격·엔진을 바꿔요(피클은 고정).</p>
 
-    <section class="sec">
-      <div class="sec-title">🔍 실시간 웹 검색</div>
-      <div class="member-row">
-        <div class="m-avatar" style="background:#E3F1FB">🔍</div>
-        <div class="m-name">구글 실시간 검색 (Google Search)<small>최신 정보와 출처 링크를 답변에 붙여요</small></div>
-        <label class="switch"><input type="checkbox" id="search-on" aria-label="실시간 웹 검색 사용"><span class="track"></span></label>
-      </div>
+          <div class="member-row" id="row-pickle">
+            <div class="m-avatar" id="avatar-member-pickle" style="background:#DFF3C6">🥒</div>
+            <div class="m-name"><span class="m-label" id="label-member-pickle">피클</span><small>빠른 실행·생활 정리 · 고정 멤버</small></div>
+            <button type="button" class="m-act" id="edit-pickle" aria-label="피클 수정">수정</button>
+            <label class="switch"><input type="checkbox" id="member-pickle" aria-label="피클 대화 참여"><span class="track"></span></label>
+          </div>
+          <div class="member-row" id="row-claude">
+            <div class="m-avatar" id="avatar-member-claude" style="background:#FFE1CB">🤖</div>
+            <div class="m-name"><span class="m-label" id="label-member-claude">Gemini</span><small>차분한 정리·비교</small></div>
+            <button type="button" class="m-act" id="edit-claude" aria-label="Gemini 수정">수정</button>
+            <button type="button" class="m-act del" id="delete-claude" aria-label="Gemini 삭제">삭제</button>
+            <label class="switch"><input type="checkbox" id="member-claude" aria-label="Gemini 대화 참여"><span class="track"></span></label>
+          </div>
+          <div class="member-row" id="row-groq">
+            <div class="m-avatar" id="avatar-member-groq" style="background:#E3E6FF">⚡</div>
+            <div class="m-name"><span class="m-label" id="label-member-groq">Groq</span><small>빠른 아이디어</small></div>
+            <button type="button" class="m-act" id="edit-groq" aria-label="Groq 수정">수정</button>
+            <button type="button" class="m-act del" id="delete-groq" aria-label="Groq 삭제">삭제</button>
+            <label class="switch"><input type="checkbox" id="member-groq" aria-label="Groq 대화 참여"><span class="track"></span></label>
+          </div>
+          <div id="custom-member-list"></div>
+          <div id="hidden-member-list" hidden></div>
+          <p class="test-result" id="member-result" hidden></p>
+        </section>
 
-      <div class="search-who" id="search-who">
-        <div class="sec-sub">검색 결과를 붙일 답변</div>
-        <label class="chip-check" id="search-chip-pickle"><input type="checkbox" id="search-pickle"> <span id="search-label-pickle">🥒 피클</span></label>
-        <label class="chip-check" id="search-chip-claude"><input type="checkbox" id="search-claude"> <span id="search-label-claude">🤖 Gemini</span></label>
-        <label class="chip-check" id="search-chip-groq"><input type="checkbox" id="search-groq"> <span id="search-label-groq">⚡ Groq</span></label>
-      </div>
-      <p class="hint" id="search-hint"></p>
-    </section>
+        <section class="sec" id="sec-search">
+          <div class="sec-title">🔍 실시간 웹 검색</div>
+          <div class="member-row">
+            <div class="m-avatar" style="background:#E3F1FB">🔍</div>
+            <div class="m-name">구글 실시간 검색 (Google Search)<small>최신 정보와 출처 링크를 답변에 붙여요</small></div>
+            <label class="switch"><input type="checkbox" id="search-on" aria-label="실시간 웹 검색 사용"><span class="track"></span></label>
+          </div>
 
-    <section class="sec free">
-      <div class="sec-title">🆓 무료로 시작하기 (Gemini · Groq · OpenRouter)</div>
-      <p class="free-lead">무료 키 하나만 넣으면 피클·Gemini·Groq 셋 다 진짜 AI로 답해요. 셋 다 카드 등록 없이 무료이고, <b>Gemini → Groq → OpenRouter</b> 순서로 시도하다가 한도 초과·장애면 저장된 다음 무료 키로 자동 전환해요.</p>
-
-      <div class="sub-hd first">⚡ Groq</div>
-
-      <label class="field">
-        <span>Groq API Key</span>
-        <div class="input-row">
-          <input id="key-groq" type="password" placeholder="gsk_..." autocomplete="off" spellcheck="false">
-          <button type="button" class="mini" data-toggle="key-groq">보기</button>
-        </div>
-      </label>
-      <label class="field">
-        <span>Groq 모델</span>
-        <select id="pick-groq" aria-label="Groq 모델 선택">
-          <option value="openai/gpt-oss-120b">openai/gpt-oss-120b (기본·무료)</option>
-          <option value="openai/gpt-oss-20b">openai/gpt-oss-20b (무료)</option>
-          <option value="qwen/qwen3.8-27b">qwen/qwen3.8-27b (무료)</option>
-          <option value="__custom">직접 입력…</option>
-        </select>
-        <input id="model-groq" type="text" placeholder="openai/gpt-oss-120b" autocomplete="off" spellcheck="false" hidden>
-      </label>
-
-      <p class="hint">
-        <a href="https://console.groq.com/keys" target="_blank" rel="noreferrer">console.groq.com/keys</a> → <b>Create API Key</b> 를 누르면 카드 등록 없이 무료로 발급돼요.
-      </p>
-      <p class="hint">기본 모델은 무료·빠른 <b>openai/gpt-oss-120b</b> 예요. Llama 계열은 2026년 8월 이후 무료 티어에서 빠져서 기본값으로 쓰지 않아요. 모델이 내려가면 <b>openai/gpt-oss-20b</b> → <b>qwen/qwen3.8-27b</b> 순서로 자동으로 바꿔 답해요.</p>
-
-      <div class="btn-row">
-        <button type="button" class="btn" id="test-groq">Groq 연결 테스트</button>
-      </div>
-      <p class="test-result" id="groq-result" hidden></p>
-
-      <div class="sub-hd">🤖 Gemini</div>
-
-      <label class="field">
-        <span>Gemini API Key</span>
-        <div class="input-row">
-          <input id="key-gemini" type="password" placeholder="AIza..." autocomplete="off" spellcheck="false">
-          <button type="button" class="mini" data-toggle="key-gemini">보기</button>
-        </div>
-      </label>
-      <label class="field">
-        <span>Gemini 모델</span>
-        <select id="pick-gemini" aria-label="Gemini 모델 선택">
-          <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (기본·무료)</option>
-          <option value="gemini-3.8-flash">gemini-3.8-flash (무료)</option>
-          <option value="__custom">직접 입력…</option>
-        </select>
-        <input id="model-gemini" type="text" placeholder="gemini-3.5-flash-lite" autocomplete="off" spellcheck="false" hidden>
-      </label>
-
-      <p class="hint">
-        <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer">aistudio.google.com</a> → <b>Get API key</b> 를 누르면 카드 등록 없이 무료로 발급돼요.
-      </p>
-      <p class="hint">기본 모델은 무료·빠른 <b>gemini-3.5-flash-lite</b>, 더 똑똑한 답을 원하면 <b>gemini-3.8-flash</b>(역시 무료)를 넣으세요. gemini-2.5-flash는 새 키에서는 더 이상 열리지 않고, 무료 한도를 넘기면 잠시 뒤 다시 시도해 주세요.</p>
-
-      <div class="btn-row">
-        <button type="button" class="btn" id="test-gemini">Gemini 연결 테스트</button>
-      </div>
-      <p class="test-result" id="gemini-result" hidden></p>
-
-      <div class="sub-hd">🌐 OpenRouter</div>
-
-      <label class="field">
-        <span>OpenRouter API Key <em>무료</em></span>
-        <div class="input-row">
-          <input id="key-openrouter" type="password" placeholder="sk-or-v1-..." autocomplete="off" spellcheck="false">
-          <button type="button" class="mini" data-toggle="key-openrouter">보기</button>
-        </div>
-      </label>
-      <label class="field">
-        <span>OpenRouter 모델</span>
-        <select id="pick-openrouter" aria-label="OpenRouter 모델 선택">
-          <option value="openrouter/free">openrouter/free (기본·무료)</option>
-          <option value="__custom">직접 입력…</option>
-        </select>
-        <input id="model-openrouter" type="text" placeholder="openrouter/free" autocomplete="off" spellcheck="false" hidden>
-      </label>
-
-      <p class="hint">
-        <a href="https://openrouter.ai/keys" target="_blank" rel="noreferrer">openrouter.ai/keys</a> → <b>Create Key</b> 로 무료 키를 받아요. 기본 모델 <b>openrouter/free</b> 는 카드 없이 쓸 수 있고, 한도를 넘기면 Gemini·Groq로 다시 넘어가요.
-      </p>
-
-      <div class="btn-row">
-        <button type="button" class="btn" id="test-conn">전체 연결 테스트</button>
-        <button type="button" class="btn ghost" id="clear-keys">키 지우기</button>
-      </div>
-      <p class="test-result" id="test-result" hidden></p>
-    </section>
-
-    <section class="sec">
-      <div class="sec-title">연결 상태</div>
-      <div class="status-row"><span class="dot" id="dot-groq"></span><span id="label-groq">Groq</span><span class="status" id="status-groq">확인 중</span></div>
-      <div class="status-row"><span class="dot" id="dot-claude"></span><span id="label-claude">Gemini</span><span class="status" id="status-claude">확인 중</span></div>
-      <div class="status-row"><span class="dot" id="dot-pickle"></span><span id="label-pickle">피클</span><span class="status" id="status-pickle">확인 중</span></div>
-      <p class="hint">무료 키가 있으면 <b>Gemini → Groq → OpenRouter</b> 순서로 답하고, 한도 초과·장애·키 없음이면 다음 무료 키로 자동 전환해요. 무료 키가 하나도 없을 때만 데모로 답합니다.</p>
-    </section>
-
-    <section class="sec">
-      <div class="sec-title">💳 유료 엔진 키 <em>직접 고를 때만</em></div>
-
-      <label class="field">
-        <span>Anthropic API Key <em>Gemini</em></span>
-        <div class="input-row">
-          <input id="key-anthropic" type="password" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
-          <button type="button" class="mini" data-toggle="key-anthropic">보기</button>
-        </div>
-      </label>
-      <label class="field">
-        <span>Anthropic 모델 <em>Gemini</em></span>
-        <select id="pick-claude" aria-label="Anthropic 모델 선택">
-          <option value="claude-sonnet-4-5">claude-sonnet-4-5</option>
-          <option value="claude-haiku-4-5">claude-haiku-4-5</option>
-          <option value="__custom">직접 입력…</option>
-        </select>
-        <input id="model-claude" type="text" placeholder="claude-sonnet-4-5" autocomplete="off" spellcheck="false" hidden>
-      </label>
-
-      <label class="field">
-        <span>OpenAI API Key <em>피클</em></span>
-        <div class="input-row">
-          <input id="key-openai" type="password" placeholder="sk-..." autocomplete="off" spellcheck="false">
-          <button type="button" class="mini" data-toggle="key-openai">보기</button>
-        </div>
-      </label>
-      <label class="field">
-        <span>피클 모델 <em>OpenAI</em></span>
-        <select id="pick-pickle" aria-label="OpenAI 모델 선택">
-          <option value="gpt-4o-mini">gpt-4o-mini</option>
-          <option value="gpt-4o">gpt-4o</option>
-          <option value="__custom">직접 입력…</option>
-        </select>
-        <input id="model-pickle" type="text" placeholder="gpt-4o-mini" autocomplete="off" spellcheck="false" hidden>
-      </label>
-
-      <p class="hint">여기 키를 넣어도 자동 답변에는 쓰지 않아요. 그 AI의 엔진을 직접 골랐을 때만 호출합니다. 무료 엔진만 쓰려면 비워 두세요.</p>
-      <p class="hint">키는 이 브라우저의 localStorage에만 저장되고 그 외 어디에도 전송되지 않아요. 각 AI 호출에만 쓰입니다.</p>
-      <p class="hint" id="paid-save-note">여기 값도 아래 <b>「모든 설정 한 번에 저장」</b>으로 함께 저장돼요.</p>
-      <p class="hint warn" id="origin-hint" hidden></p>
-    </section>
-
-    <section class="sec">
-      <div class="sec-title">☁️ Cloudflare Worker <em>선택</em></div>
-      <p class="hint">Worker 주소를 넣으면 브라우저에 API 키가 없어도 Worker가 대신 불러요. 비우면 지금처럼 브라우저 키로 직접 부릅니다.</p>
-      <label class="field">
-        <span>Worker URL</span>
-        <input id="worker-url" type="text" placeholder="https://your-worker.workers.dev" autocomplete="off" spellcheck="false">
-      </label>
-      <div class="btn-row">
-        <button type="button" class="btn" id="test-worker">Worker 연결 테스트</button>
-      </div>
-      <p class="test-result" id="worker-result" hidden></p>
-    </section>
-
-    <section class="sec">
-      <div class="sec-title">대화 <em id="room-label">전체</em></div>
-      <p class="hint" id="retention-info">보낸 지 30일이 지난 메시지는 자동으로 지워져요.</p>
-      <div class="btn-row">
-        <button type="button" class="btn" id="export-chat">현재 방 내보내기</button>
-        <button type="button" class="btn" id="copy-chat">현재 방 복사</button>
-      </div>
-      <div class="btn-row">
-        <button type="button" class="btn ghost" id="restore-example">예시 대화로 되돌리기</button>
-        <button type="button" class="btn danger" id="reset-room">현재 방 초기화</button>
-      </div>
-      <div class="btn-row">
-        <button type="button" class="btn danger" id="reset-chat">전체 대화 초기화</button>
-      </div>
-    </section>
-
-    <section class="sec">
-      <div class="sec-title">🔒 화면 잠금</div>
-      <p class="hint" id="lock-state">지금은 잠금이 꺼져 있어요. 비밀번호를 정하면 페이지를 열 때마다 잠금 화면이 먼저 보여요.</p>
-
-      <div id="lock-set">
-        <label class="field">
-          <span>새 비밀번호 <em>4자 이상</em></span>
-          <input id="lock-new" type="password" autocomplete="new-password" placeholder="비밀번호" spellcheck="false">
-        </label>
-        <label class="field">
-          <span>한 번 더</span>
-          <input id="lock-new2" type="password" autocomplete="new-password" placeholder="같은 비밀번호" spellcheck="false">
-        </label>
-        <div class="btn-row">
-          <button type="button" class="btn primary" id="lock-save">잠금 설정</button>
-        </div>
+          <div class="search-who" id="search-who">
+            <div class="sec-sub">검색 결과를 붙일 답변</div>
+            <label class="chip-check" id="search-chip-pickle"><input type="checkbox" id="search-pickle"> <span id="search-label-pickle">🥒 피클</span></label>
+            <label class="chip-check" id="search-chip-claude"><input type="checkbox" id="search-claude"> <span id="search-label-claude">🤖 Gemini</span></label>
+            <label class="chip-check" id="search-chip-groq"><input type="checkbox" id="search-groq"> <span id="search-label-groq">⚡ Groq</span></label>
+          </div>
+          <p class="hint" id="search-hint"></p>
+        </section>
       </div>
 
-      <div id="lock-off" hidden>
-        <label class="field">
-          <span>지금 비밀번호</span>
-          <input id="lock-current" type="password" autocomplete="current-password" placeholder="비밀번호" spellcheck="false">
-        </label>
-        <div class="btn-row">
-          <button type="button" class="btn danger" id="lock-remove">잠금 해제</button>
-        </div>
+      <div class="tab-panel" id="panel-api" role="tabpanel" aria-labelledby="tab-api" hidden>
+              <section class="sec" id="sec-status">
+                <div class="sec-title">연결 상태</div>
+                <div class="status-row"><span class="dot" id="dot-groq"></span><span id="label-groq">Groq</span><span class="status" id="status-groq">확인 중</span></div>
+                <div class="status-row"><span class="dot" id="dot-claude"></span><span id="label-claude">Gemini</span><span class="status" id="status-claude">확인 중</span></div>
+                <div class="status-row"><span class="dot" id="dot-pickle"></span><span id="label-pickle">피클</span><span class="status" id="status-pickle">확인 중</span></div>
+                <p class="hint">무료 키가 있으면 <b>Gemini → Groq → OpenRouter</b> 순서로 답하고, 안 되면 다음 키로 넘어가요. 키가 없을 때만 데모로 답합니다.</p>
+              </section>
+
+              <section class="sec free" id="sec-free">
+                <div class="sec-title">🆓 무료로 시작하기 (Gemini · Groq · OpenRouter)</div>
+                <p class="free-lead">무료 키 하나만 넣으면 셋 다 진짜 AI로 답해요. <b>Gemini → Groq → OpenRouter</b> 순서로, 한도 초과면 자동 전환합니다.</p>
+
+                <div class="sub-hd first">⚡ Groq</div>
+
+                <label class="field">
+                  <span>Groq API Key</span>
+                  <div class="input-row">
+                    <input id="key-groq" type="password" placeholder="gsk_..." autocomplete="off" spellcheck="false">
+                    <button type="button" class="mini" data-toggle="key-groq">보기</button>
+                  </div>
+                </label>
+                <label class="field">
+                  <span>Groq 모델</span>
+                  <select id="pick-groq" aria-label="Groq 모델 선택">
+                    <option value="openai/gpt-oss-120b">openai/gpt-oss-120b (기본·무료)</option>
+                    <option value="openai/gpt-oss-20b">openai/gpt-oss-20b (무료)</option>
+                    <option value="qwen/qwen3.8-27b">qwen/qwen3.8-27b (무료)</option>
+                    <option value="__custom">직접 입력…</option>
+                  </select>
+                  <input id="model-groq" type="text" placeholder="openai/gpt-oss-120b" autocomplete="off" spellcheck="false" hidden>
+                </label>
+
+                <p class="hint">
+                  <a href="https://console.groq.com/keys" target="_blank" rel="noreferrer">console.groq.com/keys</a> → <b>Create API Key</b> · 카드 없이 무료. 모델이 내려가면 20b → qwen 순서로 자동 전환해요.</p>
+
+                <div class="btn-row">
+                  <button type="button" class="btn" id="test-groq">Groq 연결 테스트</button>
+                </div>
+                <p class="test-result" id="groq-result" hidden></p>
+
+                <div class="sub-hd">🤖 Gemini</div>
+
+                <label class="field">
+                  <span>Gemini API Key</span>
+                  <div class="input-row">
+                    <input id="key-gemini" type="password" placeholder="AIza..." autocomplete="off" spellcheck="false">
+                    <button type="button" class="mini" data-toggle="key-gemini">보기</button>
+                  </div>
+                </label>
+                <label class="field">
+                  <span>Gemini 모델</span>
+                  <select id="pick-gemini" aria-label="Gemini 모델 선택">
+                    <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (기본·무료)</option>
+                    <option value="gemini-3.8-flash">gemini-3.8-flash (무료)</option>
+                    <option value="__custom">직접 입력…</option>
+                  </select>
+                  <input id="model-gemini" type="text" placeholder="gemini-3.5-flash-lite" autocomplete="off" spellcheck="false" hidden>
+                </label>
+
+                <p class="hint">
+                  <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer">aistudio.google.com</a> → <b>Get API key</b> · 카드 없이 무료. 기본 flash-lite, 더 똑똑한 답은 flash(무료).</p>
+
+                <div class="btn-row">
+                  <button type="button" class="btn" id="test-gemini">Gemini 연결 테스트</button>
+                </div>
+                <p class="test-result" id="gemini-result" hidden></p>
+
+                <div class="sub-hd">🌐 OpenRouter</div>
+
+                <label class="field">
+                  <span>OpenRouter API Key <em>무료</em></span>
+                  <div class="input-row">
+                    <input id="key-openrouter" type="password" placeholder="sk-or-v1-..." autocomplete="off" spellcheck="false">
+                    <button type="button" class="mini" data-toggle="key-openrouter">보기</button>
+                  </div>
+                </label>
+                <label class="field">
+                  <span>OpenRouter 모델</span>
+                  <select id="pick-openrouter" aria-label="OpenRouter 모델 선택">
+                    <option value="openrouter/free">openrouter/free (기본·무료)</option>
+                    <option value="__custom">직접 입력…</option>
+                  </select>
+                  <input id="model-openrouter" type="text" placeholder="openrouter/free" autocomplete="off" spellcheck="false" hidden>
+                </label>
+
+                <p class="hint">
+                  <a href="https://openrouter.ai/keys" target="_blank" rel="noreferrer">openrouter.ai/keys</a> → <b>Create Key</b> · 기본 <b>openrouter/free</b> 는 카드 없이 무료.
+                </p>
+
+                <div class="btn-row">
+                  <button type="button" class="btn" id="test-conn">전체 연결 테스트</button>
+                  <button type="button" class="btn ghost" id="clear-keys">키 지우기</button>
+                </div>
+                <p class="test-result" id="test-result" hidden></p>
+              </section>
+
+          <details class="adv" id="adv-paid">
+            <summary>⚙️ 고급 설정 (유료 키 · Worker)<span class="adv-arrow">▾</span></summary>
+              <section class="sec" id="sec-paid">
+                <div class="sec-title">💳 유료 엔진 키 <em>직접 고를 때만</em></div>
+
+                <label class="field">
+                  <span>Anthropic API Key <em>Gemini</em></span>
+                  <div class="input-row">
+                    <input id="key-anthropic" type="password" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
+                    <button type="button" class="mini" data-toggle="key-anthropic">보기</button>
+                  </div>
+                </label>
+                <label class="field">
+                  <span>Anthropic 모델 <em>Gemini</em></span>
+                  <select id="pick-claude" aria-label="Anthropic 모델 선택">
+                    <option value="claude-sonnet-4-5">claude-sonnet-4-5</option>
+                    <option value="claude-haiku-4-5">claude-haiku-4-5</option>
+                    <option value="__custom">직접 입력…</option>
+                  </select>
+                  <input id="model-claude" type="text" placeholder="claude-sonnet-4-5" autocomplete="off" spellcheck="false" hidden>
+                </label>
+
+                <label class="field">
+                  <span>OpenAI API Key <em>피클</em></span>
+                  <div class="input-row">
+                    <input id="key-openai" type="password" placeholder="sk-..." autocomplete="off" spellcheck="false">
+                    <button type="button" class="mini" data-toggle="key-openai">보기</button>
+                  </div>
+                </label>
+                <label class="field">
+                  <span>피클 모델 <em>OpenAI</em></span>
+                  <select id="pick-pickle" aria-label="OpenAI 모델 선택">
+                    <option value="gpt-4o-mini">gpt-4o-mini</option>
+                    <option value="gpt-4o">gpt-4o</option>
+                    <option value="__custom">직접 입력…</option>
+                  </select>
+                  <input id="model-pickle" type="text" placeholder="gpt-4o-mini" autocomplete="off" spellcheck="false" hidden>
+                </label>
+
+                <p class="hint">직접 고른 엔진만 호출하고 자동 답변에는 쓰지 않아요. 무료만 쓰려면 비워 두세요.</p>
+        <p class="hint" id="paid-save-note">키는 이 브라우저(localStorage)에만 저장되고, 아래 <b>저장</b> 버튼으로 함께 저장돼요.</p>
+                <p class="hint warn" id="origin-hint" hidden></p>
+              </section>
+
+              <section class="sec" id="sec-worker">
+                <div class="sec-title">☁️ Cloudflare Worker <em>선택</em></div>
+                <p class="hint">주소를 넣으면 브라우저 키 없이 Worker가 대신 불러요. 비우면 브라우저 키로 직접 부릅니다.</p>
+                <label class="field">
+                  <span>Worker URL</span>
+                  <input id="worker-url" type="text" placeholder="https://your-worker.workers.dev" autocomplete="off" spellcheck="false">
+                </label>
+                <div class="btn-row">
+                  <button type="button" class="btn" id="test-worker">Worker 연결 테스트</button>
+                </div>
+                <p class="test-result" id="worker-result" hidden></p>
+              </section>
+          </details>
       </div>
 
-      <p class="test-result" id="lock-result" hidden></p>
-      <p class="hint">비밀번호는 SHA-256 해시로만 이 브라우저(localStorage)에 저장돼요. 잊으면 브라우저 저장값을 지우면 되고, 대화 내용은 그대로 남아요.</p>
-    </section>
+      <div class="tab-panel" id="panel-chat" role="tabpanel" aria-labelledby="tab-chat" hidden>
+        <section class="sec" id="sec-chat">
+          <div class="sec-title">대화 <em id="room-label">전체</em></div>
+          <p class="hint" id="retention-info">보낸 지 30일이 지난 메시지는 자동으로 지워져요.</p>
+          <div class="btn-row">
+            <button type="button" class="btn" id="export-chat">현재 방 내보내기</button>
+            <button type="button" class="btn" id="copy-chat">현재 방 복사</button>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn ghost" id="restore-example">예시 대화로 되돌리기</button>
+            <button type="button" class="btn danger" id="reset-room">현재 방 초기화</button>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn danger" id="reset-chat">전체 대화 초기화</button>
+          </div>
+        </section>
 
-    <div class="sheet-ft">
+        <section class="sec" id="sec-lock">
+          <div class="sec-title">🔒 화면 잠금</div>
+          <p class="hint" id="lock-state">지금은 잠금이 꺼져 있어요. 비밀번호를 정하면 페이지를 열 때마다 잠금 화면이 먼저 보여요.</p>
+
+          <div id="lock-set">
+            <label class="field">
+              <span>새 비밀번호 <em>4자 이상</em></span>
+              <input id="lock-new" type="password" autocomplete="new-password" placeholder="비밀번호" spellcheck="false">
+            </label>
+            <label class="field">
+              <span>한 번 더</span>
+              <input id="lock-new2" type="password" autocomplete="new-password" placeholder="같은 비밀번호" spellcheck="false">
+            </label>
+            <div class="btn-row">
+              <button type="button" class="btn primary" id="lock-save">잠금 설정</button>
+            </div>
+          </div>
+
+          <div id="lock-off" hidden>
+            <label class="field">
+              <span>지금 비밀번호</span>
+              <input id="lock-current" type="password" autocomplete="current-password" placeholder="비밀번호" spellcheck="false">
+            </label>
+            <div class="btn-row">
+              <button type="button" class="btn danger" id="lock-remove">잠금 해제</button>
+            </div>
+          </div>
+
+          <p class="test-result" id="lock-result" hidden></p>
+          <p class="hint">비밀번호는 SHA-256 해시로만 이 브라우저에 저장돼요. 잊으면 저장값을 지우면 됩니다(대화는 그대로).</p>
+        </section>
+      </div>
+    
+    </div>
+
+<div class="sheet-ft">
       <button type="button" class="btn primary" id="save-all">모든 설정 한 번에 저장</button>
       <p class="ft-note" id="save-all-note">키 · 모델 · 워커 주소를 한 번에 저장해요</p>
     </div>
@@ -1090,20 +1178,22 @@
       <h2 id="ai-modal-title">새 AI 추가</h2>
       <button type="button" class="icon-btn" id="ai-close" aria-label="닫기">✕</button>
     </div>
-    <p class="hint" id="ai-lead">이름·성격·엔진만 고르면 돼요. 무료 엔진을 고르면 한도 초과 시 다른 무료 엔진으로 자동 전환합니다.</p>
 
-    <label class="field">
-      <span>AI 이름 <em>필수 · 최대 16자</em></span>
-      <input id="ai-name" type="text" placeholder="예: ChatGPT, 마케터, 선생님" maxlength="16" autocomplete="off" spellcheck="false">
-    </label>
+    <div class="sheet-body">
+      <p class="hint" id="ai-lead">이름·성격·엔진만 고르면 돼요. 무료 엔진을 고르면 한도 초과 시 다른 무료 엔진으로 자동 전환합니다.</p>
 
-    <div class="field">
-      <span>아이콘 이모지</span>
-      <div class="input-row">
-        <input id="ai-avatar" type="text" placeholder="🧠" maxlength="4" autocomplete="off" value="🧠">
-        <button type="button" class="mini" id="ai-avatar-reset">기본 🧠</button>
-      </div>
-      <div class="emoji-chips" id="ai-avatar-chips" role="group" aria-label="추천 이모지"></div>
+      <label class="field">
+        <span>AI 이름 <em>필수 · 최대 16자</em></span>
+        <input id="ai-name" type="text" placeholder="예: ChatGPT, 마케터, 선생님" maxlength="16" autocomplete="off" spellcheck="false">
+      </label>
+
+      <div class="field">
+        <span>아이콘 이모지</span>
+        <div class="input-row">
+          <input id="ai-avatar" type="text" placeholder="🧠" maxlength="4" autocomplete="off" value="🧠">
+          <button type="button" class="mini" id="ai-avatar-reset">기본 🧠</button>
+        </div>
+        <div class="emoji-chips" id="ai-avatar-chips" role="group" aria-label="추천 이모지"></div>
     </div>
 
     <label class="field">
@@ -1242,7 +1332,10 @@
     <div class="btn-row" id="ai-del-row" hidden>
       <button type="button" class="btn danger" id="ai-delete">이 AI 삭제</button>
     </div>
-  </div>
+  
+    </div>
+
+</div>
 </div>
 
 <script>
@@ -4476,12 +4569,69 @@
     syncSearchUI();
     syncStatus();
     el.modal.classList.add('open');
+    syncModalLock();
+    showSettingsTab('ai');
     setTimeout(function () {
-      if (state.settings.groqKey.trim() || state.settings.geminiKey.trim()) el.keyAnthropic.focus();
-      else el.keyGroq.focus();
+      // 아이폰·휴대폰에서는 키보드가 자동으로 올라와 화면이 흔들리므로 자동 포커스를 생략합니다.
+      if (isTouchViewport()) return;
+      try {
+        if (state.settings.groqKey.trim() || state.settings.geminiKey.trim()) el.keyAnthropic.focus({ preventScroll: true });
+        else el.keyGroq.focus({ preventScroll: true });
+      } catch (e) {}
     }, 60);
   }
-  function closeModal() { el.modal.classList.remove('open'); }
+  function closeModal() { el.modal.classList.remove('open'); syncModalLock(); }
+
+  /* 모달이 열려 있는 동안 뒤쪽 페이지가 출렁거리지 않도록 바깥 스크롤을 잠급니다. */
+  function syncModalLock() {
+    var open = (el.modal && el.modal.classList.contains('open')) || (el.aiModal && el.aiModal.classList.contains('open'));
+    if (document.body) document.body.classList.toggle('modal-open', !!open);
+  }
+  function isTouchViewport() {
+    try {
+      return window.matchMedia('(pointer: coarse)').matches || (window.innerWidth <= 600);
+    } catch (e) { return window.innerWidth <= 600; }
+  }
+
+  /* ── 설정 탭: 🤖 AI·검색 / 🔑 API·연결 / 🔒 대화·잠금 ── */
+  function showSettingsTab(name) {
+    var bar = document.getElementById('sheet-tabs');
+    if (!bar) return;
+    var tabs = bar.querySelectorAll('.stab');
+    for (var i = 0; i < tabs.length; i++) {
+      var t = tabs[i];
+      var on = t.getAttribute('data-tab') === name;
+      t.classList.toggle('on', on);
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+      var panel = document.getElementById('panel-' + t.getAttribute('data-tab'));
+      if (panel) panel.hidden = !on;
+    }
+    // 탭을 바꾸면 본문만 맨 위로 — 시트 머리·저장 바는 그대로라 흔들리지 않습니다.
+    var body = document.getElementById('settings-body');
+    if (body) body.scrollTop = 0;
+  }
+  (function initSettingsTabs() {
+    var bar = document.getElementById('sheet-tabs');
+    if (!bar) return;
+    var tabs = Array.prototype.slice.call(bar.querySelectorAll('.stab'));
+    bar.addEventListener('click', function (e) {
+      var t = e.target && e.target.closest ? e.target.closest('.stab') : null;
+      if (!t || !bar.contains(t)) return;
+      showSettingsTab(t.getAttribute('data-tab'));
+    });
+    bar.addEventListener('keydown', function (e) {
+      var idx = tabs.indexOf(document.activeElement);
+      if (idx < 0) return;
+      var step = e.key === 'ArrowRight' ? 1 : (e.key === 'ArrowLeft' ? -1 : 0);
+      if (!step) return;
+      e.preventDefault();
+      var next = tabs[(idx + step + tabs.length) % tabs.length];
+      next.focus();
+      showSettingsTab(next.getAttribute('data-tab'));
+    });
+    showSettingsTab('ai');
+  })();
 
   /* ── AI 추가·수정 모달 (커스텀 AI + 기본 AI 수정) ── */
   var editingAiId = null;        // 커스텀 id(c_...) 또는 기본 키(pickle/claude/groq)
@@ -4574,11 +4724,16 @@
     markAvatarChip(el.aiAvatar.value);
     syncEngineForm();
     el.aiModal.classList.add('open');
-    setTimeout(function () { try { el.aiName.focus(); } catch (e) {} }, 60);
+    syncModalLock();
+    setTimeout(function () {
+      if (isTouchViewport()) return;   // 휴대폰에서는 키보드 자동 표시 생략
+      try { el.aiName.focus({ preventScroll: true }); } catch (e) {}
+    }, 60);
   }
 
   function closeAiModal() {
     el.aiModal.classList.remove('open');
+    syncModalLock();
     editingAiId = null;
     editingBuiltin = false;
     setAiErr('');
