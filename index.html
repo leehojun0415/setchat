@@ -1392,6 +1392,16 @@
   var MENTION = {};
 
   /* ── 커스텀 AI·이름 도우미 ────────────── */
+  // 받침 유무에 맞는 조사를 고릅니다(예: 피클이 / Gemini가, 피클은 / Gemini는).
+  function hasBatchim(word) {
+    var s = String(word === null || word === undefined ? '' : word).trim();
+    if (!s) return false;
+    var c = s.charCodeAt(s.length - 1);
+    if (c < 0xAC00 || c > 0xD7A3) return false;   // 한글이 아니면 받침 없는 것으로 봅니다
+    return (c - 0xAC00) % 28 !== 0;
+  }
+  function josa(word, withB, withoutB) { return hasBatchim(word) ? withB : withoutB; }
+
   function escapeRe(s) {
     return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
@@ -2632,7 +2642,7 @@
     if (ch !== CHANNEL_ALL) {
       var meta = AI[ch] || { name: 'AI', avatar: '💬' };
       d.appendChild(h('b', null, '새 1:1 대화'));
-      d.appendChild(document.createTextNode(meta.avatar + ' ' + meta.name + '와의 방이에요. 여기서 보낸 메시지는 ' + meta.name + '만 답해요. 멘션 없이 그냥 보내면 돼요.'));
+      d.appendChild(document.createTextNode(meta.avatar + ' ' + meta.name + josa(meta.name, '과의', '와의') + ' 방이에요. 여기서 보낸 메시지는 ' + meta.name + '만 답해요. 멘션 없이 그냥 보내면 돼요.'));
       return d;
     }
 
@@ -2920,7 +2930,7 @@
     if (room !== CHANNEL_ALL) {
       var others = otherMentionsInRoom(text, room);
       if (others.length) {
-        addMessage('system', '💬 여기는 ' + channelName(room) + '와의 1:1 방이에요. ' +
+        addMessage('system', '💬 여기는 ' + channelName(room) + josa(channelName(room), '과의', '와의') + ' 1:1 방이에요. ' +
           others.map(function (w) { return AI[w].name; }).join(' · ') +
           '에게 묻고 싶으면 위의 💬 전체 탭에서 불러 주세요.', null, room);
       }
@@ -2928,7 +2938,7 @@
 
     if (off.length) {
       addNoticeOnce(off.map(function (w) {
-        return AI[w].avatar + ' ' + AI[w].name + '는 설정에서 꺼져 있어요.';
+        return AI[w].avatar + ' ' + AI[w].name + josa(AI[w].name, '은', '는') + ' 설정에서 꺼져 있어요.';
       }).join(' ') + ' 설정에서 다시 켜면 답합니다.', room);
     }
     if (!targets.length) {
@@ -3140,7 +3150,7 @@
     var repWho = drafts[0].who;
     for (var i = 0; i < drafts.length; i++) { if (drafts[i].who === 'pickle') repWho = 'pickle'; }
 
-    setDebateStatus(status, '🤝 토론·종합 3/3 — ' + AI[repWho].name + '가 최종 답변을 종합하는 중...');
+    setDebateStatus(status, '🤝 토론·종합 3/3 — ' + AI[repWho].name + josa(AI[repWho].name, '이', '가') + ' 최종 답변을 종합하는 중...');
 
     var block = drafts.map(function (d) {
       return '[1단계 · ' + d.name + ' 초안]\n' + clipText(d.text, 700);
@@ -3205,7 +3215,7 @@
     for (var i = 0; i < drafts.length; i++) { if (drafts[i].who === 'pickle') repWho = 'pickle'; }
     var rep = drafts.filter(function (d) { return d.who === repWho; })[0] || drafts[0];
 
-    setDebateStatus(status, '🤝 토론·종합 3/3 — ' + rep.name + '가 최종 답변을 종합하는 중... (데모)');
+    setDebateStatus(status, '🤝 토론·종합 3/3 — ' + rep.name + josa(rep.name, '이', '가') + ' 최종 답변을 종합하는 중... (데모)');
     await sleep(350);
 
     var lines = [
@@ -4429,7 +4439,7 @@
     }
 
     if (other && Math.random() < 0.55) {
-      if (who === 'pickle') out += ' ' + aiName(other.who) + '가 정리한 것 위에 제가 바로 실행할게요!';
+      if (who === 'pickle') out += ' ' + aiName(other.who) + josa(aiName(other.who), '이', '가') + ' 정리한 것 위에 제가 바로 실행할게요!';
       else if (who === 'groq') out += ' 다음 아이디어도 바로 하나 더 드릴게요 ⚡';
       else if (isCustomKey(who)) out += ' ' + aiName(other.who) + ' 님 답변에 제 관점을 한 줄만 보태 볼게요.';
       else out += ' ' + aiName('pickle') + '이 맡은 실행 부분은 제가 정리해서 옆에 붙여 두겠습니다.';
