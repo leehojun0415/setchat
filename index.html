@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, interactive-widget=resizes-content">
 <link rel="icon" type="image/png" href="logo.png">
 <link rel="apple-touch-icon" href="logo.png">
 <meta name="theme-color" content="#F7F8FA">
@@ -2828,6 +2828,28 @@
     return 850 + Math.random() * 550;
   }
 
+  // 같은 턴에서 같은 안내문이 AI 수만큼(4줄) 도배되지 않게 1번만 보여 줍니다.
+  var noticeTurn = 0;
+  var noticeSeen = {};
+  function addNoticeOnce(text, room) {
+    var k = noticeTurn + '|' + String(text);
+    if (noticeSeen[k]) return null;
+    noticeSeen[k] = true;
+    return addMessage('system', text, null, room);
+  }
+
+  // 사진은 Gemini만 읽을 수 있으므로, 사진을 붙였을 때는 답할 AI를 1명만 고릅니다.
+  function canReadImage(who) {
+    if (!hasBrowserKey('gemini')) return false;
+    return chainFor(who).indexOf('gemini') >= 0;
+  }
+  function pickImageTarget(list) {
+    var able = list.filter(canReadImage);
+    if (!able.length) return list[0] || null;   // Gemini 키가 없으면 1명이 안내문만 띄웁니다
+    var named = able.filter(function (w) { return /gemini/i.test(String(AI[w] && AI[w].name || '')); });
+    return named[0] || able[0];
+  }
+
   // 한 AI의 답을 받아 그 방에 말풍선으로 붙입니다. 여러 AI가 동시에 돌아도 서로 기다리지 않아요.
   async function runReply(who, text, room, attach) {
     await sleep(delayFor(who));
@@ -2843,10 +2865,11 @@
 
     if (!got || !got.text) {
       // 무료 엔진을 모두 시도했거나 유료 엔진이 실패했으면 가짜 데모 답변 대신 사유를 보여 줍니다.
+      // 같은 사유(예: 429 한도)가 AI 수만큼 겹쳐 나오지 않게 한 턴에 1번만 붙입니다.
       if (err) {
-        addMessage('system', '⚠️ ' + (err.freeExhausted ? err.message : AI[who].name + ' 응답 실패: ' + shortErr(err, 140)), null, room);
+        addNoticeOnce('⚠️ ' + (err.freeExhausted ? err.message : AI[who].name + ' 응답 실패: ' + shortErr(err, 140)), room);
       } else {
-        addMessage('system', '⚠️ ' + AI[who].name + ' 답변을 받지 못했어요. 잠시 뒤 다시 불러 주세요.', null, room);
+        addNoticeOnce('⚠️ ' + AI[who].name + ' 답변을 받지 못했어요. 잠시 뒤 다시 불러 주세요.', room);
       }
       return null;
     }
@@ -2860,6 +2883,22 @@
     var targets = pickTargets(text, room);
     var off = offMentions(text);
 
+    // 새 턴 — 안내문 중복 방지 기록을 비웁니다.
+    noticeTurn++;
+    noticeSeen = {};
+
+    // 📷 사진은 Gemini(비전)만 읽을 수 있어서, 여러 AI가 동시에 부르면 429가 나고
+    // 같은 오류가 여러 줄 깔립니다. 사진일 때는 답할 AI를 1명만 남깁니다.
+    if (attach && attach.kind === 'image' && targets.length > 1) {
+      var one = pickImageTarget(targets);
+      if (one) {
+        var skipped = targets.length - 1;
+        targets = [one];
+        addNoticeOnce('📷 사진은 Gemini만 볼 수 있어서 이번엔 ' + AI[one].name + '만 답해요. ' +
+          '나머지 ' + skipped + '명은 사진을 볼 수 없어 건너뛰었어요.', room);
+      }
+    }
+
     if (room !== CHANNEL_ALL) {
       var others = otherMentionsInRoom(text, room);
       if (others.length) {
@@ -2870,12 +2909,12 @@
     }
 
     if (off.length) {
-      addMessage('system', off.map(function (w) {
+      addNoticeOnce(off.map(function (w) {
         return AI[w].avatar + ' ' + AI[w].name + '는 설정에서 꺼져 있어요.';
-      }).join(' ') + ' 설정에서 다시 켜면 답합니다.', null, room);
+      }).join(' ') + ' 설정에서 다시 켜면 답합니다.', room);
     }
     if (!targets.length) {
-      if (!off.length) addMessage('system', '켜 둔 AI가 없어요. 설정에서 하나 이상 켜 주세요.', null, room);
+      if (!off.length) addNoticeOnce('켜 둔 AI가 없어요. 설정에서 하나 이상 켜 주세요.', room);
       return;
     }
 
