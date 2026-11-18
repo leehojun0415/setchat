@@ -3,203 +3,231 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#BACEE0">
+<meta name="theme-color" content="#FFFFFF">
 <title>ai비서 — 이호준 · 피클 · Gemini · Groq</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
 <style>
+  /* ── 피클 앱 스타일 테마 (2026-11) ──────────────────────
+     순백 배경 · 반투명 블러 헤더 · 연두색 내 말풍선 · 연회색 AI 말풍선 · 알약 입력창 */
   :root{
-    --bg:#BACEE0;
-    --hd-top:#B2C9DC;
-    --hd-bottom:#A7BFD3;
-    --me:#FEE500;
-    --ink:#191F28;
-    --time:#5F7183;
-    --name:#54697C;
-    --composer:#B9CDDF;
+    --bg:#FFFFFF;
+    --ink:#111827;
+    --muted:#6B7280;
+    --faint:#9CA3AF;
+    --line:#EEF0F3;
+    --soft:#F2F3F5;
+    --soft2:#F7F8FA;
+    --me-a:#72E36F;
+    --me-b:#7AE877;
+    --brand:#1F7A4D;
+    --brand-soft:#EAF9EE;
+    --brand-line:#CBEBD5;
+    --warn:#B42318;
+    --warn-soft:#FFF3F1;
   }
   *{box-sizing:border-box;}
   html,body{height:100%;}
   body{
     margin:0;
-    background:#0C0D0F;
+    background:var(--bg);
     color:var(--ink);
-    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic","Noto Sans KR",sans-serif;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif;
+    font-size:15px;line-height:1.48;letter-spacing:-0.015em;
     -webkit-font-smoothing:antialiased;
     -webkit-text-size-adjust:100%;
   }
-  button{font-family:inherit;}
-  input,textarea{font-family:inherit;}
+  button{font-family:inherit;font-size:inherit;letter-spacing:inherit;}
+  input,textarea,select{font-family:inherit;font-size:inherit;letter-spacing:inherit;}
 
-  .stage{min-height:100%;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .stage{min-height:100%;display:flex;justify-content:center;background:var(--bg);}
   .app{
     position:relative;
-    width:100%;
-    max-width:440px;
-    height:calc(100vh - 40px);
-    height:min(940px, calc(100dvh - 40px));
+    width:100%;max-width:460px;
+    height:100vh;height:100dvh;
     background:var(--bg);
-    display:flex;
-    flex-direction:column;
-    border-radius:26px;
+    display:flex;flex-direction:column;
     overflow:hidden;
-    box-shadow:0 30px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.05);
   }
-  @media (max-width:640px){
-    .stage{padding:0;}
-    .app{max-width:none;height:100vh;height:100dvh;border-radius:0;box-shadow:none;}
+  @media (min-width:641px){
+    body{background:var(--soft2);}
+    .stage{padding:20px;}
+    .app{
+      height:min(940px, calc(100dvh - 40px));
+      border-radius:26px;
+      box-shadow:0 18px 60px rgba(17,24,39,.12), 0 0 0 1px rgba(17,24,39,.04);
+    }
   }
 
-  /* ── 헤더 ─────────────────────────────── */
+  /* ── 헤더 (반투명 블러) ───────────────── */
   .hd{
-    display:flex;align-items:center;gap:10px;
-    padding:14px 12px 12px 14px;
-    background:linear-gradient(180deg,var(--hd-top),var(--hd-bottom));
-    flex:none;
+    position:relative;z-index:20;flex:none;
+    display:flex;align-items:center;gap:8px;
+    padding:10px 12px;
+    background:rgba(255,255,255,.88);
+    -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+    border-bottom:1px solid rgba(17,24,39,.06);
   }
   .hd .logo{
-    width:34px;height:34px;border-radius:50%;
-    display:grid;place-items:center;font-size:17px;flex:none;
-    background:rgba(255,255,255,.55);
-    box-shadow:inset 0 0 0 1px rgba(255,255,255,.65);
+    width:38px;height:38px;border-radius:50%;flex:none;
+    display:grid;place-items:center;font-size:19px;line-height:1;
+    background:var(--soft);
   }
-  .hd .titles{display:flex;align-items:baseline;gap:8px;flex:1;min-width:0;}
-  .hd h1{margin:0;font-size:19.5px;font-weight:800;letter-spacing:-.5px;color:#16212B;}
+  .hd .titles{display:flex;flex-direction:column;gap:1px;flex:1;min-width:0;}
+  .hd h1{margin:0;font-size:17px;font-weight:700;letter-spacing:-0.02em;color:var(--ink);}
   .hd .sub{
-    font-size:13.5px;font-weight:500;color:#4E6478;letter-spacing:-.2px;
+    font-size:12.5px;font-weight:500;color:var(--muted);letter-spacing:-0.01em;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
   .icon-btn{
-    border:0;background:transparent;color:#16212B;
-    font-size:22px;line-height:1;font-weight:700;
-    padding:6px 8px;border-radius:10px;cursor:pointer;
+    flex:none;width:38px;height:38px;
+    display:grid;place-items:center;
+    border:0;background:transparent;color:var(--ink);
+    font-size:20px;line-height:1;font-weight:700;
+    border-radius:50%;cursor:pointer;padding:0;
+    -webkit-tap-highlight-color:transparent;
   }
-  .icon-btn:hover{background:rgba(255,255,255,.25);}
+  .icon-btn:hover{background:var(--soft);}
+  .icon-btn.add{
+    width:36px;height:36px;font-size:21px;font-weight:600;
+    border:1px solid #E6E8EC;background:#fff;
+    box-shadow:0 1px 2px rgba(17,24,39,.05);
+  }
+  .icon-btn.add:hover{background:var(--soft2);}
 
   /* ── 공지 배너 ─────────────────────────── */
   .notice{
     flex:none;
-    background:#FCF6DE;
-    color:#6A5A22;
-    font-size:14px;font-weight:600;letter-spacing:-.35px;
+    background:var(--soft2);
+    color:var(--muted);
+    font-size:12.5px;font-weight:600;letter-spacing:-0.01em;
     text-align:center;
-    padding:9px 12px;
+    padding:8px 12px;
     display:flex;align-items:center;justify-content:center;gap:6px;
-    border-bottom:1px solid rgba(0,0,0,.04);
+    border-bottom:1px solid rgba(17,24,39,.05);
   }
 
   /* ── 피드 ─────────────────────────────── */
   .feed{
     flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;
-    padding:12px 12px 10px;
+    padding:16px 14px 8px;
     display:flex;flex-direction:column;
+    background:var(--bg);
     overscroll-behavior:contain;
     -webkit-overflow-scrolling:touch;
   }
   .feed::-webkit-scrollbar{width:6px;}
-  .feed::-webkit-scrollbar-thumb{background:rgba(90,115,135,.35);border-radius:99px;}
+  .feed::-webkit-scrollbar-thumb{background:rgba(17,24,39,.14);border-radius:99px;}
   .feed::-webkit-scrollbar-track{background:transparent;}
 
-  .divider{display:flex;justify-content:center;margin:10px 0 12px;flex:none;}
+  .divider{display:flex;justify-content:center;margin:12px 0 14px;flex:none;}
   .divider span{
-    background:rgba(76,96,116,.3);color:#F4F9FC;
-    font-size:13.5px;font-weight:600;letter-spacing:-.2px;
-    padding:5px 14px;border-radius:999px;
+    background:var(--soft);
+    color:var(--faint);
+    font-size:11.5px;font-weight:600;letter-spacing:-0.01em;
+    padding:5px 12px;border-radius:999px;
   }
 
   .sys{
     align-self:center;max-width:92%;
-    margin:8px 0;padding:6px 12px;
-    background:rgba(255,255,255,.55);
-    color:#41525F;font-size:12.5px;line-height:1.45;letter-spacing:-.2px;
+    margin:8px 0;padding:7px 13px;
+    background:var(--soft2);
+    color:var(--muted);font-size:12.5px;line-height:1.5;letter-spacing:-0.01em;
     border-radius:14px;text-align:center;
   }
-  .sys.warn{background:rgba(255,255,255,.88);color:#8A3B2E;}
+  .sys.warn{background:var(--warn-soft);color:var(--warn);}
 
   .empty{
-    margin:auto;text-align:center;color:#4E6478;
-    font-size:14px;line-height:1.7;
+    margin:auto;text-align:center;color:var(--muted);
+    font-size:14px;line-height:1.7;letter-spacing:-0.01em;
   }
-  .empty b{display:block;font-size:16px;color:#26374a;margin-bottom:6px;}
+  .empty b{display:block;font-size:16px;color:var(--ink);margin-bottom:6px;letter-spacing:-0.02em;}
 
-  .row{display:flex;margin:6px 0;flex:none;}
+  .row{display:flex;margin:5px 0;flex:none;}
 
-  /* 내가 보낸 말 */
+  /* 내가 보낸 말 — 연두색 알약 */
   .row.me{justify-content:flex-end;align-items:flex-end;gap:6px;}
   .row.me .bubble{
-    background:var(--me);color:var(--ink);
-    border-radius:16px;padding:10px 14px;
+    background:linear-gradient(180deg,var(--me-a),var(--me-b));
+    color:var(--ink);
+    border-radius:20px;
+    padding:10px 14px;
     max-width:76%;
-    font-size:16.5px;line-height:1.45;letter-spacing:-.2px;
+    font-size:15px;line-height:1.48;letter-spacing:-0.015em;
     white-space:pre-wrap;overflow-wrap:anywhere;
+    box-shadow:0 1px 2px rgba(17,24,39,.06);
   }
 
-  /* AI 말 */
+  /* AI 말 — 연회색 라운드 */
   .row.ai{align-items:flex-start;gap:8px;}
   .row.ai .avatar{
-    width:42px;height:42px;border-radius:14px;flex:none;
-    display:grid;place-items:center;font-size:22px;line-height:1;
-    box-shadow:inset 0 0 0 1px rgba(255,255,255,.45);
+    width:34px;height:34px;border-radius:50%;flex:none;
+    display:grid;place-items:center;font-size:17px;line-height:1;
+    background:var(--soft);
+    box-shadow:inset 0 0 0 1px rgba(17,24,39,.04);
   }
-  .row.ai .col{display:flex;flex-direction:column;gap:4px;min-width:0;max-width:calc(100% - 50px);}
-  .row.ai .name{font-size:12.5px;font-weight:600;color:var(--name);margin-left:2px;letter-spacing:-.1px;}
+  .row.ai .col{display:flex;flex-direction:column;gap:4px;min-width:0;max-width:calc(100% - 42px);}
+  .row.ai .name{font-size:12.5px;font-weight:600;color:var(--muted);margin-left:4px;letter-spacing:-0.01em;}
   .row.ai .line{display:flex;align-items:flex-end;gap:6px;min-width:0;}
   .row.ai .bubble{
-    background:#fff;color:var(--ink);
-    border-radius:16px;padding:10px 14px;
-    font-size:16.5px;line-height:1.5;letter-spacing:-.2px;
+    background:var(--soft);
+    color:var(--ink);
+    border-radius:18px;
+    padding:10px 14px;
+    font-size:15px;line-height:1.48;letter-spacing:-0.015em;
     white-space:pre-wrap;overflow-wrap:anywhere;
     min-width:0;
   }
-  .row.ai.compact{margin-left:50px;margin-top:2px;}
+  .row.ai.compact{margin-left:42px;margin-top:2px;}
   .row.ai.compact .col{max-width:calc(100% - 6px);}
 
   /* ── 말풍선 안 링크·굵게 ───────────────── */
   .row .bubble a{
-    color:#0F5B8A;font-weight:700;
+    color:var(--brand);font-weight:600;
     text-decoration:underline;text-decoration-thickness:1px;
-    text-decoration-color:rgba(15,91,138,.35);text-underline-offset:2px;
+    text-decoration-color:rgba(31,122,77,.3);text-underline-offset:2px;
     word-break:break-all;
   }
-  .row .bubble a:hover{color:#0A3F61;text-decoration-color:#0A3F61;}
-  .row .bubble strong{font-weight:800;color:#0E1720;}
+  .row .bubble a:hover{color:#155F3B;text-decoration-color:#155F3B;}
+  .row.me .bubble a{color:#0B4F2C;text-decoration-color:rgba(11,79,44,.35);}
+  .row .bubble strong{font-weight:700;color:var(--ink);}
 
   /* ── 참고·추천 링크 카드 ───────────────── */
-  .links{display:flex;flex-direction:column;gap:5px;margin-top:3px;max-width:100%;}
+  .links{display:flex;flex-direction:column;gap:6px;margin-top:4px;max-width:100%;}
   .links-hd{
-    font-size:11.5px;font-weight:800;color:#4C6578;letter-spacing:-.1px;
-    margin:0 0 1px 3px;
+    font-size:11px;font-weight:700;color:var(--faint);letter-spacing:0;
+    margin:0 0 1px 4px;
   }
   .link-card{
     display:flex;align-items:flex-start;gap:8px;
-    background:rgba(255,255,255,.86);
-    border:1px solid rgba(120,150,172,.3);
-    border-radius:12px;padding:8px 10px;
-    text-decoration:none;color:#17242E;
-    box-shadow:0 1px 1px rgba(0,0,0,.03);
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:14px;padding:9px 11px;
+    text-decoration:none;color:var(--ink);
+    box-shadow:0 1px 2px rgba(17,24,39,.04);
     -webkit-tap-highlight-color:transparent;
   }
-  .link-card:hover{background:#fff;border-color:rgba(80,125,160,.5);}
+  .link-card:hover{background:var(--soft2);border-color:#DFE3E8;}
   .link-card:active{transform:translateY(1px);}
   .link-card .ico{flex:none;font-size:13px;line-height:1.4;}
   .link-card .txt{min-width:0;display:flex;flex-direction:column;gap:1px;}
   .link-card .t{
-    font-size:13px;font-weight:700;line-height:1.35;letter-spacing:-.2px;
+    font-size:13px;font-weight:600;line-height:1.4;letter-spacing:-0.01em;
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
     overflow:hidden;overflow-wrap:anywhere;
   }
   .link-card .host{
-    font-size:11px;font-weight:600;color:#6B8398;letter-spacing:-.1px;
+    font-size:11px;font-weight:500;color:var(--faint);letter-spacing:0;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
 
   .time{
-    font-size:12px;color:var(--time);font-weight:500;
+    font-size:11px;color:var(--faint);font-weight:500;
     flex:none;padding-bottom:2px;white-space:nowrap;
   }
 
   .bubble.dots{display:inline-flex;align-items:center;gap:5px;padding:15px 14px;}
   .bubble.dots i{
-    width:7px;height:7px;border-radius:50%;background:#A9BCCB;display:block;
+    width:6px;height:6px;border-radius:50%;background:#C4C9D1;display:block;
     animation:blink 1.2s infinite ease-in-out;
   }
   .bubble.dots i:nth-child(2){animation-delay:.16s;}
@@ -214,232 +242,260 @@
     .toast{transition:none;}
   }
 
-  /* ── 입력창 ───────────────────────────── */
+  /* ── 퀵 칩 ─────────────────────────────── */
+  .quick{
+    flex:none;display:flex;gap:6px;align-items:center;
+    overflow-x:auto;overflow-y:hidden;
+    padding:8px 12px 2px;background:var(--bg);
+    scrollbar-width:none;-webkit-overflow-scrolling:touch;
+  }
+  .quick::-webkit-scrollbar{display:none;}
+  .quick-chip{
+    flex:none;border:1px solid var(--line);
+    background:var(--soft2);color:#374151;
+    border-radius:999px;padding:6px 12px;
+    font-size:12.5px;font-weight:600;letter-spacing:-0.01em;
+    cursor:pointer;white-space:nowrap;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .quick-chip:hover{background:var(--soft);}
+  .quick-chip:active{transform:translateY(1px);}
+  .quick-chip.search{
+    background:var(--brand-soft);
+    border-color:var(--brand-line);
+    color:var(--brand);
+    margin-left:auto;
+  }
+
+  /* ── 입력창 (흰색 알약) ────────────────── */
   .composer{
     flex:none;
-    display:flex;align-items:flex-end;gap:8px;
-    padding:9px 10px calc(9px + env(safe-area-inset-bottom));
-    background:var(--composer);
-    border-top:1px solid rgba(255,255,255,.35);
+    display:flex;align-items:flex-end;gap:6px;
+    margin:8px 12px calc(12px + env(safe-area-inset-bottom));
+    padding:6px 6px 6px 8px;
+    background:#fff;
+    border:1px solid #E6E8EC;
+    border-radius:28px;
+    box-shadow:0 4px 16px rgba(17,24,39,.08);
   }
+  .composer .add-btn{
+    flex:none;width:38px;height:38px;border:0;border-radius:50%;
+    background:transparent;color:var(--ink);
+    font-size:24px;font-weight:400;line-height:1;
+    display:grid;place-items:center;cursor:pointer;padding:0;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .composer .add-btn:hover{background:var(--soft);}
   .composer textarea{
     flex:1;min-width:0;
     resize:none;border:0;outline:none;
-    background:rgba(255,255,255,.62);
-    border-radius:18px;
-    padding:12px 14px;
-    font-size:16px;line-height:1.4;color:var(--ink);
-    max-height:118px;
-    box-shadow:inset 0 0 0 1px rgba(255,255,255,.55);
+    background:transparent;
+    border-radius:22px;
+    padding:9px 4px;
+    font-size:15px;line-height:1.45;color:var(--ink);
+    max-height:120px;
   }
-  .composer textarea::placeholder{color:#7A8D9E;}
-  .composer textarea:focus{box-shadow:inset 0 0 0 2px rgba(255,255,255,.9);}
+  .composer textarea::placeholder{color:var(--faint);}
+  .composer textarea:focus{background:transparent;}
   .composer .send{
-    flex:none;border:0;border-radius:16px;
-    background:var(--me);color:#231F20;
-    padding:13px 16px;
-    font-size:15.5px;font-weight:800;letter-spacing:-.3px;
-    cursor:pointer;
-    box-shadow:0 1px 2px rgba(0,0,0,.06);
+    flex:none;width:38px;height:38px;
+    display:grid;place-items:center;
+    border:0;border-radius:50%;
+    background:var(--ink);color:#fff;
+    font-size:17px;font-weight:700;line-height:1;
+    cursor:pointer;padding:0;
+    box-shadow:0 1px 2px rgba(17,24,39,.15);
   }
-  .composer .send:disabled{opacity:.5;cursor:default;}
+  .composer .send:hover{background:#1F2937;}
+  .composer .send:disabled{opacity:.45;cursor:default;}
 
   /* ── 설정 모달 ─────────────────────────── */
   .backdrop{
     position:fixed;inset:0;z-index:60;
-    background:rgba(10,15,20,.48);
+    background:rgba(17,24,39,.28);
     display:none;align-items:center;justify-content:center;
     padding:16px;
-    -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+    -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
   }
   .backdrop.open{display:flex;}
   .sheet{
     width:100%;max-width:420px;max-height:88vh;overflow-y:auto;
-    background:#F6F9FB;border-radius:20px;
+    background:#fff;border-radius:22px;
     padding:16px 16px 20px;
-    box-shadow:0 24px 70px rgba(0,0,0,.4);
+    box-shadow:0 24px 70px rgba(17,24,39,.28);
   }
   .sheet-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
-  .sheet-hd h2{margin:0;font-size:18px;letter-spacing:-.4px;}
-  .sheet-hd .icon-btn{font-size:17px;padding:6px 9px;}
+  .sheet-hd h2{margin:0;font-size:17px;font-weight:700;letter-spacing:-0.02em;}
+  .sheet-hd .icon-btn{font-size:16px;width:32px;height:32px;}
 
-  .sec{padding:14px 0 4px;border-top:1px solid #E2EAF0;}
+  .sec{padding:14px 0 4px;border-top:1px solid var(--line);}
   .sec:first-of-type{border-top:0;}
-  .sec-title{font-size:13px;font-weight:800;color:#40566A;letter-spacing:-.2px;margin-bottom:10px;}
+  .sec-title{font-size:13px;font-weight:700;color:#374151;letter-spacing:-0.01em;margin-bottom:10px;}
 
   /* 무료 시작 섹션 */
   .sec.free{
-    background:linear-gradient(180deg,#EAF7EE,#F5FAF6);
-    border:1px solid #CBE7D3;border-top:1px solid #CBE7D3;
-    border-radius:14px;
+    background:linear-gradient(180deg,#F1FAF3,#F8FDF9);
+    border:1px solid var(--brand-line);border-top:1px solid var(--brand-line);
+    border-radius:16px;
     padding:12px 12px 8px;margin:2px 0 14px;
   }
-  .sec.free .sec-title{font-size:13.5px;color:#1D6B3F;margin-bottom:4px;}
-  .sec.free .free-lead{font-size:12px;line-height:1.5;color:#3F6B52;margin:0 0 10px;letter-spacing:-.1px;}
+  .sec.free .sec-title{font-size:13px;color:var(--brand);margin-bottom:4px;}
+  .sec.free .free-lead{font-size:12px;line-height:1.5;color:#4B6B58;margin:0 0 10px;letter-spacing:-0.01em;}
   .sec.free .field > span{color:#20472F;}
-  .sec.free .btn.primary{background:#1E8A4F;border-color:#1E8A4F;}
+  .sec.free .btn.primary{background:var(--brand);border-color:var(--brand);}
 
   .sub-hd{
-    font-size:12.5px;font-weight:800;color:#20472F;letter-spacing:-.1px;
-    margin:10px 0 8px;padding-top:10px;border-top:1px dashed #CFE3D6;
+    font-size:12px;font-weight:700;color:#20472F;letter-spacing:-0.01em;
+    margin:10px 0 8px;padding-top:10px;border-top:1px dashed #D9EFE1;
   }
   .sub-hd.first{margin-top:0;padding-top:0;border-top:0;}
 
-  .status-row{display:flex;align-items:center;gap:8px;font-size:14px;padding:5px 0;color:#22303C;}
-  .status-row .dot{width:8px;height:8px;border-radius:50%;background:#C2CFDA;flex:none;}
-  .status-row .dot.on{background:#33B36B;}
-  .status-row .status{margin-left:auto;font-size:12.5px;color:#6B7D8D;font-weight:600;}
+  .status-row{display:flex;align-items:center;gap:8px;font-size:14px;padding:6px 0;color:var(--ink);}
+  .status-row .dot{width:8px;height:8px;border-radius:50%;background:#D8DCE2;flex:none;}
+  .status-row .dot.on{background:#22C55E;}
+  .status-row .status{margin-left:auto;font-size:12.5px;color:var(--muted);font-weight:500;}
+  .status-row .status.sub-soft{color:var(--faint);}
 
   .field{display:block;margin-bottom:11px;}
-  .field > span{display:block;font-size:13px;font-weight:700;color:#2A3A48;margin-bottom:5px;letter-spacing:-.2px;}
-  .field > span em{font-style:normal;font-weight:600;color:#7A8D9E;font-size:12px;margin-left:4px;}
+  .field > span{display:block;font-size:12.5px;font-weight:600;color:#374151;margin-bottom:5px;letter-spacing:-0.01em;}
+  .field > span em{font-style:normal;font-weight:500;color:var(--faint);font-size:11.5px;margin-left:4px;}
   .field input{
-    width:100%;border:1px solid #D5E0E9;background:#fff;border-radius:11px;
-    padding:10px 12px;font-size:14px;color:#1B2530;outline:none;
+    width:100%;border:1px solid #E6E8EC;background:#fff;border-radius:12px;
+    padding:10px 12px;font-size:14px;color:var(--ink);outline:none;
   }
-  .field input:focus{border-color:#8FB0C9;box-shadow:0 0 0 3px rgba(143,176,201,.22);}
+  .field input:focus{border-color:#C7CDD5;box-shadow:0 0 0 3px rgba(17,24,39,.06);}
+  .field textarea{
+    width:100%;border:1px solid #E6E8EC;background:#fff;border-radius:12px;
+    padding:10px 12px;font-size:14px;line-height:1.5;color:var(--ink);outline:none;
+    resize:vertical;min-height:62px;
+  }
+  .field textarea:focus{border-color:#C7CDD5;box-shadow:0 0 0 3px rgba(17,24,39,.06);}
+  .field select{
+    width:100%;border:1px solid #E6E8EC;background:#fff;border-radius:12px;
+    padding:10px 12px;font-size:14px;color:var(--ink);outline:none;cursor:pointer;
+  }
+  .field select:focus{border-color:#C7CDD5;box-shadow:0 0 0 3px rgba(17,24,39,.06);}
+
   .input-row{display:flex;gap:6px;}
   .input-row input{flex:1;min-width:0;}
   .mini{
-    flex:none;border:1px solid #D5E0E9;background:#fff;border-radius:11px;
-    padding:0 12px;font-size:12.5px;font-weight:700;color:#40566A;cursor:pointer;
+    flex:none;border:1px solid #E6E8EC;background:#fff;border-radius:11px;
+    padding:0 12px;font-size:12.5px;font-weight:600;color:#374151;cursor:pointer;
   }
+  .mini:hover{background:var(--soft2);}
 
-  .hint{font-size:12px;line-height:1.55;color:#6B7D8D;margin:8px 0;letter-spacing:-.1px;}
-  .hint a{color:#1D6B3F;font-weight:700;}
-  .hint.warn{color:#8A3B2E;}
+  .hint{font-size:12px;line-height:1.55;color:var(--muted);margin:8px 0;letter-spacing:-0.01em;}
+  .hint a{color:var(--brand);font-weight:600;}
+  .hint.warn{color:var(--warn);}
 
   .btn-row{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap;}
   .btn{
-    flex:1 1 auto;border:1px solid #D5E0E9;background:#fff;color:#22303C;
-    border-radius:12px;padding:11px 12px;font-size:13.5px;font-weight:700;
-    cursor:pointer;letter-spacing:-.2px;
+    flex:1 1 auto;border:1px solid #E6E8EC;background:#fff;color:#374151;
+    border-radius:12px;padding:11px 12px;font-size:13.5px;font-weight:600;
+    cursor:pointer;letter-spacing:-0.01em;
   }
-  .btn:hover{background:#F0F5F9;}
-  .btn.primary{background:#1F2B36;border-color:#1F2B36;color:#fff;}
-  .btn.primary:hover{background:#2B3B49;}
-  .btn.danger{background:#FFF1EE;border-color:#F3C9C0;color:#A33A28;}
+  .btn:hover{background:var(--soft2);}
+  .btn.primary{background:var(--ink);border-color:var(--ink);color:#fff;}
+  .btn.primary:hover{background:#1F2937;}
+  .btn.danger{background:var(--warn-soft);border-color:#F5D2CC;color:var(--warn);}
   .btn.ghost{background:transparent;}
   .btn:disabled{opacity:.55;cursor:default;}
 
-  .test-result{font-size:12.5px;line-height:1.55;color:#2E6B45;margin:9px 0 0;white-space:pre-wrap;word-break:break-word;}
-  .test-result.err{color:#A33A28;}
+  .test-result{font-size:12.5px;line-height:1.55;color:#1F7A4D;margin:9px 0 0;white-space:pre-wrap;word-break:break-word;}
+  .test-result.err{color:var(--warn);}
 
   /* ── 화면 잠금 ─────────────────────────── */
   .lock{
     position:absolute;inset:0;z-index:80;
-    background:linear-gradient(180deg,var(--hd-top),var(--hd-bottom));
+    background:rgba(255,255,255,.97);
+    -webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
     display:none;align-items:center;justify-content:center;
     padding:22px;
   }
   .lock.open{display:flex;}
   .lock-box{width:100%;max-width:320px;text-align:center;}
-  .lock-icon{font-size:42px;line-height:1;margin-bottom:14px;}
-  .lock-box h2{margin:0 0 6px;font-size:20px;font-weight:800;letter-spacing:-.5px;color:#16212B;}
-  .lock-sub{margin:0 0 18px;font-size:13.5px;font-weight:600;color:#41586B;letter-spacing:-.2px;line-height:1.5;}
+  .lock-icon{font-size:38px;line-height:1;margin-bottom:14px;}
+  .lock-box h2{margin:0 0 6px;font-size:19px;font-weight:700;letter-spacing:-0.02em;color:var(--ink);}
+  .lock-sub{margin:0 0 18px;font-size:13px;font-weight:500;color:var(--muted);letter-spacing:-0.01em;line-height:1.5;}
   .lock input{
-    width:100%;border:0;border-radius:14px;
-    background:rgba(255,255,255,.88);
-    padding:14px 15px;font-size:16px;color:#1B2530;outline:none;
-    box-shadow:inset 0 0 0 1px rgba(255,255,255,.95);
+    width:100%;border:1px solid #E6E8EC;border-radius:14px;
+    background:var(--soft2);
+    padding:14px 15px;font-size:16px;color:var(--ink);outline:none;
     font-family:inherit;
   }
-  .lock input:focus{box-shadow:inset 0 0 0 2px #fff;background:#fff;}
+  .lock input:focus{background:#fff;border-color:#C7CDD5;box-shadow:0 0 0 3px rgba(17,24,39,.06);}
   .lock .btn{width:100%;margin-top:10px;padding:13px 12px;font-size:15px;border-radius:13px;}
-  .lock-msg{min-height:18px;margin:10px 2px 0;font-size:12.5px;font-weight:700;color:#8A3B2E;letter-spacing:-.1px;}
+  .lock-msg{min-height:18px;margin:10px 2px 0;font-size:12.5px;font-weight:600;color:var(--warn);letter-spacing:-0.01em;}
 
   /* ── 참여 AI·검색 토글 ───────────────── */
   .member-row{
-    display:flex;align-items:center;gap:10px;padding:9px 2px;
-    border-bottom:1px dashed #E2EAF0;
+    display:flex;align-items:center;gap:8px;padding:9px 2px;
+    border-bottom:1px solid var(--line);
   }
   .member-row:last-of-type{border-bottom:0;}
   .member-row .m-avatar{
-    width:30px;height:30px;border-radius:10px;flex:none;
+    width:30px;height:30px;border-radius:50%;flex:none;
     display:grid;place-items:center;font-size:15px;
-    box-shadow:inset 0 0 0 1px rgba(255,255,255,.7);
+    background:var(--soft);
+    box-shadow:inset 0 0 0 1px rgba(17,24,39,.04);
   }
-  .member-row .m-name{font-size:14px;font-weight:700;color:#22303C;flex:1;min-width:0;letter-spacing:-.2px;}
+  .member-row .m-name{font-size:13.5px;font-weight:600;color:var(--ink);flex:1;min-width:0;letter-spacing:-0.01em;}
   .member-row .m-name small{
-    display:block;font-size:11.5px;font-weight:600;color:#7A8D9E;
-    margin-top:2px;letter-spacing:-.1px;
+    display:block;font-size:11px;font-weight:500;color:var(--faint);
+    margin-top:2px;letter-spacing:0;
   }
-  .member-row.off .m-name{color:#8A9AA8;}
-  .switch{position:relative;width:46px;height:27px;flex:none;}
+  .member-row.off .m-name{color:var(--faint);}
+  .switch{position:relative;width:44px;height:26px;flex:none;}
   .switch input{
     position:absolute;inset:0;width:100%;height:100%;margin:0;
     opacity:0;cursor:pointer;z-index:2;
   }
   .switch .track{
-    position:absolute;inset:0;border-radius:999px;background:#C7D4DF;
+    position:absolute;inset:0;border-radius:999px;background:#DDE1E6;
     transition:background .16s ease;pointer-events:none;
   }
   .switch .track::after{
-    content:'';position:absolute;top:3px;left:3px;width:21px;height:21px;
+    content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;
     border-radius:50%;background:#fff;
-    box-shadow:0 1px 2px rgba(0,0,0,.22);
+    box-shadow:0 1px 2px rgba(17,24,39,.2);
     transition:transform .16s ease;
   }
-  .switch input:checked + .track{background:#33B36B;}
-  .switch input:checked + .track::after{transform:translateX(19px);}
-  .switch input:focus-visible + .track{box-shadow:0 0 0 3px rgba(51,179,107,.3);}
+  .switch input:checked + .track{background:#22C55E;}
+  .switch input:checked + .track::after{transform:translateX(18px);}
+  .switch input:focus-visible + .track{box-shadow:0 0 0 3px rgba(34,197,94,.25);}
   .switch input:disabled + .track{opacity:.55;}
 
   .search-who{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 2px;}
   .search-who.off{opacity:.5;}
   .search-who .sec-sub{
-    width:100%;font-size:11.5px;font-weight:800;color:#40566A;
-    letter-spacing:-.1px;margin-bottom:2px;
+    width:100%;font-size:11.5px;font-weight:700;color:#374151;
+    letter-spacing:-0.01em;margin-bottom:2px;
   }
   .chip-check{
     display:inline-flex;align-items:center;gap:5px;
-    border:1px solid #D5E0E9;background:#fff;border-radius:999px;
-    padding:6px 11px;font-size:12.5px;font-weight:700;color:#2A3A48;
-    cursor:pointer;letter-spacing:-.1px;
+    border:1px solid #E6E8EC;background:#fff;border-radius:999px;
+    padding:6px 11px;font-size:12px;font-weight:600;color:#374151;
+    cursor:pointer;letter-spacing:-0.01em;
   }
-  .chip-check input{margin:0;width:14px;height:14px;accent-color:#1E8A4F;cursor:pointer;}
-  .chip-check:has(input:checked){border-color:#9FD3B4;background:#F1FAF4;color:#1D6B3F;}
+  .chip-check input{margin:0;width:14px;height:14px;accent-color:#22C55E;cursor:pointer;}
+  .chip-check:has(input:checked){border-color:var(--brand-line);background:var(--brand-soft);color:var(--brand);}
   .chip-check:has(input:disabled){opacity:.6;cursor:default;}
 
-  /* ── 실시간 검색 카드·복사 버튼 ─────────── */
+  /* ── 복사 버튼 ─────────────────────────── */
   .row.ai .tools{display:flex;justify-content:flex-end;gap:6px;margin-top:1px;}
   .copy-btn{
-    border:1px solid rgba(120,150,172,.34);background:rgba(255,255,255,.5);
-    color:#5B7387;font-size:11.5px;font-weight:700;letter-spacing:-.1px;
+    border:1px solid var(--line);background:#fff;
+    color:var(--muted);font-size:11px;font-weight:600;letter-spacing:0;
     padding:4px 10px;border-radius:999px;cursor:pointer;
     -webkit-tap-highlight-color:transparent;
   }
-  .copy-btn:hover{background:#fff;color:#22303C;border-color:rgba(80,125,160,.5);}
+  .copy-btn:hover{background:var(--soft2);color:var(--ink);border-color:#DFE3E8;}
   .copy-btn:active{transform:translateY(1px);}
 
-  /* ── 입력창 앞 퀵 칩 ───────────────────── */
-  .quick{
-    flex:none;display:flex;gap:6px;align-items:center;
-    overflow-x:auto;overflow-y:hidden;
-    padding:8px 10px 2px;background:var(--composer);
-    scrollbar-width:none;-webkit-overflow-scrolling:touch;
-  }
-  .quick::-webkit-scrollbar{display:none;}
-  .quick-chip{
-    flex:none;border:1px solid rgba(255,255,255,.8);
-    background:rgba(255,255,255,.62);color:#26374a;
-    border-radius:999px;padding:6px 12px;
-    font-size:12.5px;font-weight:700;letter-spacing:-.2px;
-    cursor:pointer;white-space:nowrap;
-    -webkit-tap-highlight-color:transparent;
-  }
-  .quick-chip:hover{background:#fff;}
-  .quick-chip:active{transform:translateY(1px);}
-  .quick-chip.search{
-    background:rgba(254,229,0,.58);
-    border-color:rgba(210,186,0,.45);
-    margin-left:auto;
-  }
-
   .toast{
-    position:absolute;left:50%;bottom:88px;transform:translate(-50%,10px);
-    background:rgba(28,36,44,.92);color:#fff;
-    font-size:13px;font-weight:600;
+    position:absolute;left:50%;bottom:96px;transform:translate(-50%,10px);
+    background:rgba(17,24,39,.92);color:#fff;
+    font-size:13px;font-weight:600;letter-spacing:-0.01em;
     padding:9px 15px;border-radius:999px;
     opacity:0;pointer-events:none;
     transition:opacity .2s ease, transform .2s ease;
@@ -447,6 +503,32 @@
     overflow:hidden;text-overflow:ellipsis;
   }
   .toast.show{opacity:1;transform:translate(-50%,0);}
+
+  /* ── AI 추가(+)·이름·커스텀 AI 폼 ─────── */
+  .sec-title.with-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .sec-title.with-btn > span{min-width:0;}
+  .sec-title.with-btn .mini{padding:5px 10px;border-radius:9px;white-space:nowrap;}
+
+  .emoji-chips{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 11px;}
+  .emoji-chip{
+    border:1px solid #E6E8EC;background:#fff;border-radius:10px;
+    width:34px;height:32px;font-size:16px;line-height:1;cursor:pointer;
+    display:grid;place-items:center;
+  }
+  .emoji-chip:hover{background:var(--soft2);}
+  .emoji-chip.on{border-color:var(--brand-line);background:var(--brand-soft);box-shadow:0 0 0 2px rgba(34,197,94,.16);}
+
+  .m-act{
+    flex:none;border:1px solid #E6E8EC;background:#fff;color:#4B5563;
+    font-size:11px;font-weight:700;letter-spacing:-0.01em;
+    padding:5px 8px;border-radius:9px;cursor:pointer;
+  }
+  .m-act:hover{background:var(--soft2);}
+  .m-act.del{color:var(--warn);border-color:#F5D2CC;background:#FFF8F6;}
+  .m-act.del:hover{background:var(--warn-soft);}
+  .member-row.custom .m-name small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+  #ai-modal,#rename-modal{z-index:66;}
 </style>
 </head>
 <body>
@@ -459,6 +541,7 @@
         <h1>ai비서</h1>
         <div class="sub" id="hd-sub">이호준 · 피클 · Gemini · Groq</div>
       </div>
+      <button class="icon-btn add" id="open-add-ai" type="button" aria-label="AI 추가" title="AI 추가">+</button>
       <button class="icon-btn" id="open-settings" aria-label="설정">⋯</button>
     </header>
 
@@ -474,8 +557,9 @@
     </div>
 
     <form class="composer" id="composer" autocomplete="off">
-      <textarea id="input" rows="1" placeholder="메시지 입력" aria-label="메시지 입력"></textarea>
-      <button class="send" id="send" type="submit">보내기</button>
+      <button class="add-btn" id="open-add-ai-2" type="button" aria-label="AI 추가" title="AI 추가">+</button>
+      <textarea id="input" rows="1" placeholder="메시지 보내기" aria-label="메시지 입력"></textarea>
+      <button class="send" id="send" type="submit" aria-label="보내기" title="보내기">↑</button>
     </form>
 
     <div class="toast" id="toast" role="status"></div>
@@ -503,24 +587,28 @@
     </div>
 
     <section class="sec" id="sec-members">
-      <div class="sec-title">👥 대화에 부를 AI</div>
-      <p class="hint">끈 AI는 이름을 부르지 않는 한 답하지 않고, 위쪽 이름 표시에서도 빠집니다. 최소 한 명은 켜 둘게요.</p>
+      <div class="sec-title with-btn"><span>👥 대화에 부를 AI</span><button type="button" class="mini" id="add-ai-inline">+ 새 AI 추가</button></div>
+      <p class="hint">끈 AI는 이름을 부르지 않는 한 답하지 않고, 위쪽 이름 표시에서도 빠집니다. 최소 한 명은 켜 둘게요. <b>이름</b>을 누르면 부르는 이름을 바꿀 수 있어요.</p>
 
       <div class="member-row" id="row-pickle">
         <div class="m-avatar" style="background:#DFF3C6">🥒</div>
-        <div class="m-name">피클<small>빠른 실행·생활 정리</small></div>
+        <div class="m-name"><span class="m-label" id="label-member-pickle">피클</span><small>빠른 실행·생활 정리</small></div>
+        <button type="button" class="m-act" id="rename-pickle" aria-label="피클 이름 바꾸기">이름</button>
         <label class="switch"><input type="checkbox" id="member-pickle" aria-label="피클 대화 참여"><span class="track"></span></label>
       </div>
       <div class="member-row" id="row-claude">
         <div class="m-avatar" style="background:#FFE1CB">🤖</div>
-        <div class="m-name">Gemini<small>차분한 정리·비교</small></div>
+        <div class="m-name"><span class="m-label" id="label-member-claude">Gemini</span><small>차분한 정리·비교</small></div>
+        <button type="button" class="m-act" id="rename-claude" aria-label="Gemini 이름 바꾸기">이름</button>
         <label class="switch"><input type="checkbox" id="member-claude" aria-label="Gemini 대화 참여"><span class="track"></span></label>
       </div>
       <div class="member-row" id="row-groq">
         <div class="m-avatar" style="background:#E3E6FF">⚡</div>
-        <div class="m-name">Groq<small>빠른 아이디어</small></div>
+        <div class="m-name"><span class="m-label" id="label-member-groq">Groq</span><small>빠른 아이디어</small></div>
+        <button type="button" class="m-act" id="rename-groq" aria-label="Groq 이름 바꾸기">이름</button>
         <label class="switch"><input type="checkbox" id="member-groq" aria-label="Groq 대화 참여"><span class="track"></span></label>
       </div>
+      <div id="custom-member-list"></div>
       <p class="test-result" id="member-result" hidden></p>
     </section>
 
@@ -534,9 +622,9 @@
 
       <div class="search-who" id="search-who">
         <div class="sec-sub">검색 결과를 붙일 답변</div>
-        <label class="chip-check"><input type="checkbox" id="search-pickle"> 🥒 피클</label>
-        <label class="chip-check"><input type="checkbox" id="search-claude"> 🤖 Gemini</label>
-        <label class="chip-check"><input type="checkbox" id="search-groq"> ⚡ Groq</label>
+        <label class="chip-check"><input type="checkbox" id="search-pickle"> <span id="search-label-pickle">🥒 피클</span></label>
+        <label class="chip-check"><input type="checkbox" id="search-claude"> <span id="search-label-claude">🤖 Gemini</span></label>
+        <label class="chip-check"><input type="checkbox" id="search-groq"> <span id="search-label-groq">⚡ Groq</span></label>
       </div>
       <p class="hint" id="search-hint"></p>
     </section>
@@ -598,9 +686,9 @@
 
     <section class="sec">
       <div class="sec-title">연결 상태</div>
-      <div class="status-row"><span class="dot" id="dot-groq"></span><span>Groq</span><span class="status" id="status-groq">데모 모드</span></div>
-      <div class="status-row"><span class="dot" id="dot-claude"></span><span>Gemini</span><span class="status" id="status-claude">데모 모드</span></div>
-      <div class="status-row"><span class="dot" id="dot-pickle"></span><span>피클</span><span class="status" id="status-pickle">데모 모드</span></div>
+      <div class="status-row"><span class="dot" id="dot-groq"></span><span id="label-groq">Groq</span><span class="status" id="status-groq">데모 모드</span></div>
+      <div class="status-row"><span class="dot" id="dot-claude"></span><span id="label-claude">Gemini</span><span class="status" id="status-claude">데모 모드</span></div>
+      <div class="status-row"><span class="dot" id="dot-pickle"></span><span id="label-pickle">피클</span><span class="status" id="status-pickle">데모 모드</span></div>
       <p class="hint">키 하나면 셋 다 실제로 답해요. 순서는 <b>Groq 키 → Gemini 키 → 데모 모드</b>이고, AI별 전용 키(Anthropic·OpenAI)를 넣으면 그 키를 먼저 씁니다.</p>
     </section>
 
@@ -689,6 +777,134 @@
   </div>
 </div>
 
+<div class="backdrop" id="ai-modal" role="dialog" aria-modal="true" aria-labelledby="ai-modal-title">
+  <div class="sheet">
+    <div class="sheet-hd">
+      <h2 id="ai-modal-title">새 AI 추가</h2>
+      <button type="button" class="icon-btn" id="ai-close" aria-label="닫기">✕</button>
+    </div>
+    <p class="hint" id="ai-lead">이름·성격·엔진만 고르면 돼요. 키가 없으면 데모 응답으로 답하고, 키를 넣으면 바로 실제 AI가 돼요.</p>
+
+    <label class="field">
+      <span>AI 이름 <em>필수 · 최대 16자</em></span>
+      <input id="ai-name" type="text" placeholder="예: ChatGPT, 마케터, 선생님" maxlength="16" autocomplete="off" spellcheck="false">
+    </label>
+
+    <div class="field">
+      <span>아이콘 이모지</span>
+      <div class="input-row">
+        <input id="ai-avatar" type="text" placeholder="🧠" maxlength="4" autocomplete="off" value="🧠">
+        <button type="button" class="mini" id="ai-avatar-reset">기본 🧠</button>
+      </div>
+      <div class="emoji-chips" id="ai-avatar-chips" role="group" aria-label="추천 이모지"></div>
+    </div>
+
+    <label class="field">
+      <span>성격·역할 프롬프트 <em>비우면 기본 실무형</em></span>
+      <textarea id="ai-prompt" rows="3" maxlength="600" placeholder="예: 사업 아이디어와 수익성을 날카롭게 분석해 주는 비서"></textarea>
+    </label>
+
+    <label class="field">
+      <span>사용할 엔진</span>
+      <select id="ai-engine">
+        <option value="gemini">Gemini 무료 키 (실시간 검색 가능)</option>
+        <option value="groq">Groq 무료 키 (빠른 답변)</option>
+        <option value="openai">OpenAI (ChatGPT) 키</option>
+        <option value="anthropic">Anthropic (Claude) 키</option>
+        <option value="custom">OpenAI 호환 커스텀 API</option>
+      </select>
+    </label>
+
+    <div id="ai-group-gemini">
+      <div class="member-row">
+        <div class="m-avatar" style="background:#EAF9EE">🔍</div>
+        <div class="m-name">실시간 웹 검색 붙이기<small>Gemini 엔진일 때만 적용돼요</small></div>
+        <label class="switch"><input type="checkbox" id="ai-websearch" aria-label="이 AI에 실시간 웹 검색 붙이기"><span class="track"></span></label>
+      </div>
+    </div>
+
+    <div id="ai-group-openai" hidden>
+      <label class="field">
+        <span>OpenAI 키 <em>비우면 위 설정의 키</em></span>
+        <div class="input-row">
+          <input id="ai-openai-key" type="password" placeholder="sk-..." autocomplete="off" spellcheck="false">
+          <button type="button" class="mini" data-toggle="ai-openai-key">보기</button>
+        </div>
+      </label>
+      <label class="field">
+        <span>모델</span>
+        <input id="ai-openai-model" type="text" placeholder="gpt-4o-mini" autocomplete="off" spellcheck="false">
+      </label>
+    </div>
+
+    <div id="ai-group-anthropic" hidden>
+      <label class="field">
+        <span>Anthropic 키 <em>비우면 위 설정의 키</em></span>
+        <div class="input-row">
+          <input id="ai-anthropic-key" type="password" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
+          <button type="button" class="mini" data-toggle="ai-anthropic-key">보기</button>
+        </div>
+      </label>
+      <label class="field">
+        <span>모델</span>
+        <input id="ai-anthropic-model" type="text" placeholder="claude-sonnet-4-5" autocomplete="off" spellcheck="false">
+      </label>
+    </div>
+
+    <div id="ai-group-custom" hidden>
+      <label class="field">
+        <span>엔드포인트 URL <em>필수</em></span>
+        <input id="ai-custom-base" type="text" placeholder="https://api.example.com/v1" autocomplete="off" spellcheck="false">
+      </label>
+      <label class="field">
+        <span>API 키 <em>없으면 비워 두세요</em></span>
+        <div class="input-row">
+          <input id="ai-custom-key" type="password" placeholder="sk-..." autocomplete="off" spellcheck="false">
+          <button type="button" class="mini" data-toggle="ai-custom-key">보기</button>
+        </div>
+      </label>
+      <label class="field">
+        <span>모델 이름 <em>필수</em></span>
+        <input id="ai-custom-model" type="text" placeholder="gpt-4o-mini" autocomplete="off" spellcheck="false">
+      </label>
+      <p class="hint">…/v1 처럼 넣으면 뒤에 <b>/chat/completions</b> 를 붙여 불러요.</p>
+    </div>
+
+    <p class="hint" id="ai-engine-hint"></p>
+    <p class="test-result err" id="ai-err" hidden></p>
+
+    <div class="btn-row">
+      <button type="button" class="btn primary" id="ai-save">추가하기</button>
+      <button type="button" class="btn" id="ai-cancel">취소</button>
+    </div>
+    <div class="btn-row" id="ai-del-row" hidden>
+      <button type="button" class="btn danger" id="ai-delete">이 AI 삭제</button>
+    </div>
+  </div>
+</div>
+
+<div class="backdrop" id="rename-modal" role="dialog" aria-modal="true" aria-labelledby="rename-title">
+  <div class="sheet">
+    <div class="sheet-hd">
+      <h2 id="rename-title">AI 이름 바꾸기</h2>
+      <button type="button" class="icon-btn" id="rename-close" aria-label="닫기">✕</button>
+    </div>
+    <p class="hint" id="rename-lead">부르는 이름을 바꿔요. @이름으로 부르면 이 AI만 답해요.</p>
+    <label class="field">
+      <span>새 이름 <em>최대 16자</em></span>
+      <input id="rename-input" type="text" maxlength="16" autocomplete="off" spellcheck="false" placeholder="예: 호준비서">
+    </label>
+    <p class="test-result err" id="rename-err" hidden></p>
+    <div class="btn-row">
+      <button type="button" class="btn primary" id="rename-save">저장</button>
+      <button type="button" class="btn" id="rename-reset">기본 이름으로</button>
+    </div>
+    <div class="btn-row">
+      <button type="button" class="btn ghost" id="rename-cancel">취소</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function () {
   'use strict';
@@ -750,6 +966,41 @@
   var GROQ_FALLBACKS = ['openai/gpt-oss-20b', 'qwen/qwen3.8-27b'];
   var GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
+  var BASE_KEYS = ['pickle', 'claude', 'groq'];
+  var CUSTOM_PREFIX = 'c_';
+  var MAX_CUSTOM = 12;
+  var NAME_MAX = 16;
+  var DEFAULT_AVATAR = '🧠';
+
+  var DEFAULT_NAMES = { pickle: '피클', claude: 'Gemini', groq: 'Groq' };
+  var BASE_ALIASES = {
+    pickle: ['피클'],
+    claude: ['Gemini', '제미나이', '클로드'],
+    groq: ['Groq', '그록']
+  };
+
+  // 추천 이모지와 커스텀 AI 아바타 색
+  var AVATAR_CHOICES = ['🧠', '✨', '📊', '🎨', '💡', '🧑‍🏫', '💼', '🍳', '⚖️', '🩺', '🎧', '✈️'];
+  var CUSTOM_TINTS = ['#EAF9EE', '#FDF0E8', '#ECEDFD', '#E9F4FB', '#F9EDF6', '#FFF6DF', '#EDF3E6', '#F4ECE8'];
+
+  // 커스텀 AI가 쓸 수 있는 엔진
+  var ENGINES = {
+    gemini: { label: 'Gemini · 무료 키', short: 'Gemini' },
+    groq: { label: 'Groq · 무료 키', short: 'Groq' },
+    openai: { label: 'OpenAI (ChatGPT)', short: 'OpenAI' },
+    anthropic: { label: 'Anthropic (Claude)', short: 'Anthropic' },
+    custom: { label: 'OpenAI 호환 API', short: '커스텀 API' }
+  };
+  var ENGINE_KEYS = ['gemini', 'groq', 'openai', 'anthropic', 'custom'];
+
+  var AI_ENGINE_HINT = {
+    gemini: '설정에 저장한 Gemini 키로 답해요. 키가 없으면 데모 응답으로 답하고, 키를 넣으면 실시간 구글 검색까지 붙일 수 있어요.',
+    groq: '설정에 저장한 Groq 키로 답해요. 카드 없이 무료로 쓸 수 있고 답이 빠릅니다. 키가 없으면 데모 응답이에요.',
+    openai: 'OpenAI 키를 넣으면 ChatGPT가 답해요. 비워 두면 위 설정의 OpenAI 키를 써요.',
+    anthropic: 'Anthropic 키를 넣으면 Claude가 답해요. 비워 두면 위 설정의 Anthropic 키를 써요.',
+    custom: 'OpenAI 호환 API(예: 로컬 LLM·프록시)를 직접 불러요. 엔드포인트 주소와 모델 이름이 필요해요.'
+  };
+
   var state = {
     messages: [],
     settings: {
@@ -763,24 +1014,241 @@
       pickleModel: 'gpt-4o-mini',
       members: { pickle: true, claude: true, groq: true },      // 대화에 부를 AI
       webSearch: true,                                          // Gemini 실시간 구글 검색
-      searchFor: { pickle: true, claude: true, groq: true }     // 검색 결과를 붙일 답변
+      searchFor: { pickle: true, claude: true, groq: true },    // 검색 결과를 붙일 답변
+      names: { pickle: '', claude: '', groq: '' },              // 비우면 기본 이름
+      customAis: []                                             // 사용자가 직접 추가한 AI
     }
   };
 
-  var MEMBER_KEYS = ['pickle', 'claude', 'groq'];
+  var MEMBER_KEYS = BASE_KEYS.slice();
+  var MENTION = {};
+
+  /* ── 커스텀 AI·이름 도우미 ────────────── */
+  function escapeRe(s) {
+    return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function normName(v) {
+    return String(v === null || v === undefined ? '' : v)
+      .replace(/\s+/g, ' ')
+      .replace(/^[@#]+/, '')
+      .trim();
+  }
+
+  function isCustomKey(who) {
+    return typeof who === 'string' && who.indexOf(CUSTOM_PREFIX) === 0;
+  }
+
+  function customList() {
+    return Array.isArray(state.settings.customAis) ? state.settings.customAis : [];
+  }
+
+  function customById(id) {
+    var list = customList();
+    for (var i = 0; i < list.length; i++) if (list[i] && list[i].id === id) return list[i];
+    return null;
+  }
+
+  function customOnCount() {
+    var n = 0;
+    customList().forEach(function (c) { if (c && c.enabled !== false) n++; });
+    return n;
+  }
+
+  // 지금 부르는 이름 (기본 AI는 바꾼 이름이 있으면 그것)
+  function aiName(who) {
+    if (isCustomKey(who)) {
+      var c = customById(who);
+      return c ? c.name : '지운 AI';
+    }
+    var saved = state.settings.names ? state.settings.names[who] : '';
+    return (typeof saved === 'string' && saved.trim()) ? saved.trim() : (DEFAULT_NAMES[who] || who);
+  }
+
+  // 지운 AI의 지난 메시지도 이름표와 함께 남겨 둡니다.
+  function metaFor(who) {
+    return AI[who] || { name: aiName(who) || 'AI', avatar: DEFAULT_AVATAR, tint: '#F2F3F5' };
+  }
+
+  function firstGlyph(raw) {
+    var a = String(raw === null || raw === undefined ? '' : raw).replace(/\s+/g, '');
+    if (!a) return '';
+    var cp = a.codePointAt ? a.codePointAt(0) : a.charCodeAt(0);
+    var len = cp > 0xFFFF ? 2 : 1;
+    // 👨‍🏫 처럼 붙은 이모지는 붙은 글자까지 함께 남깁니다.
+    while (a.length > len && a.charCodeAt(len) === 0x200D) len += 2;
+    return a.slice(0, len);
+  }
+
+  function cleanAvatar(raw) {
+    var g = firstGlyph(raw);
+    return g || DEFAULT_AVATAR;
+  }
+
+  function nameTaken(name, selfKey) {
+    var n = String(name).toLowerCase();
+    var i, j, k;
+    for (i = 0; i < MEMBER_KEYS.length; i++) {
+      k = MEMBER_KEYS[i];
+      if (k === selfKey) continue;
+      if (aiName(k).toLowerCase() === n) return true;
+    }
+    for (i = 0; i < BASE_KEYS.length; i++) {
+      k = BASE_KEYS[i];
+      if (k === selfKey) continue;
+      var al = BASE_ALIASES[k] || [];
+      for (j = 0; j < al.length; j++) if (al[j].toLowerCase() === n) return true;
+    }
+    return false;
+  }
+
+  function nameProblem(name, selfKey) {
+    var n = normName(name);
+    if (!n) return 'AI 이름을 먼저 넣어 주세요.';
+    if (n.length > NAME_MAX) return '이름은 ' + NAME_MAX + '자까지 쓸 수 있어요.';
+    if (/[<>{}[\]"'`]/.test(n)) return '이름에 < > { } [ ] 따옴표는 쓸 수 없어요.';
+    if (nameTaken(n, selfKey)) return '"' + n + '"은(는) 이미 다른 AI가 쓰고 있어요. 다른 이름으로 해 주세요.';
+    return '';
+  }
+
+  // 저장값이 깨져 있어도 쓸 수 있게 필요한 항목만 골라 담습니다.
+  function sanitizeCustomAi(raw, idx) {
+    if (!raw || typeof raw !== 'object') return null;
+    var name = normName(raw.name);
+    if (!name) return null;
+    if (name.length > NAME_MAX) name = name.slice(0, NAME_MAX);
+    var engine = ENGINE_KEYS.indexOf(raw.engine) >= 0 ? raw.engine : 'gemini';
+    var id = (typeof raw.id === 'string' && /^c_[A-Za-z0-9_-]{4,40}$/.test(raw.id)) ? raw.id : CUSTOM_PREFIX + uid();
+    return {
+      id: id,
+      name: name,
+      avatar: cleanAvatar(raw.avatar),
+      tint: (typeof raw.tint === 'string' && /^#[0-9A-Fa-f]{6}$/.test(raw.tint)) ? raw.tint : CUSTOM_TINTS[idx % CUSTOM_TINTS.length],
+      prompt: typeof raw.prompt === 'string' ? raw.prompt.slice(0, 600) : '',
+      engine: engine,
+      model: typeof raw.model === 'string' ? raw.model.slice(0, 80) : '',
+      apiKey: typeof raw.apiKey === 'string' ? raw.apiKey.slice(0, 300) : '',
+      baseUrl: typeof raw.baseUrl === 'string' ? raw.baseUrl.slice(0, 300) : '',
+      webSearch: raw.webSearch !== false,
+      enabled: raw.enabled !== false
+    };
+  }
+
+  function sanitizeCustomList(list) {
+    if (!Array.isArray(list)) return [];
+    var reserved = {};
+    BASE_KEYS.forEach(function (w) {
+      reserved[DEFAULT_NAMES[w].toLowerCase()] = 1;
+      (BASE_ALIASES[w] || []).forEach(function (a) { reserved[a.toLowerCase()] = 1; });
+    });
+    var out = [], seen = {};
+    for (var i = 0; i < list.length && out.length < MAX_CUSTOM; i++) {
+      var c = sanitizeCustomAi(list[i], out.length);
+      if (!c) continue;
+      var key = c.name.toLowerCase();
+      if (seen[c.id] || seen[key] || reserved[key]) continue;   // 같은 id·이름은 하나만
+      seen[c.id] = 1;
+      seen[key] = 1;
+      out.push(c);
+    }
+    return out;
+  }
+
+  /* ── AI 목록·페르소나 다시 만들기 ────── */
+  function refreshRegistry() {
+    Object.keys(AI).forEach(function (k) { if (isCustomKey(k)) delete AI[k]; });
+    Object.keys(PERSONA).forEach(function (k) { if (isCustomKey(k)) delete PERSONA[k]; });
+
+    BASE_KEYS.forEach(function (w) { AI[w].name = aiName(w); });
+
+    MEMBER_KEYS = BASE_KEYS.slice();
+    customList().forEach(function (c, idx) {
+      if (!c || !c.id) return;
+      AI[c.id] = {
+        name: c.name,
+        avatar: c.avatar || DEFAULT_AVATAR,
+        tint: c.tint || CUSTOM_TINTS[idx % CUSTOM_TINTS.length]
+      };
+      PERSONA[c.id] = buildCustomPersona(c);
+      MEMBER_KEYS.push(c.id);
+    });
+    buildMentions();
+  }
+
+  // 기본 AI의 기본 이름이 바뀌었으면 페르소나 안의 이름도 바꿔 넣습니다.
+  var NAME_SWAP = [
+    ['피클', 'pickle'],
+    ['Gemini', 'claude'], ['제미나이', 'claude'], ['클로드', 'claude'],
+    ['Groq', 'groq'], ['그록', 'groq']
+  ];
+
+  function applyNames(text) {
+    var out = String(text || '');
+    NAME_SWAP.forEach(function (pair) {
+      var cur = aiName(pair[1]);
+      if (cur && cur !== pair[0]) out = out.split(pair[0]).join(cur);
+    });
+    return out;
+  }
+
+  function buildCustomPersona(c) {
+    var others = MEMBER_KEYS.filter(function (k) { return k !== c.id && memberOn(k); })
+      .map(function (k) { return '"' + aiName(k) + '"'; });
+    var head = '너는 단체 채팅방 "ai비서"에 있는 AI "' + c.name + '"야. 방에는 사용자(이호준)' +
+      (others.length ? '와 ' + others.join(', ') + ' 동료들이' : '') + ' 함께 있어.';
+    var role = String(c.prompt || '').trim() || '정확하고 실용적인 실무형 비서. 군더더기 없이 바로 쓸 수 있는 답을 줘.';
+    return [
+      head,
+      '- 역할·성격: ' + role,
+      '- 짧은 존댓말 3~5줄, 이모지는 1~2개만. 인사나 빈말로 시작하지 말고 첫 줄에 결론부터 써.',
+      '- 질문에는 ① 핵심 답 ② 이유·비교 포인트 ③ 바로 할 다음 행동 순서로 짧게 정리해.',
+      '- 확인하지 않은 가격·재고·순위·영업시간은 단정하지 말고 확인할 방법이나 링크를 함께 줘.',
+      '- 강조는 **굵게**, 링크는 [제목](https://...) 형식으로 써도 돼.',
+      '- 마크다운 제목(#)은 쓰지 말고, 다른 AI가 이미 말한 내용은 반복하지 말고 보태.',
+      '- 모르는 것은 아는 척하지 말고, 비밀번호·인증코드는 채팅에 올려 달라고 절대 요청하지 마.'
+    ].join('\n');
+  }
+
+  function personaFor(who) {
+    if (isCustomKey(who)) {
+      var c = customById(who);
+      return PERSONA[who] || buildCustomPersona(c || { name: 'AI' });
+    }
+    return applyNames(PERSONA[who] || '');
+  }
+
+  // 부르는 이름(@이름, 이름야)을 지금 이름으로 맞춰 둡니다.
+  function buildMentions() {
+    MENTION = {
+      pickle: /@\s*피클|피클\s*[야아]/,
+      claude: /@\s*(gemini|제미나이|클로드)|제미나이|(gemini|클로드)\s*[야아]/i,
+      groq: /@\s*(groq|그록)|(groq|그록)\s*[야아]/i
+    };
+    BASE_KEYS.forEach(function (w) {
+      var name = aiName(w);
+      if ((BASE_ALIASES[w] || []).indexOf(name) >= 0) return;   // 기본 이름·별칭은 이미 들어 있어요
+      MENTION[w] = new RegExp(MENTION[w].source +
+        '|@\\s*' + escapeRe(name) + '(?![\\w가-힣])|' + escapeRe(name) + '\\s*[야아]', 'i');
+    });
+    customList().forEach(function (c) {
+      if (!c || !c.id) return;
+      var n = escapeRe(c.name);
+      MENTION[c.id] = new RegExp('@\\s*' + n + '(?![\\w가-힣])|' + n + '\\s*[야아]', 'i');
+    });
+  }
 
   // 저장값이 깨져 있어도 쓸 수 있게 불리언만 골라 담습니다.
   // atLeastOne이면 모두 꺼진 상태는 허용하지 않습니다(대화 상대가 사라지니까요).
   function readFlags(src, base, atLeastOne) {
     var out = {};
-    MEMBER_KEYS.forEach(function (w) { out[w] = !base || base[w] !== false; });
+    BASE_KEYS.forEach(function (w) { out[w] = !base || base[w] !== false; });
     if (src && typeof src === 'object') {
-      MEMBER_KEYS.forEach(function (w) {
+      BASE_KEYS.forEach(function (w) {
         if (typeof src[w] === 'boolean') out[w] = src[w];
       });
     }
-    if (atLeastOne && !out.pickle && !out.claude && !out.groq) {
-      MEMBER_KEYS.forEach(function (w) { out[w] = true; });
+    if (atLeastOne && !out.pickle && !out.claude && !out.groq && !customOnCount()) {
+      BASE_KEYS.forEach(function (w) { out[w] = true; });
     }
     return out;
   }
@@ -860,7 +1328,61 @@
     lockCurrent: document.getElementById('lock-current'),
     lockSave: document.getElementById('lock-save'),
     lockRemove: document.getElementById('lock-remove'),
-    lockResult: document.getElementById('lock-result')
+    lockResult: document.getElementById('lock-result'),
+
+    openAddAi: document.getElementById('open-add-ai'),
+    openAddAi2: document.getElementById('open-add-ai-2'),
+    addAiInline: document.getElementById('add-ai-inline'),
+    aiModal: document.getElementById('ai-modal'),
+    aiTitle: document.getElementById('ai-modal-title'),
+    aiClose: document.getElementById('ai-close'),
+    aiLead: document.getElementById('ai-lead'),
+    aiName: document.getElementById('ai-name'),
+    aiAvatar: document.getElementById('ai-avatar'),
+    aiAvatarReset: document.getElementById('ai-avatar-reset'),
+    aiAvatarChips: document.getElementById('ai-avatar-chips'),
+    aiPrompt: document.getElementById('ai-prompt'),
+    aiEngine: document.getElementById('ai-engine'),
+    aiGroupGemini: document.getElementById('ai-group-gemini'),
+    aiGroupOpenai: document.getElementById('ai-group-openai'),
+    aiGroupAnthropic: document.getElementById('ai-group-anthropic'),
+    aiGroupCustom: document.getElementById('ai-group-custom'),
+    aiWebsearch: document.getElementById('ai-websearch'),
+    aiOpenaiKey: document.getElementById('ai-openai-key'),
+    aiOpenaiModel: document.getElementById('ai-openai-model'),
+    aiAnthropicKey: document.getElementById('ai-anthropic-key'),
+    aiAnthropicModel: document.getElementById('ai-anthropic-model'),
+    aiCustomBase: document.getElementById('ai-custom-base'),
+    aiCustomKey: document.getElementById('ai-custom-key'),
+    aiCustomModel: document.getElementById('ai-custom-model'),
+    aiEngineHint: document.getElementById('ai-engine-hint'),
+    aiErr: document.getElementById('ai-err'),
+    aiSave: document.getElementById('ai-save'),
+    aiCancel: document.getElementById('ai-cancel'),
+    aiDelete: document.getElementById('ai-delete'),
+    aiDelRow: document.getElementById('ai-del-row'),
+    customMemberList: document.getElementById('custom-member-list'),
+    labelMemberPickle: document.getElementById('label-member-pickle'),
+    labelMemberClaude: document.getElementById('label-member-claude'),
+    labelMemberGroq: document.getElementById('label-member-groq'),
+    labelPickle: document.getElementById('label-pickle'),
+    labelClaude: document.getElementById('label-claude'),
+    labelGroq: document.getElementById('label-groq'),
+    searchLabelPickle: document.getElementById('search-label-pickle'),
+    searchLabelClaude: document.getElementById('search-label-claude'),
+    searchLabelGroq: document.getElementById('search-label-groq'),
+    renamePickle: document.getElementById('rename-pickle'),
+    renameClaude: document.getElementById('rename-claude'),
+    renameGroq: document.getElementById('rename-groq'),
+    renameModal: document.getElementById('rename-modal'),
+    renameTitle: document.getElementById('rename-title'),
+    renameLead: document.getElementById('rename-lead'),
+    renameInput: document.getElementById('rename-input'),
+    renameErr: document.getElementById('rename-err'),
+    renameSave: document.getElementById('rename-save'),
+    renameReset: document.getElementById('rename-reset'),
+    renameCancel: document.getElementById('rename-cancel'),
+    renameClose: document.getElementById('rename-close')
   };
 
   /* ── 유틸 ─────────────────────────────── */
@@ -1230,6 +1752,31 @@
       });
     }
     if (data && data.settings && typeof data.settings === 'object') {
+      if (data.settings.names && typeof data.settings.names === 'object') {
+        BASE_KEYS.forEach(function (w) {
+          var n = normName(data.settings.names[w]);
+          state.settings.names[w] = n ? n.slice(0, NAME_MAX) : '';
+        });
+      }
+      state.settings.customAis = sanitizeCustomList(data.settings.customAis);
+
+      // 저장된 이름끼리 겹치면 그 AI만 기본 이름으로 되돌립니다.
+      (function dedupeNames() {
+        var used = {};
+        customList().forEach(function (c) { used[c.name.toLowerCase()] = 1; });
+        BASE_KEYS.forEach(function (w) {
+          if (!state.settings.names[w]) return;
+          var n = aiName(w);
+          var k = n.toLowerCase();
+          if (n === DEFAULT_NAMES[w] || used[k] || nameTaken(n, w)) {
+            state.settings.names[w] = '';
+            return;
+          }
+          used[k] = 1;
+        });
+      })();
+      refreshRegistry();
+
       if (typeof data.settings.groqKey === 'string') state.settings.groqKey = data.settings.groqKey;
       if (typeof data.settings.groqModel === 'string' && data.settings.groqModel) state.settings.groqModel = data.settings.groqModel;
       if (typeof data.settings.geminiKey === 'string') state.settings.geminiKey = data.settings.geminiKey;
@@ -1542,7 +2089,7 @@
   /* ── 응답 흐름 ─────────────────────────── */
   function pickTargets(text) {
     // 이름을 부르면 그 AI만(꺼져 있으면 아무도) 답하고, 부르지 않으면 켜 둔 AI 전부가 답합니다.
-    var mentioned = MEMBER_KEYS.filter(function (w) { return MENTION[w].test(text); });
+    var mentioned = MEMBER_KEYS.filter(function (w) { return MENTION[w] && MENTION[w].test(text); });
     if (mentioned.length) return mentioned.filter(memberOn);
     return memberList();
   }
@@ -1550,13 +2097,14 @@
   // 꺼 둔 AI를 콕 집어 불렀는지 — 그럴 때만 안내합니다.
   function offMentions(text) {
     return MEMBER_KEYS.filter(function (w) {
-      return !memberOn(w) && MENTION[w].test(text);
+      return !memberOn(w) && MENTION[w] && MENTION[w].test(text);
     });
   }
 
   function delayFor(who) {
     if (who === 'pickle') return 550 + Math.random() * 450;
     if (who === 'groq') return 380 + Math.random() * 320;
+    if (isCustomKey(who)) return 600 + Math.random() * 450;
     return 850 + Math.random() * 550;
   }
 
@@ -1621,8 +2169,9 @@
   // 모든 응답은 { text, links } 형태로 돌려줍니다.
   async function replyFor(who, userText, spoken) {
     var provider = providerFor(who);
-    if (provider === 'anthropic') return { text: await callClaude(), links: [] };
-    if (provider === 'openai') return { text: await callOpenAI(), links: [] };
+    if (provider === 'anthropic') return { text: await callClaude(who), links: [] };
+    if (provider === 'openai') return { text: await callOpenAI(who), links: [] };
+    if (provider === 'custom') return { text: await callCustomApi(who), links: [] };
     if (provider === 'groq') return { text: await callGroq(who), links: [] };
     if (provider === 'gemini') return await callGemini(who);
     await sleep(220);
@@ -1666,9 +2215,10 @@
   }
 
   /* ── 실제 API ─────────────────────────── */
-  async function callClaude() {
-    var key = state.settings.anthropicKey.trim();
-    var model = state.settings.claudeModel.trim() || 'claude-sonnet-4-5';
+  async function callClaude(who) {
+    var c = isCustomKey(who) ? customById(who) : null;
+    var key = (c && c.apiKey.trim() ? c.apiKey.trim() : state.settings.anthropicKey.trim());
+    var model = cleanModelName((c && c.model) || state.settings.claudeModel, 'claude-sonnet-4-5');
 
     var res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -1681,8 +2231,8 @@
       body: JSON.stringify({
         model: model,
         max_tokens: 800,
-        system: PERSONA.claude,
-        messages: historyFor('claude')
+        system: personaFor(who),
+        messages: historyFor(who)
       })
     });
 
@@ -1702,11 +2252,12 @@
     return out;
   }
 
-  async function callOpenAI() {
-    var key = state.settings.openaiKey.trim();
-    var model = state.settings.pickleModel.trim() || 'gpt-4o-mini';
+  async function callOpenAI(who) {
+    var c = isCustomKey(who) ? customById(who) : null;
+    var key = (c && c.apiKey.trim() ? c.apiKey.trim() : state.settings.openaiKey.trim());
+    var model = cleanModelName((c && c.model) || state.settings.pickleModel, 'gpt-4o-mini');
 
-    var msgs = [{ role: 'system', content: PERSONA.pickle }].concat(historyFor('pickle'));
+    var msgs = [{ role: 'system', content: personaFor(who) }].concat(historyFor(who));
 
     var res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -1803,7 +2354,7 @@
 
   function geminiPayload(who, toolStyle) {
     var body = {
-      systemInstruction: { parts: [{ text: PERSONA[who] }] },
+      systemInstruction: { parts: [{ text: personaFor(who) }] },
       contents: geminiContents(who),
       generationConfig: geminiGenConfig({
         temperature: who === 'claude' ? 0.5 : 0.8,
@@ -1903,8 +2454,9 @@
   }
 
   async function callGemini(who) {
+    var c = isCustomKey(who) ? customById(who) : null;
     var key = state.settings.geminiKey.trim();
-    var model = geminiModel();
+    var model = cleanModelName((c && c.model) || state.settings.geminiModel, GEMINI_DEFAULT_MODEL);
 
     var got = await geminiAttempt(key, who, model, wantsSearch(who));
 
@@ -1920,7 +2472,7 @@
     }
 
     if (got.model !== model) {
-      state.settings.geminiModel = got.model;
+      if (!c) state.settings.geminiModel = got.model;
       save();
       syncStatus();
       addMessage('system', 'Gemini 모델 ' + model + '은(는) 지금 새 키로 쓸 수 없어서 ' + got.model + '로 답했어요. 설정에 이 모델로 저장했어요.');
@@ -1958,7 +2510,7 @@
   function groqPayload(who, model) {
     var body = {
       model: model,
-      messages: [{ role: 'system', content: PERSONA[who] || PERSONA.groq }].concat(historyFor(who)),
+      messages: [{ role: 'system', content: personaFor(who) }].concat(historyFor(who)),
       temperature: who === 'claude' ? 0.5 : 0.75,
       max_completion_tokens: 800
     };
@@ -2007,8 +2559,9 @@
   }
 
   async function callGroq(who) {
+    var c = isCustomKey(who) ? customById(who) : null;
     var key = state.settings.groqKey.trim();
-    var model = groqModel();
+    var model = cleanModelName((c && c.model) || state.settings.groqModel, GROQ_DEFAULT_MODEL);
 
     var got = await groqAttempt(key, who, model);
     if (!got.res.ok) throw new Error('Groq ' + httpErrText(got.res.status, got.data));
@@ -2017,7 +2570,7 @@
     if (!out.trim()) throw new Error('Groq 빈 응답');
 
     if (got.model !== model) {
-      state.settings.groqModel = got.model;
+      if (!c) state.settings.groqModel = got.model;
       save();
       syncStatus();
       addMessage('system', 'Groq 모델 ' + model + '은(는) 지금 쓸 수 없어서 ' + got.model + '로 답했어요. 설정에 이 모델로 저장했어요.');
@@ -2051,6 +2604,51 @@
       throw err;
     }
     return { data: got.data, model: got.model };
+  }
+
+  /* ── OpenAI 호환 커스텀 API ────────────── */
+  // …/v1 처럼 넣으면 /chat/completions 를 붙이고, 이미 전체 주소면 그대로 부릅니다.
+  function customEndpoint(raw) {
+    var u = String(raw || '').trim().replace(/\s+/g, '');
+    if (!u) return '';
+    var safe = safeUrl(u);
+    if (!safe) return '';
+    if (/\/chat\/completions$/i.test(safe)) return safe;
+    return safe.replace(/\/+$/, '') + '/chat/completions';
+  }
+
+  async function callCustomApi(who) {
+    var c = customById(who);
+    if (!c) throw new Error('AI 정보를 찾을 수 없어요');
+
+    var url = customEndpoint(c.baseUrl);
+    if (!url) throw new Error('엔드포인트 주소가 올바르지 않아요');
+
+    var model = String(c.model || '').trim();
+    if (!model) throw new Error('모델 이름이 필요해요');
+
+    var headers = { 'content-type': 'application/json' };
+    if (c.apiKey.trim()) headers['authorization'] = 'Bearer ' + c.apiKey.trim();
+
+    var res = await fetch(url, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({
+        model: model,
+        temperature: 0.7,
+        max_tokens: 800,
+        messages: [{ role: 'system', content: personaFor(who) }].concat(historyFor(who))
+      })
+    });
+
+    var data = null;
+    try { data = await res.json(); } catch (e) { data = null; }
+    if (!res.ok) throw new Error('API ' + httpErrText(res.status, data));
+
+    var ch = data && Array.isArray(data.choices) ? data.choices[0] : null;
+    var out = ch && ch.message ? String(ch.message.content || '') : '';
+    if (!out.trim()) throw new Error('빈 응답');
+    return out;
   }
 
   /* ── 데모 응답 ─────────────────────────── */
@@ -2182,16 +2780,77 @@
         '좋아요, {topic}는 이렇게 가보죠. 막히면 다른 각을 바로 드릴게요.',
         '{topic} — 작게 먼저 해보면 답이 빨리 나와요 ⚡'
       ]
+    },
+    // 직접 추가한 AI가 키 없이(데모 모드로) 답할 때 쓰는 기본 문장
+    custom: {
+      greet: [
+        '네, 준비됐어요 🙂 무엇부터 도와드릴까요?',
+        '불러 주셔서 고마워요. 바로 시작해 볼까요?'
+      ],
+      thanks: [
+        '쳔만에요. 더 필요한 게 있으면 바로 불러 주세요.',
+        '도움이 되었다니 다행이에요. 다음 항목도 바로 맡을게요.'
+      ],
+      schedule: [
+        '{topic} — 시간과 장소를 기준으로 일정을 정리해 드릴게요.',
+        '{topic} 건은 확정된 것부터 시간 순서대로 짚어 드릴게요.'
+      ],
+      money: [
+        '{topic} — 금액과 결제 예정일부터 확인해 드릴게요.',
+        '{topic} 건은 조건을 나눠서 비교하는 게 안전해요. 바로 정리해 드릴게요.'
+      ],
+      mail: [
+        '{topic} 관련 메일은 답징이 필요한 것만 골라 드릴게요.',
+        '{topic} — 보낸 사람과 요청 사항 기준으로 분류해 드릴게요.'
+      ],
+      work: [
+        '{topic} — 바로 초안을 만들고 확인할 부분을 따로 표시할게요.',
+        '{topic} 쪽은 두 단계로 나눠 진행하면 수월해요. 먼저 정리해 드릴게요.'
+      ],
+      food: [
+        '{topic} — 거리와 영업시간을 같이 보고 후보를 골라 드릴게요.',
+        '{topic} 쪽으로 후보를 세 곳만 추려 볼게요.'
+      ],
+      recommend: [
+        '{topic} — 데모 응답이라 실시간 확인은 못 했지만, 고르는 기준은 이렇게 잡으면 좋아요.\n1) 지금 바로 되는 조건(거리·영업시간)\n2) 같은 조건에서 가격이 낮은 쪽\n3) 최근 후기가 많은 기본\n아래 링크에서 실제 값과 영업시간을 보고 하나 골라 주세요.',
+        '{topic} — 세 갈래로 좁혀 볼게요.\n· 빠른 선택: 지금 바로 되는 곳\n· 가성비: 가격 먼저 보는 쪽\n· 안전한 선택: 후기 많은 기본\n아래 링크에서 비교해 보시고 정해 주시면 바로 적어 둘게요.'
+      ],
+      ask: [
+        '{topic} — 가능한지 확인해서 바로 알려드릴게요.',
+        '{topic} 건은 조건에 따라 달라질 수 있어요. 확인되는 대로 정리해 드릴게요.'
+      ],
+      plain: [
+        '{topic} — 알겠어요. 바로 정리해 드릴게요.',
+        '좋아요, {topic} 건은 제가 맡아 볼게요. 결과 나오면 알려드릴게요.',
+        '{topic} 쪽으로 먼저 확인해서 다음 단계까지 정리해 드릴게요.'
+      ]
     }
   };
 
+  // 부르는 이름(@지금이름)을 지금 이름 기준으로 걷어냅니다.
+  function stripNames(text) {
+    var s = String(text || '');
+    MEMBER_KEYS.forEach(function (w) {
+      var n = aiName(w);
+      if (!n) return;
+      s = s.replace(new RegExp('@\\s*' + escapeRe(n) + '\\S*', 'gi'), ' ');
+    });
+    return s;
+  }
+
   function topicPhrase(t) {
-    var s = String(t || '')
+    var s = stripNames(t)
       .replace(/@\s*(피클|Gemini|제미나이|클로드|Groq|그록)\S*/gi, ' ')
       .replace(/\s+/g, ' ')
       .trim();
     s = s.replace(/^[야아]\s+/, '');
     s = s.replace(/^(피클|Gemini|제미나이|클로드|Groq|그록)(야|아|만|는|도|한테|에게|에게만)?[\s,]*/i, '').trim();
+    MEMBER_KEYS.forEach(function (w) {
+      var n = aiName(w);
+      if (!n) return;
+      s = s.replace(new RegExp('^' + escapeRe(n) + '\\s*(야|아|님|만|는|도|한테|에게)?[\\s,]*', 'i'), '');
+    });
+    s = s.trim();
     s = s.replace(/[.?!~,。…ㅋㅎ\s]+$/g, '').trim();
     s = s.replace(/(해\s*줘|해\s*주세요|주세요|줘|줄래요|줄래|할까요|할까|볼까요|볼까|될까요|될까|되나요|인가요|일까|어때|까)$/g, '').trim();
 
@@ -2222,7 +2881,7 @@
   // 데모 모드에서도 "어디서 확인할지"를 바로 누를 수 있게 검색·지도 링크를 붙입니다.
   // (데모는 실시간 검색을 하지 않으므로 특정 업체를 추천하는 척하지 않고 검색 링크만 줍니다.)
   function demoQuery(t) {
-    var s = String(t || '')
+    var s = stripNames(t)
       .replace(/@\s*(피클|Gemini|제미나이|클로드|Groq|그록)\S*/gi, ' ')
       .replace(/(추천해\s*줘|추천|알아봐\s*줘|알아봐|검색해\s*줘|검색|찾아\s*줘|찾아줘|비교해\s*줘|비교|순위|리스트|좀|해\s*줘|해줘|주세요|줘|어때|베스트)/g, ' ')
       .replace(/[\[\]()"'<>]/g, ' ')
@@ -2254,7 +2913,7 @@
   function demoReply(who, userText, spoken) {
     var cat = categoryOf(userText);
     var topic = topicPhrase(userText);
-    var bank = DEMO[who] || DEMO.pickle;
+    var bank = DEMO[who] || DEMO.custom || DEMO.pickle;
     var list = bank[cat] || bank.plain;
     var idx = (demoSpin + topic.length + (userText || '').length) % list.length;
     demoSpin++;
@@ -2267,9 +2926,10 @@
     }
 
     if (other && Math.random() < 0.55) {
-      if (who === 'pickle') out += ' Gemini가 정리한 것 위에 제가 바로 실행할게요!';
+      if (who === 'pickle') out += ' ' + aiName(other.who) + '가 정리한 것 위에 제가 바로 실행할게요!';
       else if (who === 'groq') out += ' 다음 아이디어도 바로 하나 더 드릴게요 ⚡';
-      else out += ' 피클이 맡은 실행 부분은 제가 정리해서 옆에 붙여 두겠습니다.';
+      else if (isCustomKey(who)) out += ' ' + aiName(other.who) + ' 님 답변에 제 관점을 한 줄만 보태 볼게요.';
+      else out += ' ' + aiName('pickle') + '이 맡은 실행 부분은 제가 정리해서 옆에 붙여 두겠습니다.';
     }
 
     var links = [];
@@ -2303,6 +2963,248 @@
     }, 60);
   }
   function closeModal() { el.modal.classList.remove('open'); }
+
+  /* ── AI 추가·수정 모달 ──────────────── */
+  var editingAiId = null;
+  var renameKey = null;
+
+  function setAiErr(text) {
+    if (!el.aiErr) return;
+    el.aiErr.hidden = !text;
+    el.aiErr.textContent = text || '';
+  }
+
+  function setRenameErr(text) {
+    if (!el.renameErr) return;
+    el.renameErr.hidden = !text;
+    el.renameErr.textContent = text || '';
+  }
+
+  function fillAvatarChips() {
+    if (!el.aiAvatarChips || (el.aiAvatarChips.childNodes && el.aiAvatarChips.childNodes.length)) return;
+    AVATAR_CHOICES.forEach(function (em) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'emoji-chip';
+      b.setAttribute('data-emoji', em);
+      b.textContent = em;
+      b.addEventListener('click', function () {
+        if (el.aiAvatar) el.aiAvatar.value = em;
+        markAvatarChip(em);
+      });
+      el.aiAvatarChips.appendChild(b);
+    });
+  }
+
+  function markAvatarChip(em) {
+    var kids = (el.aiAvatarChips && el.aiAvatarChips.childNodes) || [];
+    for (var i = 0; i < kids.length; i++) {
+      var k = kids[i];
+      if (!k || typeof k.getAttribute !== 'function') continue;
+      k.className = 'emoji-chip' + (k.getAttribute('data-emoji') === em ? ' on' : '');
+    }
+  }
+
+  function syncEngineForm() {
+    var e = el.aiEngine ? el.aiEngine.value : 'gemini';
+    if (el.aiGroupGemini) el.aiGroupGemini.hidden = e !== 'gemini';
+    if (el.aiGroupOpenai) el.aiGroupOpenai.hidden = e !== 'openai';
+    if (el.aiGroupAnthropic) el.aiGroupAnthropic.hidden = e !== 'anthropic';
+    if (el.aiGroupCustom) el.aiGroupCustom.hidden = e !== 'custom';
+    if (el.aiEngineHint) el.aiEngineHint.textContent = AI_ENGINE_HINT[e] || '';
+  }
+
+  function openAiForm(id) {
+    var c = id ? customById(id) : null;
+    editingAiId = c ? c.id : null;
+    fillAvatarChips();
+    setAiErr('');
+
+    if (el.aiTitle) el.aiTitle.textContent = c ? 'AI 수정' : '새 AI 추가';
+    if (el.aiSave) el.aiSave.textContent = c ? '저장' : '추가하기';
+    if (el.aiLead) el.aiLead.textContent = c
+      ? '이름·아이콘·성격·엔진을 바꿀 수 있어요. 저장하면 대화방 이름표에도 바로 반영돼요.'
+      : '이름·성격·엔진만 고르면 돼요. 키가 없으면 데모 응답으로 답하고, 키를 넣으면 바로 실제 AI가 돼요.';
+    if (el.aiDelRow) el.aiDelRow.hidden = !c;
+
+    el.aiName.value = c ? c.name : '';
+    el.aiAvatar.value = c ? c.avatar : DEFAULT_AVATAR;
+    el.aiPrompt.value = c ? c.prompt : '';
+    el.aiEngine.value = c ? c.engine : 'gemini';
+    if (el.aiWebsearch) el.aiWebsearch.checked = c ? c.webSearch !== false : true;
+
+    el.aiOpenaiKey.value = (c && c.engine === 'openai') ? c.apiKey : '';
+    el.aiOpenaiModel.value = (c && c.engine === 'openai') ? c.model : '';
+    el.aiAnthropicKey.value = (c && c.engine === 'anthropic') ? c.apiKey : '';
+    el.aiAnthropicModel.value = (c && c.engine === 'anthropic') ? c.model : '';
+    el.aiCustomBase.value = (c && c.engine === 'custom') ? c.baseUrl : '';
+    el.aiCustomKey.value = (c && c.engine === 'custom') ? c.apiKey : '';
+    el.aiCustomModel.value = (c && c.engine === 'custom') ? c.model : '';
+
+    markAvatarChip(el.aiAvatar.value);
+    syncEngineForm();
+    el.aiModal.classList.add('open');
+    setTimeout(function () { try { el.aiName.focus(); } catch (e) {} }, 60);
+  }
+
+  function closeAiModal() {
+    el.aiModal.classList.remove('open');
+    editingAiId = null;
+    setAiErr('');
+  }
+
+  function saveAiForm() {
+    var name = normName(el.aiName.value);
+    var problem = nameProblem(name, editingAiId || '');
+    if (problem) { setAiErr(problem); return; }
+
+    var engine = ENGINE_KEYS.indexOf(el.aiEngine.value) >= 0 ? el.aiEngine.value : 'gemini';
+    var model = '', key = '', base = '', search = true;
+
+    if (engine === 'openai') {
+      key = el.aiOpenaiKey.value.trim();
+      model = cleanModelName(el.aiOpenaiModel.value, 'gpt-4o-mini');
+    } else if (engine === 'anthropic') {
+      key = el.aiAnthropicKey.value.trim();
+      model = cleanModelName(el.aiAnthropicModel.value, 'claude-sonnet-4-5');
+    } else if (engine === 'custom') {
+      base = el.aiCustomBase.value.trim();
+      key = el.aiCustomKey.value.trim();
+      model = el.aiCustomModel.value.trim();
+      if (!customEndpoint(base)) { setAiErr('엔드포인트 주소를 https:// 로 시작하게 넣어 주세요.'); return; }
+      if (!model) { setAiErr('모델 이름을 넣어 주세요. (예: gpt-4o-mini)'); return; }
+    } else if (engine === 'gemini') {
+      search = !!(el.aiWebsearch && el.aiWebsearch.checked);
+    }
+
+    var avatar = cleanAvatar(el.aiAvatar.value);
+    var prompt = String(el.aiPrompt.value || '').trim().slice(0, 600);
+
+    if (!editingAiId && customList().length >= MAX_CUSTOM) {
+      setAiErr('AI는 ' + MAX_CUSTOM + '개까지 추가할 수 있어요. 쓰지 않는 AI를 먼저 지워 주세요.');
+      return;
+    }
+
+    var rec = null, created = null, oldName = '';
+
+    if (editingAiId) {
+      rec = customById(editingAiId);
+      if (!rec) { setAiErr('이 AI를 찾을 수 없어요. 목록을 새로 그린 뒤 다시 해 주세요.'); return; }
+      oldName = rec.name;
+      rec.name = name;
+      rec.avatar = avatar;
+      rec.prompt = prompt;
+      rec.engine = engine;
+      rec.model = model;
+      rec.apiKey = key;
+      rec.baseUrl = base;
+      rec.webSearch = search;
+    } else {
+      rec = {
+        id: CUSTOM_PREFIX + uid(),
+        name: name,
+        avatar: avatar,
+        tint: CUSTOM_TINTS[customList().length % CUSTOM_TINTS.length],
+        prompt: prompt,
+        engine: engine,
+        model: model,
+        apiKey: key,
+        baseUrl: base,
+        webSearch: search,
+        enabled: true
+      };
+      state.settings.customAis.push(rec);
+      created = rec;
+    }
+
+    refreshRegistry();
+    save();
+    syncMembers();
+    syncSearchUI();
+    syncStatus();
+
+    // 모달을 두 마리 다 닫고 메인 화면으로 돌아 와서 바로 보이게 합니다.
+    closeAiModal();
+    closeModal();
+    render();
+
+    if (created) {
+      addMessage('system', created.avatar + ' ' + created.name + ' 님이 대화에 참여했어요');
+      toast(created.name + ' 님을 대화에 불러왔어요');
+    } else if (oldName !== rec.name) {
+      addMessage('system', '✏️ AI 이름을 ' + oldName + ' → ' + rec.name + '(으)로 바꿨어요. @' + rec.name + ' 로 부르면 돼요');
+      toast(rec.name + '(으)로 바꿨어요');
+    } else {
+      toast(rec.name + ' 설정을 저장했어요');
+    }
+  }
+
+  function deleteCustom(id) {
+    var c = customById(id);
+    if (!c) return;
+    if (!window.confirm('"' + c.name + '" AI를 대화에서 내보낼까요? 지난 대화는 그대로 남아요.')) return;
+
+    var i = state.settings.customAis.indexOf(c);
+    if (i >= 0) state.settings.customAis.splice(i, 1);
+    refreshRegistry();
+    if (!memberList().length) BASE_KEYS.forEach(function (w) { state.settings.members[w] = true; });
+
+    save();
+    closeAiModal();
+    closeModal();
+    syncMembers();
+    syncSearchUI();
+    syncStatus();
+    render();
+    addMessage('system', '🗑 ' + c.name + ' 님을 대화에서 내보냈어요');
+    toast(c.name + ' 삭제했어요');
+  }
+
+  /* ── 기본 AI 이름 바꾸기 ─────────────── */
+  function openRename(who) {
+    if (!DEFAULT_NAMES[who]) return;
+    renameKey = who;
+    if (el.renameTitle) el.renameTitle.textContent = aiName(who) + ' 이름 바꾸기';
+    if (el.renameLead) el.renameLead.textContent = '부르는 이름을 바꿔요. @이름으로 부르면 이 AI만 답해요. 기본 이름은 "' + DEFAULT_NAMES[who] + '"이에요.';
+    el.renameInput.value = aiName(who);
+    setRenameErr('');
+    el.renameModal.classList.add('open');
+    setTimeout(function () {
+      try { el.renameInput.focus(); el.renameInput.select(); } catch (e) {}
+    }, 60);
+  }
+
+  function closeRename() {
+    el.renameModal.classList.remove('open');
+    renameKey = null;
+    setRenameErr('');
+  }
+
+  function saveRename(toDefault) {
+    if (!renameKey) return;
+    var who = renameKey;
+    var name = toDefault ? DEFAULT_NAMES[who] : normName(el.renameInput.value);
+    var problem = nameProblem(name, who);
+    if (problem) { setRenameErr(problem); return; }
+
+    var before = aiName(who);
+    state.settings.names[who] = (name === DEFAULT_NAMES[who]) ? '' : name;
+    refreshRegistry();
+    save();
+    closeRename();
+    closeModal();
+    syncMembers();
+    syncSearchUI();
+    syncStatus();
+    render();
+
+    if (before !== name) {
+      addMessage('system', '✏️ ' + before + ' → ' + name + ' 이름을 바꿨어요. @' + name + ' 로 부르면 돼요');
+      toast(name + '(으)로 바꿨어요');
+    } else {
+      toast('이미 같은 이름이에요');
+    }
+  }
 
   /* ── 화면 잠금 화면 ─────────────────── */
   function showLock() {
@@ -2359,20 +3261,39 @@
   }
 
   /* ── 참여 AI·검색 설정 ───────────────── */
-  var MENTION = {
-    pickle: /@\s*피클|피클\s*[야아]/,
-    claude: /@\s*(gemini|제미나이|클로드)|제미나이|(gemini|클로드)\s*[야아]/i,
-    groq: /@\s*(groq|그록)|(groq|그록)\s*[야아]/i
-  };
+  // 부르는 이름(MENTION)은 refreshRegistry → buildMentions 에서 지금 이름으로 다시 만듭니다.
 
-  function memberOn(who) { return state.settings.members[who] !== false; }
+  function memberOn(who) {
+    if (isCustomKey(who)) {
+      var c = customById(who);
+      return !!c && c.enabled !== false;
+    }
+    return state.settings.members[who] !== false;
+  }
 
   function memberList() {
     return MEMBER_KEYS.filter(memberOn);
   }
 
   function wantsSearch(who) {
-    return state.settings.webSearch !== false && state.settings.searchFor[who] !== false;
+    if (state.settings.webSearch === false) return false;
+    if (isCustomKey(who)) {
+      var c = customById(who);
+      return !!c && c.engine === 'gemini' && c.webSearch !== false;
+    }
+    return state.settings.searchFor[who] !== false;
+  }
+
+  // 퀵 칩을 DOM 순서대로 돌며 처리합니다(동적으로 붙인 커스텀 AI 칩까지 같이).
+  function eachChip(fn) {
+    var q = el.quickChips;
+    var kids = (q && q.childNodes) || [];
+    for (var i = 0; i < kids.length; i++) {
+      var k = kids[i];
+      if (!k || typeof k.getAttribute !== 'function') continue;
+      if (!k.getAttribute('data-member')) continue;
+      fn(k);
+    }
   }
 
   function syncMembers() {
@@ -2381,18 +3302,132 @@
 
     var boxes = { pickle: el.memberPickle, claude: el.memberClaude, groq: el.memberGroq };
     var rows = { pickle: el.rowPickle, claude: el.rowClaude, groq: el.rowGroq };
-    MEMBER_KEYS.forEach(function (w) {
+    var labels = { pickle: el.labelMemberPickle, claude: el.labelMemberClaude, groq: el.labelMemberGroq };
+    BASE_KEYS.forEach(function (w) {
       var on = memberOn(w);
-      if (boxes[w]) boxes[w].checked = on;
+      if (boxes[w]) {
+        boxes[w].checked = on;
+        boxes[w].setAttribute('aria-label', AI[w].name + ' 대화 참여');
+      }
       if (rows[w]) rows[w].className = 'member-row' + (on ? '' : ' off');
+      if (labels[w]) labels[w].textContent = AI[w].name;
     });
 
-    // 끈 AI의 멘션 칩은 숨깁니다.
-    Array.prototype.forEach.call(document.querySelectorAll('.quick-chip[data-member]'), function (btn) {
+    // 르 퀵 칩: 이름·멘션을 지금 이름으로 맞추고, 끈 AI의 칩은 숨깁니다.
+    eachChip(function (btn) {
       var w = btn.getAttribute('data-member');
+      var meta = AI[w];
+      if (!meta) return;
       var hide = !memberOn(w);
       btn.style.display = hide ? 'none' : '';
       btn.setAttribute('aria-hidden', hide ? 'true' : 'false');
+      btn.textContent = meta.avatar + ' ' + meta.name;
+      btn.setAttribute('data-mention', '@' + meta.name + ' ');
+      btn.setAttribute('aria-label', meta.name + ' 부르기');
+    });
+
+    renderCustomRows();
+  }
+
+  // 커스텀 AI 설정 줄과 퀵 칩을 지금 목록으로 다시 그립니다.
+  function renderCustomRows() {
+    var box = el.customMemberList;
+    if (box) {
+      try { box.innerHTML = ''; } catch (e) {}
+    }
+
+    var q = el.quickChips;
+    if (q && q.childNodes) {
+      for (var i = q.childNodes.length - 1; i >= 0; i--) {
+        var n = q.childNodes[i];
+        if (n && typeof n.getAttribute === 'function' && n.getAttribute('data-custom') === '1') q.removeChild(n);
+      }
+    }
+
+    customList().forEach(function (c) {
+      if (!c || !c.id) return;
+      var meta = AI[c.id] || { name: c.name, avatar: c.avatar, tint: c.tint };
+      var on = memberOn(c.id);
+
+      if (box) {
+        var row = h('div', 'member-row custom' + (on ? '' : ' off'));
+        row.id = 'row-' + c.id;
+
+        var av = h('div', 'm-avatar', meta.avatar);
+        av.style.background = meta.tint || '#F2F3F5';
+        row.appendChild(av);
+
+        var nm = h('div', 'm-name');
+        var lb = h('span', 'm-label', meta.name);
+        nm.appendChild(lb);
+        nm.appendChild(h('small', null, (ENGINES[c.engine] ? ENGINES[c.engine].short : 'AI') + ' · ' + providerLabel(c.id)));
+        row.appendChild(nm);
+
+        var edit = document.createElement('button');
+        edit.type = 'button';
+        edit.className = 'm-act';
+        edit.textContent = '수정';
+        edit.setAttribute('aria-label', meta.name + ' 설정 수정');
+        edit.addEventListener('click', function () { openAiForm(c.id); });
+        row.appendChild(edit);
+
+        var del = document.createElement('button');
+        del.type = 'button';
+        del.className = 'm-act del';
+        del.textContent = '삭제';
+        del.setAttribute('aria-label', meta.name + ' 삭제');
+        del.addEventListener('click', function () { deleteCustom(c.id); });
+        row.appendChild(del);
+
+        var sw = document.createElement('label');
+        sw.className = 'switch';
+        var cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = on;
+        cb.setAttribute('aria-label', meta.name + ' 대화 참여');
+        cb.addEventListener('change', function () {
+          var cur = customById(c.id);
+          if (!cur) return;
+          if (!cb.checked) {
+            var others = memberList().filter(function (w) { return w !== c.id; });
+            if (!others.length) {
+              cb.checked = true;
+              setMemberResult('AI는 최소 한 명은 켜 두어야 해요. 마지막 한 명은 끌 수 없어요.', true);
+              return;
+            }
+            cur.enabled = false;
+          } else {
+            cur.enabled = true;
+          }
+          save();
+          syncMembers();
+          syncStatus();
+          setMemberResult(cur.name + (cur.enabled
+            ? '를 켰어요. 이제 답변에 함께합니다.'
+            : '를 껐어요. 이름을 부르지 않으면 답하지 않아요.'), false);
+          toast(cur.name + (cur.enabled ? ' 켰어요' : ' 껐어요'));
+        });
+        sw.appendChild(cb);
+        sw.appendChild(h('span', 'track'));
+        row.appendChild(sw);
+
+        box.appendChild(row);
+      }
+
+      if (q) {
+        var chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'quick-chip';
+        chip.setAttribute('data-member', c.id);
+        chip.setAttribute('data-custom', '1');
+        chip.setAttribute('data-mention', '@' + meta.name + ' ');
+        chip.setAttribute('aria-label', meta.name + ' 부르기');
+        chip.textContent = meta.avatar + ' ' + meta.name;
+        chip.style.display = on ? '' : 'none';
+        chip.addEventListener('click', function () { insertAtCaret('@' + meta.name + ' '); });
+        if (el.quickSearch && el.quickSearch.parentNode === q && q.insertBefore) q.insertBefore(chip, el.quickSearch);
+        else q.appendChild(chip);
+      }
     });
   }
 
@@ -2409,8 +3444,10 @@
     el.searchOn.checked = on;
 
     var boxes = { pickle: el.searchPickle, claude: el.searchClaude, groq: el.searchGroq };
-    MEMBER_KEYS.forEach(function (w) {
+    var labels = { pickle: el.searchLabelPickle, claude: el.searchLabelClaude, groq: el.searchLabelGroq };
+    BASE_KEYS.forEach(function (w) {
       var box = boxes[w];
+      if (labels[w]) labels[w].textContent = AI[w].avatar + ' ' + AI[w].name;
       if (!box) return;
       box.checked = state.settings.searchFor[w] !== false;
       box.disabled = !on;
@@ -2423,6 +3460,10 @@
     } else if (on && !MEMBER_KEYS.some(wantsSearch)) {
       parts.push('검색을 붙일 답변을 하나도 고르지 않았어요 — 지금은 링크 없이 답합니다.');
     }
+    var gem = customList().filter(function (c) { return c.engine === 'gemini' && memberOn(c.id) && c.webSearch !== false; });
+    if (gem.length && state.settings.geminiKey.trim()) {
+      parts.push('직접 추가한 ' + gem.map(function (c) { return c.name; }).join(' · ') + ' 도 Gemini 검색을 함께 써요.');
+    }
     el.searchHint.textContent = parts.join(' ');
   }
 
@@ -2432,7 +3473,7 @@
       var next = readFlags(state.settings.members, state.settings.members, false);
       next[who] = box.checked;
 
-      if (!next.pickle && !next.claude && !next.groq) {
+      if (!next.pickle && !next.claude && !next.groq && !customOnCount()) {
         box.checked = true;
         setMemberResult('AI는 최소 한 명은 켜 두어야 해요. 마지막 한 명은 끌 수 없어요.', true);
         return;
@@ -2462,9 +3503,21 @@
   }
   /* ── 어느 키로 답할지 ─────────────────── */
   // Groq 키 → Gemini 키 → 데모 모드. AI별 전용 키(Anthropic·OpenAI)는 그 AI에서만 먼저 씁니다.
+  // 직접 추가한 AI는 고른 엔진을 그대로 따릅니다.
   function providerFor(who) {
     var hasGroq = !!state.settings.groqKey.trim();
     var hasGemini = !!state.settings.geminiKey.trim();
+
+    if (isCustomKey(who)) {
+      var c = customById(who);
+      if (!c) return 'demo';
+      if (c.engine === 'gemini') return hasGemini ? 'gemini' : 'demo';
+      if (c.engine === 'groq') return hasGroq ? 'groq' : 'demo';
+      if (c.engine === 'openai') return (c.apiKey.trim() || state.settings.openaiKey.trim()) ? 'openai' : 'demo';
+      if (c.engine === 'anthropic') return (c.apiKey.trim() || state.settings.anthropicKey.trim()) ? 'anthropic' : 'demo';
+      if (c.engine === 'custom') return (customEndpoint(c.baseUrl) && c.model.trim()) ? 'custom' : 'demo';
+      return 'demo';
+    }
 
     if (who === 'claude') {
       if (state.settings.anthropicKey.trim()) return 'anthropic';
@@ -2485,6 +3538,18 @@
 
   function providerLabel(who) {
     var p = providerFor(who);
+
+    if (isCustomKey(who)) {
+      var c = customById(who);
+      if (!c) return '내보냄';
+      if (p === 'anthropic') return 'Anthropic · ' + cleanModelName(c.model, state.settings.claudeModel.trim() || 'claude-sonnet-4-5');
+      if (p === 'openai') return 'OpenAI · ' + cleanModelName(c.model, state.settings.pickleModel.trim() || 'gpt-4o-mini');
+      if (p === 'custom') return '커스텀 API · ' + c.model;
+      if (p === 'groq') return 'Groq · ' + cleanModelName(c.model, groqModel());
+      if (p === 'gemini') return 'Gemini · ' + cleanModelName(c.model, geminiModel()) + (wantsSearch(who) ? ' 🔍' : '');
+      return '데모 응답';
+    }
+
     if (p === 'anthropic') return '실시간 · ' + (state.settings.claudeModel.trim() || 'claude-sonnet-4-5');
     if (p === 'openai') return '실시간 · ' + (state.settings.pickleModel.trim() || 'gpt-4o-mini');
     if (p === 'groq') return 'Groq · ' + groqModel();
@@ -2493,6 +3558,10 @@
   }
 
   function syncStatus() {
+    if (el.labelGroq) el.labelGroq.textContent = aiName('groq');
+    if (el.labelClaude) el.labelClaude.textContent = aiName('claude');
+    if (el.labelPickle) el.labelPickle.textContent = aiName('pickle');
+
     el.statusGroq.textContent = memberOn('groq') ? providerLabel('groq') : '꺼짐';
     el.dotGroq.className = 'dot' + (memberOn('groq') && providerFor('groq') !== 'demo' ? ' on' : '');
     el.statusClaude.textContent = memberOn('claude') ? providerLabel('claude') : '꺼짐';
@@ -2502,6 +3571,8 @@
 
     var n = state.messages.length;
     el.retentionInfo.textContent = '지금 ' + n + '개 보관 중이에요. 보낸 지 30일이 지난 메시지는 자동으로 지워져요.';
+
+    renderCustomRows();
   }
 
   el.openSettings.addEventListener('click', openModal);
@@ -2510,7 +3581,55 @@
     if (e.target === el.modal) closeModal();
   });
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && el.modal.classList.contains('open')) closeModal();
+    if (e.key !== 'Escape') return;
+    if (el.renameModal && el.renameModal.classList.contains('open')) { closeRename(); return; }
+    if (el.aiModal && el.aiModal.classList.contains('open')) { closeAiModal(); return; }
+    if (el.modal.classList.contains('open')) closeModal();
+  });
+
+  /* ── AI 추가·이름 버튼 연결 ───────────── */
+  [el.openAddAi, el.openAddAi2, el.addAiInline].forEach(function (b) {
+    if (!b) return;
+    b.addEventListener('click', function (e) {
+      if (e && e.preventDefault) e.preventDefault();
+      openAiForm(null);
+    });
+  });
+
+  if (el.aiClose) el.aiClose.addEventListener('click', closeAiModal);
+  if (el.aiCancel) el.aiCancel.addEventListener('click', closeAiModal);
+  if (el.aiSave) el.aiSave.addEventListener('click', saveAiForm);
+  if (el.aiDelete) el.aiDelete.addEventListener('click', function () {
+    if (editingAiId) deleteCustom(editingAiId);
+  });
+  if (el.aiEngine) el.aiEngine.addEventListener('change', syncEngineForm);
+  if (el.aiAvatarReset) el.aiAvatarReset.addEventListener('click', function () {
+    el.aiAvatar.value = DEFAULT_AVATAR;
+    markAvatarChip(DEFAULT_AVATAR);
+  });
+  if (el.aiAvatar) el.aiAvatar.addEventListener('input', function () {
+    markAvatarChip(cleanAvatar(el.aiAvatar.value));
+  });
+  if (el.aiModal) el.aiModal.addEventListener('click', function (e) {
+    if (e.target === el.aiModal) closeAiModal();
+  });
+
+  [[el.renamePickle, 'pickle'], [el.renameClaude, 'claude'], [el.renameGroq, 'groq']].forEach(function (pair) {
+    if (!pair[0]) return;
+    pair[0].addEventListener('click', function () { openRename(pair[1]); });
+  });
+  if (el.renameSave) el.renameSave.addEventListener('click', function () { saveRename(false); });
+  if (el.renameReset) el.renameReset.addEventListener('click', function () { saveRename(true); });
+  if (el.renameCancel) el.renameCancel.addEventListener('click', closeRename);
+  if (el.renameClose) el.renameClose.addEventListener('click', closeRename);
+  if (el.renameModal) el.renameModal.addEventListener('click', function (e) {
+    if (e.target === el.renameModal) closeRename();
+  });
+  if (el.renameInput) el.renameInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.isComposing) {
+      e.preventDefault();
+      saveRename(false);
+    }
   });
 
   el.lockForm.addEventListener('submit', function (e) {
@@ -2797,7 +3916,8 @@
 
   /* ── 내보내기 / 초기화 ────────────────── */
   function chatAsText() {
-    var lines = ['# ai비서 — 이호준 · 피클 · Gemini · Groq', '', '내보낸 시각: ' + fmtFull(new Date()), ''];
+    var names = memberList().map(function (w) { return AI[w].name; }).join(' · ');
+    var lines = ['# ai비서 — 이호준 · ' + (names || 'AI'), '', '내보낸 시각: ' + fmtFull(new Date()), ''];
     var lastDay = '';
     state.messages.forEach(function (m) {
       var k = dayKey(m.ts);
@@ -2807,7 +3927,7 @@
         lines.push('');
         lastDay = k;
       }
-      var name = m.who === 'user' ? '이호준' : (m.who === 'system' ? '(안내)' : AI[m.who].name);
+      var name = m.who === 'user' ? '이호준' : (m.who === 'system' ? '(안내)' : metaFor(m.who).name);
       lines.push('[' + fmtTime(m.ts) + '] ' + name + ': ' + m.text);
       var ls = normalizeLinks(m.links);
       for (var i = 0; i < ls.length; i++) lines.push('    🔗 ' + ls[i].title + ' — ' + ls[i].url);
@@ -2881,6 +4001,7 @@
   /* ── 시작 ─────────────────────────────── */
   (function init() {
     var removed = load();
+    refreshRegistry();
     if (migrated) toast('새 대화로 시작해요');
 
     var search = '';
