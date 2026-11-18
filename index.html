@@ -5,9 +5,48 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, interactive-widget=resizes-content">
 <link rel="icon" type="image/png" href="logo.png">
 <link rel="apple-touch-icon" href="logo.png">
-<meta name="theme-color" content="#F7F8FA">
-<meta name="apple-mobile-web-app-title" content="AI비서">
 <meta name="theme-color" content="#FFFFFF">
+<meta name="color-scheme" content="light dark">
+<meta name="apple-mobile-web-app-title" content="AI비서">
+<script>
+/* 🎨 화면 테마 부트스트랩 — 저장된 테마(시스템 자동/라이트/다크)를 첫 페인트 전에 적용해
+   흰 화면이 번쩍이는 현상을 막습니다. 고른 값은 이 브라우저(localStorage)에만 저장돼요. */
+(function () {
+  'use strict';
+  var KEY = 'setchat.theme';
+  var META = { light: '#FFFFFF', dark: '#0F1115' };
+  function read() {
+    try {
+      var v = localStorage.getItem(KEY);
+      return (v === 'light' || v === 'dark' || v === 'system') ? v : 'system';
+    } catch (e) { return 'system'; }
+  }
+  function prefersDark() {
+    try { return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); }
+    catch (e) { return false; }
+  }
+  function resolved(mode) {
+    return (mode === 'dark' || (mode === 'system' && prefersDark())) ? 'dark' : 'light';
+  }
+  function apply(mode) {
+    var theme = resolved(mode);
+    var root = document.documentElement;
+    root.setAttribute('data-theme', theme);
+    root.setAttribute('data-theme-mode', mode);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', META[theme] || META.light);
+    return theme;
+  }
+  apply(read());
+  try {
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    var onChange = function () { if (read() === 'system') apply('system'); };
+    if (mq.addEventListener) mq.addEventListener('change', onChange);
+    else if (mq.addListener) mq.addListener(onChange);
+  } catch (e) {}
+  window.AIBiseoTheme = { key: KEY, read: read, apply: apply, resolved: resolved };
+})();
+</script>
 <title>AI비서 — 이호준 · 피클 · Gemini · Groq</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
 <style>
@@ -848,6 +887,380 @@
     .status-row{flex-wrap:wrap;}
     .status-row .status{margin-left:auto;max-width:60%;text-align:right;}
   }
+
+  /* ══ 🎨 라이트/다크 테마 토큰 (2026-11) ══════════════════════
+     흩어져 있던 흰색·회색을 토큰으로 모아 한 곳에서 바꿉니다. */
+  :root{
+    --sheet:#FFFFFF;
+    --card:#FFFFFF;
+    --card-line:#E6E8EC;
+    --chip-ink:#374151;
+    --chip-ink-soft:#4B5563;
+    --me-ink:#111827;
+    --ring:rgba(17,24,39,.06);
+    --glass:rgba(255,255,255,.88);
+    --glass-2:rgba(255,255,255,.9);
+    --hair:rgba(17,24,39,.06);
+    --hair-soft:rgba(17,24,39,.05);
+    --scroll:rgba(17,24,39,.14);
+    --backdrop:rgba(17,24,39,.28);
+    --switch-off:#DDE1E6;
+    --switch-knob:#FFFFFF;
+    --dot-off:#D8DCE2;
+    --dots:#C4C9D1;
+    --send-bg:#111827;
+    --send-ink:#FFFFFF;
+    --toast-bg:rgba(17,24,39,.92);
+    --toast-ink:#FFFFFF;
+    --shadow-soft:0 1px 2px rgba(17,24,39,.04);
+    --shadow-composer:0 4px 16px rgba(17,24,39,.08);
+    --shadow-sheet:0 24px 70px rgba(17,24,39,.28);
+    --pm-bg:#FFFFFF;
+    --pm-ico:#F1F3F6;
+    --ok:#1F7A4D;
+    --link-hover:#155F3B;
+    --me-link:#0B4F2C;
+    --danger-line:#F5D2CC;
+    --danger-bg:#FFF8F6;
+    --free-a:#F1FAF3;--free-b:#F8FDF9;--free-ink:#4B6B58;--free-strong:#20472F;--free-line:#D9EFE1;
+    --regen-hover:#DDF4E5;
+    --final-a:#F1FAF4;--final-b:#F8FDFA;
+    --note-bg:#FDF0E8;--note-line:#F3D9C4;--note-ink:#B45309;
+    --unv:#92400E;--unv-bg:#FEF6E7;--unv-line:#F6E3BD;
+  }
+
+  /* 다크 모드 — 깊은 먹색 바탕에 눈이 편한 대비 */
+  html[data-theme="dark"]{
+    color-scheme:dark;
+    --bg:#0F1115;
+    --ink:#ECEEF2;
+    --muted:#A0A8B4;
+    --faint:#7C8592;
+    --line:#262B33;
+    --soft:#1C2129;
+    --soft2:#171B21;
+    --me-a:#2F7A52;
+    --me-b:#368B5D;
+    --me-ink:#F2FBF5;
+    --brand:#6AD694;
+    --brand-soft:#14251B;
+    --brand-line:#27503A;
+    --warn:#FF9C8F;
+    --warn-soft:#2B1815;
+    --sheet:#14181E;
+    --card:#171C23;
+    --card-line:#2B313A;
+    --chip-ink:#D3D9E1;
+    --chip-ink-soft:#BFC6D0;
+    --ring:rgba(255,255,255,.08);
+    --glass:rgba(15,17,21,.86);
+    --glass-2:rgba(15,17,21,.9);
+    --hair:rgba(255,255,255,.07);
+    --hair-soft:rgba(255,255,255,.06);
+    --scroll:rgba(255,255,255,.18);
+    --backdrop:rgba(0,0,0,.62);
+    --switch-off:#39414C;
+    --switch-knob:#E7EAF0;
+    --dot-off:#454D58;
+    --dots:#5A626E;
+    --send-bg:#ECEEF2;
+    --send-ink:#0F1115;
+    --toast-bg:rgba(236,238,242,.94);
+    --toast-ink:#0F1115;
+    --shadow-soft:0 1px 2px rgba(0,0,0,.4);
+    --shadow-composer:0 4px 16px rgba(0,0,0,.45);
+    --shadow-sheet:0 24px 70px rgba(0,0,0,.62);
+    --pm-bg:#1A1F26;
+    --pm-ico:#232A33;
+    --ok:#6AD694;
+    --link-hover:#8DEBAE;
+    --me-link:#EAFBF0;
+    --danger-line:#59302A;
+    --danger-bg:#2B1917;
+    --free-a:#14251B;--free-b:#101A14;--free-ink:#9EC7AE;--free-strong:#CBEAD8;--free-line:#24422F;
+    --regen-hover:#1D3A29;
+    --final-a:#12211A;--final-b:#0F1A15;
+    --note-bg:#3A2A1B;--note-line:#5A4128;--note-ink:#F5C48A;
+    --unv:#F5C48A;--unv-bg:#2A1D14;--unv-line:#57431F;
+  }
+
+  /* 다크 모드에서 하드코딩 색을 토큰으로 바꿔 끼웁니다. */
+  html[data-theme="dark"] body{background:var(--bg);color:var(--ink);}
+  html[data-theme="dark"] .stage,
+  html[data-theme="dark"] .app{background:var(--bg);}
+  html[data-theme="dark"] .hd{background:var(--glass);border-bottom-color:var(--hair);}
+  html[data-theme="dark"] .hd .logo img{background:var(--card);}
+  html[data-theme="dark"] .tabs{background:var(--glass-2);border-bottom-color:var(--hair);}
+  html[data-theme="dark"] .tab{background:var(--card);border-color:var(--line);}
+  html[data-theme="dark"] .tab:hover{background:var(--soft2);}
+  html[data-theme="dark"] .tab.on{background:var(--brand-soft);border-color:var(--brand-line);color:var(--brand);}
+  html[data-theme="dark"] .icon-btn.add{background:var(--card);border-color:var(--card-line);box-shadow:none;}
+  html[data-theme="dark"] .icon-btn:hover{background:var(--soft);}
+  html[data-theme="dark"] .notice{background:var(--soft2);border-bottom-color:var(--hair-soft);}
+  html[data-theme="dark"] .feed::-webkit-scrollbar-thumb{background:var(--scroll);}
+  html[data-theme="dark"] .divider span{background:var(--soft);color:var(--faint);}
+  html[data-theme="dark"] .sys{background:var(--soft2);color:var(--muted);}
+  html[data-theme="dark"] .sys.warn{background:var(--warn-soft);color:var(--warn);}
+  html[data-theme="dark"] .row.me .bubble{color:var(--me-ink);box-shadow:none;}
+  html[data-theme="dark"] .row.me .bubble a{color:var(--me-link);text-decoration-color:rgba(255,255,255,.45);}
+  html[data-theme="dark"] .row .bubble a:hover{color:var(--link-hover);text-decoration-color:var(--link-hover);}
+  html[data-theme="dark"] .row .bubble strong{color:var(--ink);}
+  html[data-theme="dark"] .row.ai .avatar,
+  html[data-theme="dark"] .member-row .m-avatar{box-shadow:inset 0 0 0 1px rgba(255,255,255,.05);color:#111827;}
+  html[data-theme="dark"] .link-card{background:var(--card);border-color:var(--line);box-shadow:none;}
+  html[data-theme="dark"] .link-card:hover{background:var(--soft2);border-color:var(--card-line);}
+  html[data-theme="dark"] .bubble.dots i{background:var(--dots);}
+  html[data-theme="dark"] .quick-chip{background:var(--soft2);color:var(--chip-ink);border-color:var(--line);}
+  html[data-theme="dark"] .composer{background:var(--card);border-color:var(--card-line);box-shadow:var(--shadow-composer);}
+  html[data-theme="dark"] .composer .send{background:var(--send-bg);color:var(--send-ink);}
+  html[data-theme="dark"] .composer .send:hover{background:#FFFFFF;}
+  html[data-theme="dark"] .attach-chip,
+  html[data-theme="dark"] .mode-chip{background:var(--card);border-color:var(--line);color:var(--chip-ink);}
+  html[data-theme="dark"] .mode-chip.on{background:#161E2E;border-color:#2A3A55;color:#9DC0FF;}
+  html[data-theme="dark"] .mode-chip.debate{background:#14251B;border-color:#27503A;color:#8FE3AE;}
+  html[data-theme="dark"] .plus-menu{background:var(--pm-bg);box-shadow:0 18px 50px rgba(0,0,0,.55),0 0 0 1px var(--card-line);}
+  html[data-theme="dark"] .pm-item:hover,
+  html[data-theme="dark"] .pm-item:active{background:var(--soft2);}
+  html[data-theme="dark"] .pm-ico{background:var(--pm-ico);}
+  html[data-theme="dark"] .backdrop{background:var(--backdrop);}
+  html[data-theme="dark"] .sheet{background:var(--sheet);box-shadow:var(--shadow-sheet);}
+  html[data-theme="dark"] .sheet-hd,
+  html[data-theme="dark"] .sheet-tabs,
+  html[data-theme="dark"] .sheet-ft{background:var(--sheet);border-color:var(--line);}
+  html[data-theme="dark"] .stab.on{background:var(--soft);color:var(--ink);border-color:var(--card-line);}
+  html[data-theme="dark"] .adv{background:var(--card);border-color:var(--card-line);box-shadow:none;}
+  html[data-theme="dark"] .adv[open]{background:var(--soft2);}
+  html[data-theme="dark"] .sec-title{color:var(--chip-ink);}
+  html[data-theme="dark"] .sec.free{background:linear-gradient(180deg,var(--free-a),var(--free-b));border-color:var(--brand-line);}
+  html[data-theme="dark"] .sec.free .free-lead{color:var(--free-ink);}
+  html[data-theme="dark"] .sec.free .field > span{color:var(--free-strong);}
+  html[data-theme="dark"] .sub-hd{color:var(--free-strong);border-top-color:var(--free-line);}
+  html[data-theme="dark"] .status-row .dot{background:var(--dot-off);}
+  html[data-theme="dark"] .field > span{color:var(--chip-ink);}
+  html[data-theme="dark"] .field input,
+  html[data-theme="dark"] .field textarea,
+  html[data-theme="dark"] .field select{background:var(--card);border-color:var(--card-line);color:var(--ink);}
+  html[data-theme="dark"] .field input:focus,
+  html[data-theme="dark"] .field textarea:focus,
+  html[data-theme="dark"] .field select:focus{border-color:#4A525E;box-shadow:0 0 0 3px var(--ring);}
+  html[data-theme="dark"] .mini{background:var(--card);border-color:var(--card-line);color:var(--chip-ink);}
+  html[data-theme="dark"] .btn{background:var(--card);border-color:var(--card-line);color:var(--chip-ink);}
+  html[data-theme="dark"] .btn:hover{background:var(--soft2);}
+  html[data-theme="dark"] .btn.primary{background:#ECEEF2;border-color:#ECEEF2;color:#0F1115;}
+  html[data-theme="dark"] .btn.primary:hover{background:#FFFFFF;}
+  html[data-theme="dark"] .btn.danger{background:var(--danger-bg);border-color:var(--danger-line);color:var(--warn);}
+  html[data-theme="dark"] .lock{background:rgba(15,17,21,.97);}
+  html[data-theme="dark"] .lock input{background:var(--soft2);border-color:var(--card-line);color:var(--ink);}
+  html[data-theme="dark"] .lock input:focus{background:var(--card);border-color:#4A525E;box-shadow:0 0 0 3px var(--ring);}
+  html[data-theme="dark"] .switch input:not(:checked) + .track{background:var(--switch-off);}
+  html[data-theme="dark"] .switch .track::after{background:var(--switch-knob);}
+  html[data-theme="dark"] .search-who .sec-sub{color:var(--chip-ink);}
+  html[data-theme="dark"] .chip-check{background:var(--card);border-color:var(--card-line);color:var(--chip-ink);}
+  html[data-theme="dark"] .copy-btn{background:var(--card);border-color:var(--line);}
+  html[data-theme="dark"] .copy-btn:hover{background:var(--soft2);border-color:var(--card-line);color:var(--ink);}
+  html[data-theme="dark"] .copy-btn.regen{background:var(--brand-soft);border-color:var(--brand-line);color:var(--brand);}
+  html[data-theme="dark"] .copy-btn.regen:hover{background:var(--regen-hover);color:var(--link-hover);}
+  html[data-theme="dark"] .toast{background:var(--toast-bg);color:var(--toast-ink);}
+  html[data-theme="dark"] .emoji-chip{background:var(--card);border-color:var(--card-line);}
+  html[data-theme="dark"] .m-act{background:var(--card);border-color:var(--card-line);color:var(--chip-ink-soft);}
+  html[data-theme="dark"] .m-act.del{background:var(--danger-bg);border-color:var(--danger-line);color:var(--warn);}
+  html[data-theme="dark"] #hidden-member-list{border-color:var(--card-line);}
+  html[data-theme="dark"] .test-result{color:var(--ok);}
+  html[data-theme="dark"] .test-result.err{color:var(--warn);}
+
+  /* ── 🎨 화면 테마 선택(시스템·라이트·다크) ─────────────── */
+  .seg{
+    display:flex;gap:4px;margin:2px 0 8px;
+    background:var(--soft2);border:1px solid var(--line);
+    border-radius:14px;padding:4px;
+  }
+  .seg-btn{
+    flex:1 1 0;border:0;background:transparent;color:var(--muted);
+    border-radius:11px;padding:9px 6px;
+    font-size:12.5px;font-weight:700;letter-spacing:-0.01em;
+    cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent;
+    touch-action:manipulation;
+  }
+  .seg-btn.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow-soft);}
+  html[data-theme="dark"] .seg-btn.on{background:var(--card);color:var(--ink);}
+
+  /* ── 📌 토론·종합 단계별 카드 (사진 IMG_8405·8406) ─────── */
+  .debate .d-stage{
+    display:flex;align-items:center;gap:6px;
+    font-size:12px;font-weight:800;color:var(--brand);letter-spacing:-0.01em;
+    margin:10px 0 6px;padding-top:9px;border-top:1px dashed var(--line);
+  }
+  .debate .d-stage:first-of-type{border-top:0;padding-top:0;margin-top:4px;}
+  .debate .d-item{
+    font-size:12.5px;line-height:1.58;color:var(--chip-ink-soft);letter-spacing:-0.01em;
+    margin:0 0 8px;padding-left:0;border-left:0;
+    white-space:pre-wrap;word-break:break-word;
+  }
+  .debate .d-name{font-weight:800;color:var(--ink);}
+  .debate .d-who{font-size:11px;font-weight:700;color:var(--faint);letter-spacing:-0.01em;margin:8px 0 4px;}
+
+  /* 📌 3단계 근거 기반 종합 — 연한 초록 박스 + ①~④ + 근거 배지 */
+  .final-card{
+    flex:1 1 auto;min-width:0;max-width:100%;
+    background:linear-gradient(180deg,var(--final-a),var(--final-b));
+    border:1px solid var(--brand-line);border-radius:16px;
+    padding:11px 12px 10px;
+  }
+  .final-card .fc-title{
+    font-size:12px;font-weight:800;color:var(--brand);letter-spacing:-0.01em;margin:0 0 9px;
+  }
+  .final-card .fc-sec{margin:0 0 9px;}
+  .final-card .fc-sec:last-of-type{margin-bottom:4px;}
+  .final-card .fc-head{display:flex;align-items:baseline;gap:5px;margin:0 0 2px;min-width:0;}
+  .final-card .fc-num{flex:none;font-size:11.5px;font-weight:800;color:var(--brand);}
+  .final-card .fc-hd{
+    display:inline-flex;align-items:center;gap:4px;min-width:0;
+    font-size:11.5px;font-weight:800;letter-spacing:-0.01em;
+    color:var(--brand);background:transparent;border:0;border-radius:0;padding:0;margin:0;
+  }
+  .final-card .fc-sec.fc-basis .fc-hd{color:#2563EB;background:transparent;border-color:transparent;}
+  .final-card .fc-sec.fc-split .fc-hd{color:#8A5A00;background:transparent;border-color:transparent;}
+  .final-card .fc-sec.fc-open .fc-hd{color:#9A3412;background:transparent;border-color:transparent;}
+  .final-card .fc-bd{font-size:13.5px;line-height:1.6;color:var(--ink);letter-spacing:-0.012em;}
+  .final-card .fc-line{white-space:pre-wrap;overflow-wrap:anywhere;}
+  .final-card .fc-line.warn{
+    color:var(--unv);background:var(--unv-bg);border-radius:8px;
+    padding:2px 6px;margin:2px 0;
+  }
+  .final-card .fc-gap{height:4px;}
+  .final-card .fc-line:empty{display:none;}
+
+  /* 근거 배지 — 🌐 검색 N · 🧠 자체 지식 N · ⚠️ 근거 미확인 N */
+  .debate-evidence{display:flex;gap:5px;flex-wrap:wrap;margin:6px 0 0;}
+  .debate-evidence span{
+    font-size:10.5px;font-weight:700;border-radius:999px;padding:3px 9px;
+    background:#fff;border:1px solid var(--line);color:var(--muted);
+    white-space:nowrap;
+  }
+  .debate-evidence span.bad{background:var(--note-bg);border-color:var(--note-line);color:var(--note-ink);}
+
+  /* ⚠️ 근거 미확인으로 표시된 주장 — 노란/주황 하이라이트 */
+  .unverified-box{
+    align-self:stretch;margin:6px 0 2px;
+    border:1px solid var(--unv-line);background:var(--soft2);
+    border-radius:14px;padding:9px 10px 8px;
+  }
+  .unverified-box .ub-hd{font-size:12px;font-weight:800;color:var(--unv);letter-spacing:-0.01em;margin:0 0 6px;}
+  .unverified-box .ub-row{
+    font-size:12px;line-height:1.5;color:var(--unv);letter-spacing:-0.01em;
+    background:var(--unv-bg);border:1px solid var(--unv-line);border-radius:10px;
+    padding:6px 9px;margin:0 0 5px;white-space:pre-wrap;overflow-wrap:anywhere;
+  }
+  .unverified-box .ub-row:last-child{margin-bottom:0;}
+  .unverified-box .ub-row b{font-weight:800;margin-right:4px;}
+
+  /* 📊 AI 사용량·비용 */
+  .usage-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:8px 0 10px;}
+  .usage-card{
+    background:var(--soft2);border:1px solid var(--line);border-radius:13px;
+    padding:9px 10px;min-width:0;
+  }
+  .usage-card .u-k{display:block;font-size:10.5px;font-weight:700;color:var(--faint);letter-spacing:-0.01em;}
+  .usage-card b{
+    display:block;font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-0.02em;
+    margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .usage-card small{display:block;font-size:10px;color:var(--faint);margin-top:1px;line-height:1.35;}
+  .usage-models{display:flex;flex-direction:column;gap:5px;margin:2px 0 8px;}
+  .usage-row{
+    display:flex;align-items:center;gap:8px;
+    background:var(--card);border:1px solid var(--card-line);border-radius:11px;
+    padding:7px 9px;font-size:11.5px;color:var(--chip-ink);
+  }
+  .usage-row .u-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;letter-spacing:-0.01em;}
+  .usage-row .u-tier{flex:none;font-size:10px;font-weight:800;border-radius:999px;padding:2px 7px;}
+  .usage-row .u-tier.free{background:var(--brand-soft);color:var(--brand);border:1px solid var(--brand-line);}
+  .usage-row .u-tier.paid{background:#FDF0E8;color:#B45309;border:1px solid #F3D9C4;}
+  .usage-row .u-num{flex:none;color:var(--muted);font-weight:600;}
+  .usage-empty{margin:2px 0 8px;font-size:12px;color:var(--faint);}
+  .usage-days{display:flex;gap:3px;align-items:flex-end;justify-content:flex-start;height:46px;margin:0 0 10px;}
+  .usage-day{flex:0 0 auto;width:22px;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;}
+  .usage-day .bar{width:100%;max-width:16px;border-radius:4px 4px 2px 2px;background:var(--brand-line);min-height:2px;}
+  .usage-day.on .bar{background:var(--brand);}
+  .usage-note{margin:0 0 8px;font-size:11px;line-height:1.5;color:var(--faint);}
+  .usage-providers{display:flex;flex-direction:column;gap:5px;margin:0 0 8px;}
+  .usage-providers .usage-row.off{opacity:.62;}
+  .usage-providers .u-act{
+    flex:none;border:1px solid var(--line);background:var(--card);color:var(--muted);
+    font-size:10.5px;font-weight:800;border-radius:999px;padding:4px 9px;cursor:pointer;
+    font-family:inherit;
+  }
+  .usage-providers .u-act.warn{color:#B45309;border-color:#F3D9C4;background:#FDF0E8;}
+  .usage-providers .u-act.ok{color:var(--brand);border-color:var(--brand-line);background:var(--brand-soft);}
+  .usage-providers .u-status{flex:none;font-size:10px;font-weight:800;border-radius:999px;padding:2px 7px;
+    background:var(--soft2);border:1px solid var(--line);color:var(--muted);}
+  .usage-providers .u-status.bad{background:#FDF0E8;border-color:#F3D9C4;color:#B45309;}
+  .usage-limits{
+    display:flex;flex-wrap:wrap;gap:6px;align-items:flex-end;
+    border:1px solid var(--line);background:var(--soft2);border-radius:13px;
+    padding:9px 10px;margin:0 0 8px;
+  }
+  .usage-limits .u-limit-field{display:flex;flex-direction:column;gap:3px;flex:1 1 96px;min-width:0;}
+  .usage-limits .u-limit-field span{font-size:10.5px;font-weight:700;color:var(--faint);}
+  .usage-limits input{
+    width:100%;border:1px solid var(--card-line);background:var(--card);color:var(--ink);
+    border-radius:9px;padding:7px 9px;font:inherit;font-size:12.5px;font-weight:700;
+  }
+  .usage-limits .mini{flex:none;}
+  .usage-limits .u-limit-note{flex:1 1 100%;margin:0;font-size:10.5px;color:var(--faint);line-height:1.45;}
+  .usage-toggle-row{margin:0 0 8px;}
+  .usage-toggle-row .u-name small{display:block;font-size:10px;font-weight:500;color:var(--faint);margin-top:1px;}
+  .usage-attempts{display:flex;flex-direction:column;gap:3px;margin:0 0 8px;}
+  .usage-attempt{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);}
+  .usage-attempt .a-dot{flex:none;width:7px;height:7px;border-radius:50%;background:var(--brand);}
+  .usage-attempt.bad .a-dot{background:#DC2626;}
+  .usage-attempt .a-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--chip-ink);font-weight:600;}
+  .usage-attempt .a-meta{flex:none;color:var(--faint);}
+
+  /* 다크 모드 — 토론 카드·근거 박스·사용량 카드 */
+  html[data-theme="dark"] .final-tag{color:#8FE3AE;background:#14251B;border-color:#27503A;}
+  html[data-theme="dark"] .debate{background:var(--card);border-color:var(--card-line);}
+  html[data-theme="dark"] .debate > summary{color:var(--chip-ink);}
+  html[data-theme="dark"] .debate > summary::before{color:var(--faint);}
+  html[data-theme="dark"] .debate .d-stage{color:var(--brand);border-top-color:var(--line);}
+  html[data-theme="dark"] .debate .d-who{color:var(--faint);}
+  html[data-theme="dark"] .debate .d-item{color:var(--chip-ink-soft);}
+  html[data-theme="dark"] .debate .d-name{color:var(--ink);}
+  html[data-theme="dark"] .debate .d-flag{background:var(--soft2);border-left-color:var(--card-line);color:var(--chip-ink-soft);}
+  html[data-theme="dark"] .debate .d-flag.against{background:#2B1A1A;border-left-color:#8C4A4A;color:#F0A9A9;}
+  html[data-theme="dark"] .debate .d-flag.hole{background:#2A2417;border-left-color:#7C6428;color:#EED298;}
+  html[data-theme="dark"] .debate .d-flag.unsure{background:#2C1F15;border-left-color:#8A5630;color:#F5C48A;}
+  html[data-theme="dark"] .debate .d-flag.agree{background:#15251C;border-left-color:#2F6644;color:#9EE6BA;}
+  html[data-theme="dark"] .final-card{
+    background:linear-gradient(180deg,var(--final-a),var(--final-b));
+    border-color:var(--brand-line);box-shadow:none;
+  }
+  html[data-theme="dark"] .final-card .fc-title{color:#8FE3AE;}
+  html[data-theme="dark"] .final-card .fc-num{color:#8FE3AE;}
+  html[data-theme="dark"] .final-card .fc-hd{color:#8FE3AE;background:transparent;border-color:transparent;}
+  html[data-theme="dark"] .final-card .fc-sec.fc-basis .fc-hd{color:#A9C6FF;}
+  html[data-theme="dark"] .final-card .fc-sec.fc-split .fc-hd{color:#F2D08B;}
+  html[data-theme="dark"] .final-card .fc-sec.fc-open .fc-hd{color:#F5C48A;}
+  html[data-theme="dark"] .final-card .fc-bd{color:var(--chip-ink-soft);}
+  html[data-theme="dark"] .final-card .fc-line.warn{color:#F5C48A;background:#2A1D14;}
+  html[data-theme="dark"] .debate-evidence span{background:var(--card);border-color:var(--card-line);color:var(--chip-ink-soft);}
+  html[data-theme="dark"] .debate-evidence span.bad{background:var(--note-bg);border-color:var(--note-line);color:var(--note-ink);}
+  html[data-theme="dark"] .unverified-box{background:#1E1810;border-color:#4A3B22;}
+  html[data-theme="dark"] .unverified-box .ub-hd{color:#F5C48A;}
+  html[data-theme="dark"] .unverified-box .ub-row{background:var(--unv-bg);border-color:var(--unv-line);color:var(--unv);}
+  /* 📊 사용량·비용 */
+  html[data-theme="dark"] .usage-card{background:var(--card);border-color:var(--card-line);}
+  html[data-theme="dark"] .usage-row{background:var(--soft2);border-color:var(--line);}
+  html[data-theme="dark"] .usage-row .u-tier.free{background:var(--brand-soft);border-color:var(--brand-line);color:var(--brand);}
+  html[data-theme="dark"] .usage-row .u-tier.paid{background:#3A2A1B;color:#F5C48A;border-color:#5A4128;}
+  html[data-theme="dark"] .usage-providers .u-act{background:var(--card);border-color:var(--card-line);color:var(--chip-ink-soft);}
+  html[data-theme="dark"] .usage-providers .u-act.warn{background:#3A2A1B;border-color:#5A4128;color:#F5C48A;}
+  html[data-theme="dark"] .usage-providers .u-act.ok{background:var(--brand-soft);border-color:var(--brand-line);color:var(--brand);}
+  html[data-theme="dark"] .usage-providers .u-status{background:var(--soft2);border-color:var(--line);}
+  html[data-theme="dark"] .usage-providers .u-status.bad{background:#3A2A1B;border-color:#5A4128;color:#F5C48A;}
+  html[data-theme="dark"] .usage-limits{background:var(--card);border-color:var(--card-line);}
+  html[data-theme="dark"] .usage-limits input{background:var(--soft2);border-color:var(--line);color:var(--ink);}
+  html[data-theme="dark"] .usage-attempt .a-name{color:var(--chip-ink);}
 </style>
 </head>
 <body>
@@ -1175,9 +1588,68 @@
                 <p class="test-result" id="worker-result" hidden></p>
               </section>
           </details>
+
+              <section class="sec" id="sec-usage">
+                <div class="sec-title with-btn">
+                  <span>📊 AI 사용량·비용</span>
+                  <button type="button" class="mini" id="usage-refresh">새로고침</button>
+                </div>
+                <p class="hint">이 브라우저가 부른 AI 호출을 시도(attempt) 단위로 모아 둡니다. 실패 후 다음 엔진으로 넘어간 경우도 각각 세요. 금액은 공개 요금표로 계산한 <b>예상치</b>이고, 무료 모델은 0원이에요. 기록은 <b>이 브라우저(localStorage)</b>에만 저장됩니다.</p>
+
+                <div class="usage-cards" id="usage-cards">
+                  <div class="usage-card"><span class="u-k">호출</span><b id="usage-calls">–</b><small id="usage-calls-sub">최근 30일</small></div>
+                  <div class="usage-card"><span class="u-k">성공·폴백·오류</span><b id="usage-split">–</b><small>건수</small></div>
+                  <div class="usage-card"><span class="u-k">예상 비용</span><b id="usage-cost">–</b><small id="usage-cost-sub">USD · 원화 참고치</small></div>
+                </div>
+                <div class="usage-cards">
+                  <div class="usage-card"><span class="u-k">이번 달 사용</span><b id="usage-month-cost">–</b><small id="usage-month-sub">이번 달 누적</small></div>
+                  <div class="usage-card"><span class="u-k">월간 예상</span><b id="usage-month-proj">–</b><small>지난 일수 기준 추정</small></div>
+                  <div class="usage-card"><span class="u-k">평균 응답</span><b id="usage-latency">–</b><small id="usage-latency-sub">시도 단위 평균</small></div>
+                </div>
+
+                <div class="usage-providers" id="usage-providers"></div>
+                <div class="usage-models" id="usage-models">
+                  <p class="usage-empty">아직 기록이 없어요. AI와 대화하면 여기에 쌓입니다.</p>
+                </div>
+                <div class="usage-days" id="usage-days" hidden></div>
+
+                <div class="usage-limits" id="usage-limits">
+                  <div class="u-limit-field">
+                    <span>분당 호출 한도</span>
+                    <input id="usage-limit-minute" type="number" min="1" max="600" inputmode="numeric" aria-label="분당 호출 한도">
+                  </div>
+                  <div class="u-limit-field">
+                    <span>일일 호출 한도</span>
+                    <input id="usage-limit-day" type="number" min="1" max="100000" inputmode="numeric" aria-label="일일 호출 한도">
+                  </div>
+                  <button type="button" class="mini" id="usage-limit-save">한도 저장</button>
+                  <p class="u-limit-note" id="usage-limit-note"></p>
+                </div>
+
+                <div class="usage-row usage-toggle-row">
+                  <span class="u-name">연속 실패·한도 초과 시 자동 건너뛰기<small id="usage-autoskip-note"></small></span>
+                  <label class="switch"><input type="checkbox" id="usage-autoskip" aria-label="연속 실패 시 자동 건너뛰기"><span class="track"></span></label>
+                </div>
+
+                <div class="usage-attempts" id="usage-attempts" hidden></div>
+                <p class="usage-note" id="usage-note" hidden></p>
+                <div class="btn-row">
+                  <button type="button" class="btn" id="usage-reset">기록 초기화</button>
+                </div>
+              </section>
       </div>
 
       <div class="tab-panel" id="panel-chat" role="tabpanel" aria-labelledby="tab-chat" hidden>
+        <section class="sec" id="sec-theme">
+          <div class="sec-title">🎨 화면 테마</div>
+          <div class="seg" role="group" aria-label="화면 테마 선택">
+            <button type="button" class="seg-btn" id="theme-system" data-theme-mode="system" aria-pressed="true">🌗 시스템 자동</button>
+            <button type="button" class="seg-btn" id="theme-light" data-theme-mode="light" aria-pressed="false">☀️ 라이트</button>
+            <button type="button" class="seg-btn" id="theme-dark" data-theme-mode="dark" aria-pressed="false">🌙 다크</button>
+          </div>
+          <p class="hint" id="theme-hint">기본은 기기 설정을 따라가요. 고른 값은 이 브라우저에만 저장되고, 위쪽 상태바 색도 함께 바뀝니다.</p>
+        </section>
+
         <section class="sec" id="sec-chat">
           <div class="sec-title">대화 <em id="room-label">전체</em></div>
           <p class="hint" id="retention-info">보낸 지 30일이 지난 메시지는 자동으로 지워져요.</p>
@@ -2732,7 +3204,7 @@
       col.appendChild(h('div', 'final-tag', tag));
     }
     var line = h('div', 'line');
-    line.appendChild(m.final ? finalCardEl(m.text) : richText('div', 'bubble', m.text));
+    line.appendChild(m.final ? finalCardEl(m) : richText('div', 'bubble', m.text));
     line.appendChild(h('div', 'time', fmtTime(m.ts)));
     col.appendChild(line);
     var chips = linksEl(m.links);
@@ -2774,16 +3246,24 @@
 
   // 📌 3단계 최종 종합 카드 — 4개 블록을 제목이 붙은 카드로 나눠 보여 줍니다.
   //    예전에 저장된(제목 없는) 종합 답변은 말풍선 그대로 보여 줍니다.
-  function finalCardEl(text) {
+  function finalCardEl(m) {
+    var msg = (m && typeof m === 'object') ? m : null;
+    var text = msg ? msg.text : m;
     var parsed = parseFinalBlocks(text);
     if (parsed.found < 2) return richText('div', 'bubble', text);
 
     var wrap = h('div', 'final-card');
-    DEBATE_BLOCKS.forEach(function (b) {
+    // 사진처럼 3단계가 한눈에 들어오도록 제목을 먼저 붙입니다.
+    wrap.appendChild(h('div', 'fc-title', '3단계 · 근거 기반 종합'));
+
+    DEBATE_BLOCKS.forEach(function (b, i) {
       var body = tidyLines(parsed.sections[b.key]);
       if (!body.length) return;
       var sec = h('div', 'fc-sec fc-' + b.key);
-      sec.appendChild(h('div', 'fc-hd', b.title));
+      var head = h('div', 'fc-head');
+      head.appendChild(h('span', 'fc-num', DEBATE_NUMS[i] || ''));
+      head.appendChild(h('div', 'fc-hd', b.title));
+      sec.appendChild(head);
       var box = h('div', 'fc-bd');
       body.forEach(function (ln) {
         if (!ln.trim()) { box.appendChild(h('div', 'fc-gap')); return; }
@@ -2793,7 +3273,73 @@
       sec.appendChild(box);
       wrap.appendChild(sec);
     });
+
+    // 근거 배지 — 🌐 검색 N · 🧠 자체 지식 N · ⚠️ 근거 미확인 N
+    var ev = debateEvidenceOf(msg);
+    var badges = h('div', 'debate-evidence');
+    badges.appendChild(h('span', null, '🌐 검색 ' + ev.search));
+    badges.appendChild(h('span', null, '🧠 자체 지식 ' + ev.self));
+    var ub = h('span', ev.unverified ? 'bad' : null, '⚠️ 근거 미확인 ' + ev.unverified);
+    badges.appendChild(ub);
+    wrap.appendChild(badges);
+
     return wrap;
+  }
+
+  // 종합 카드 아래 근거 배지에 쓸 숫자 — 저장된 값이 없으면 기록에서 다시 셉니다.
+  function debateEvidenceOf(m) {
+    var d = (m && m.debate) || {};
+    var ev = d.evidence;
+    if (ev && typeof ev === 'object') {
+      return {
+        search: Math.max(0, Number(ev.search) || 0),
+        self: Math.max(0, Number(ev.self) || 0),
+        unverified: Math.max(0, Number(ev.unverified) || debateFlagCounts(d).unsure)
+      };
+    }
+    var drafts = [];
+    (Array.isArray(d.stages) ? d.stages : []).forEach(function (st) {
+      if (!/1단계/.test(String((st && st.title) || ''))) return;
+      (st.items || []).forEach(function (it) { drafts.push(it); });
+    });
+    var selfN = 0;
+    drafts.forEach(function (it) {
+      selfN += (String((it && it.text) || '').match(/\[일반\s*추론\]/g) || []).length;
+    });
+    if (!selfN) {
+      selfN = drafts.filter(function (it) {
+        return !/출처\s*있음|검색 출처 \d/.test(String((it && it.text) || ''));
+      }).length;
+    }
+    return {
+      search: (m && Array.isArray(m.links)) ? m.links.length : 0,
+      self: selfN,
+      unverified: debateFlagCounts(d).unsure
+    };
+  }
+
+  // ⚠️ 근거 미확인으로 표시된 주장 — 접힌 과정 박스 밖에서도 바로 보이게 모아 둡니다.
+  function unverifiedEl(m) {
+    var d = (m && m.debate) || {};
+    var rows = [];
+    (Array.isArray(d.stages) ? d.stages : []).forEach(function (st) {
+      if (!/2단계/.test(String((st && st.title) || ''))) return;
+      (st.items || []).forEach(function (it) {
+        var f = parseReviewFlags(it.text);
+        f.unsure.forEach(function (t) { rows.push({ name: it.name || 'AI', text: t }); });
+      });
+    });
+    if (!rows.length) return null;
+
+    var box = h('div', 'unverified-box');
+    box.appendChild(h('div', 'ub-hd', '⚠️ 근거 미확인으로 표시된 주장'));
+    rows.slice(0, 8).forEach(function (r) {
+      var row = h('div', 'ub-row');
+      row.appendChild(h('b', null, r.name));
+      row.appendChild(document.createTextNode(' ' + r.text));
+      box.appendChild(row);
+    });
+    return box;
   }
 
   // 💬 AI 토론 과정 보기 — 접고 펼 수 있는 박스
@@ -2802,8 +3348,16 @@
     var box = document.createElement('details');
     box.className = 'debate';
     var n = (d.participants && d.participants.length) || 1;
+    var nDraft = 0, nReview = 0;
+    (d.stages || []).forEach(function (st) {
+      if (/1단계/.test(String(st.title || ''))) nDraft += (st.items || []).length;
+      if (/2단계/.test(String(st.title || ''))) nReview += (st.items || []).length;
+    });
+    var nUnsure = debateFlagCounts(d).unsure;
     var sum = document.createElement('summary');
-    sum.textContent = '💬 AI 토론 과정 보기 (' + n + '명 참여)';
+    sum.textContent = '💬 AI 토론 과정 보기 · ' + n + '명 참여' +
+      ' · 초안 ' + nDraft + ' · 반론 ' + nReview +
+      (nUnsure ? ' · ⚠️ 근거 미확인 ' + nUnsure : '');
     box.appendChild(sum);
 
     (d.stages || []).forEach(function (st) {
@@ -2852,7 +3406,17 @@
       if (items.length) stages.push({ title: String(st.title || '토론').slice(0, 40), items: items });
     });
     if (!stages.length) return null;
-    return { participants: parts, stages: stages };
+
+    // 근거 배지 숫자(새로 저장된 기록에만 있음)
+    var ev = null;
+    if (d.evidence && typeof d.evidence === 'object') {
+      ev = {
+        search: Math.max(0, Number(d.evidence.search) || 0),
+        self: Math.max(0, Number(d.evidence.self) || 0),
+        unverified: Math.max(0, Number(d.evidence.unverified) || 0)
+      };
+    }
+    return { participants: parts, stages: stages, evidence: ev };
   }
 
   function typingEl(who) {
@@ -2924,6 +3488,10 @@
       if (m.who !== 'user' && !AI[m.who]) return;
       if (m.debate) feed.appendChild(debateEl(m));
       feed.appendChild(rowEl(m, m.who !== 'user' && m.who === prevWho));
+      if (m.debate && m.final) {
+        var ub = unverifiedEl(m);
+        if (ub) feed.appendChild(ub);
+      }
       prevWho = m.who;
     });
 
@@ -3136,7 +3704,9 @@
       // 무료 엔진을 모두 시도했거나 유료 엔진이 실패했으면 가짜 데모 답변 대신 사유를 보여 줍니다.
       // 같은 사유(예: 429 한도)가 AI 수만큼 겹쳐 나오지 않게 한 턴에 1번만 붙입니다.
       if (err) {
-        addNoticeOnce('⚠️ ' + (err.freeExhausted ? err.message : AI[who].name + ' 응답 실패: ' + shortErr(err, 140)), room);
+        addNoticeOnce('⚠️ ' + ((err.freeExhausted || err.limitBlocked || err.blockedOnly)
+          ? err.message
+          : AI[who].name + ' 응답 실패: ' + shortErr(err, 140)), room);
       } else {
         addNoticeOnce('⚠️ ' + AI[who].name + ' 답변을 받지 못했어요. 잠시 뒤 다시 불러 주세요.', room);
       }
@@ -3227,6 +3797,7 @@
     { key: 'split', title: '일치점 · 차이점', alias: ['일치점과 차이점', '공통점과 차이점', '합의점과 차이점', '일치와 차이'] },
     { key: 'open', title: '남은 불일치 · 근거 미확인 주의', alias: ['남은 불일치', '남은 쟁점', '근거 미확인 주의', '남은 불일치와 근거 미확인'] }
   ];
+  var DEBATE_NUMS = ['①', '②', '③', '④'];
 
   // 2단계 검토에서 요구하는 표시 4종
   var DEBATE_FLAGS = [
@@ -3524,13 +4095,31 @@
     return stages;
   }
 
+  // 종합 카드의 근거 배지 숫자 — 초안에 붙은 검색 출처, 자체 지식으로 답한 초안, 근거 미확인 표시
+  function debateEvidence(drafts, reviews, links) {
+    var unsure = 0;
+    (reviews || []).forEach(function (r) { unsure += parseReviewFlags(r.text).unsure.length; });
+    var selfN = 0;
+    (drafts || []).forEach(function (d) {
+      selfN += (String(d.text || '').match(/\[일반\s*추론\]/g) || []).length;
+    });
+    if (!selfN) {
+      selfN = (drafts || []).filter(function (d) { return !(d.links || []).length; }).length;
+    }
+    return { search: (links || []).length, self: selfN, unverified: unsure };
+  }
+
   function finishDebate(repWho, text, links, drafts, reviews, status) {
     var names = drafts.map(function (d) { return d.name; });
     (reviews || []).forEach(function (r) { if (names.indexOf(r.name) < 0) names.push(r.name); });
     removeMessage(status);
     addMessage(repWho, text, links, CHANNEL_ALL, {
       final: true,
-      debate: { participants: names, stages: debateStages(drafts, reviews) }
+      debate: {
+        participants: names,
+        stages: debateStages(drafts, reviews),
+        evidence: debateEvidence(drafts, reviews, links)
+      }
     });
     setBusy(false);
     render();
@@ -3576,7 +4165,7 @@
     render();
 
     if (!drafts.length) {
-      var why = (lastErr && lastErr.freeExhausted)
+      var why = (lastErr && (lastErr.freeExhausted || lastErr.limitBlocked || lastErr.blockedOnly))
         ? lastErr.message
         : 'AI 초안을 만들지 못했어요. 잠시 후 다시 시도해 주세요.' + (lastErr ? ' (사유: ' + shortErr(lastErr, 90) + ')' : '');
       setDebateStatus(status, '⚠️ ' + why);
@@ -3936,7 +4525,9 @@
 
     // 실패하면 가짜 데모 답변으로 바꾸지 않고, 사유만 알려 주고 원래 답변은 남깁니다.
     if (err) {
-      addMessage('system', '⚠️ ' + (err.freeExhausted ? err.message : AI[who].name + ' 응답 실패: ' + shortErr(err, 140)), null, ch);
+      addMessage('system', '⚠️ ' + ((err.freeExhausted || err.limitBlocked || err.blockedOnly)
+        ? err.message
+        : AI[who].name + ' 응답 실패: ' + shortErr(err, 140)), null, ch);
     }
 
     if (got && got.text) {
@@ -3987,35 +4578,67 @@
       personaExtra: extraBits.join('\n\n')
     };
 
+    // 📊 사용 중지·자동 건너뜀 상태인 공급자는 부르지 않고 다음 엔진으로 넘어갑니다.
+    var blocked = [];
+    var priorFailures = 0;
+    var reserved = false;
+
     for (var i = 0; i < chain.length; i++) {
       var engine = chain[i];
       var viaWorker = !!(base && engine !== 'custom' && workerMap && workerMap[engine]);
       var direct = hasDirectKey(engine, who);
       if (!viaWorker && !direct) continue;      // 키가 없는 엔진은 조용히 건너뜁니다
 
+      var pstat = providerStatus(engine);
+      if (pstat.blocked) { blocked.push(pstat); continue; }
+
+      // 📊 분당·일일 호출 한도 — 넘었으면 실제 호출 전에 막습니다.
+      if (!reserved) { reserveCall(); reserved = true; }
+
       if (viaWorker) {
         attempts++;
+        lastUsageMeta = null;
+        var wt0 = Date.now();
         try {
           var out = await callWorker(who, base, engine, userText, callCtx);
+          usageRecordTry(engine, who, callCtx, 'worker', true, out, Date.now() - wt0, priorFailures, null);
           lastEngine[who] = engine;
           syncStatus();
           return out;
         } catch (err) {
+          usageRecordTry(engine, who, callCtx, 'worker', false, null, Date.now() - wt0, priorFailures, err);
+          priorFailures++;
           lastErr = err;
         }
       }
 
       if (direct) {
         attempts++;
+        lastUsageMeta = null;
+        var dt0 = Date.now();
         try {
           var got = await callEngineDirect(engine, who, callCtx);
+          usageRecordTry(engine, who, callCtx, 'direct', true, got, Date.now() - dt0, priorFailures, null);
           lastEngine[who] = engine;
           syncStatus();
           return got;
         } catch (err2) {
+          usageRecordTry(engine, who, callCtx, 'direct', false, null, Date.now() - dt0, priorFailures, err2);
+          priorFailures++;
           lastErr = err2;
         }
       }
+    }
+
+    // 부를 수 있는 엔진이 모두 사용 중지·자동 건너뜀 상태
+    if (!attempts && blocked.length) {
+      var names = blocked.map(function (b) {
+        return b.label + '(' + (b.disabled ? '사용 중지' : '자동 건너뜀') + ')';
+      }).join(', ');
+      var be = new Error('지금 부를 수 있는 AI가 없어요 — ' + names +
+        '. 설정 › 🔑 API·연결 › 📊 AI 사용량·비용에서 다시 켜 주세요.');
+      be.blockedOnly = true;
+      throw be;
     }
 
     // 키가 하나도 없는 순수 데모 상태 — 예전처럼 데모 답변으로 답합니다.
@@ -4144,6 +4767,13 @@
       data.content.forEach(function (b) { if (b && b.type === 'text' && b.text) out += b.text; });
     }
     if (!out.trim()) throw new Error('빈 응답');
+    var ua = data && data.usage;
+    lastUsageMeta = ua ? {
+      model: model,
+      promptTokens: Number(ua.input_tokens) || 0,
+      completionTokens: Number(ua.output_tokens) || 0,
+      measured: true
+    } : null;
     return out;
   }
 
@@ -4183,6 +4813,13 @@
       out = String(data.choices[0].message.content || '');
     }
     if (!out.trim()) throw new Error('빈 응답');
+    var ou = data && data.usage;
+    lastUsageMeta = ou ? {
+      model: model,
+      promptTokens: Number(ou.prompt_tokens) || 0,
+      completionTokens: Number(ou.completion_tokens) || 0,
+      measured: true
+    } : null;
     return out;
   }
 
@@ -4421,6 +5058,13 @@
     var parsed = geminiText(got.data);
     var out = parsed.text;
     var cand = parsed.cand;
+    var um = got.data && got.data.usageMetadata;
+    lastUsageMeta = um ? {
+      model: got.model,
+      promptTokens: Number(um.promptTokenCount) || 0,
+      completionTokens: Number(um.candidatesTokenCount) || 0,
+      measured: true
+    } : null;
 
     if (!out.trim()) {
       if (cand && cand.finishReason === 'SAFETY') throw new Error('Gemini가 안전 정책으로 답하지 않았어요');
@@ -4524,6 +5168,13 @@
 
     var out = groqText(got.data);
     if (!out.trim()) throw new Error('Groq 빈 응답');
+    var gu = got.data && got.data.usage;
+    lastUsageMeta = gu ? {
+      model: got.model,
+      promptTokens: Number(gu.prompt_tokens) || 0,
+      completionTokens: Number(gu.completion_tokens) || 0,
+      measured: true
+    } : null;
 
     if (got.model !== model) {
       if (!c) state.settings.groqModel = got.model;
@@ -4604,6 +5255,13 @@
     var ch = data && Array.isArray(data.choices) ? data.choices[0] : null;
     var out = ch && ch.message ? String(ch.message.content || '') : '';
     if (!out.trim()) throw new Error('빈 응답');
+    var cu = data && data.usage;
+    lastUsageMeta = cu ? {
+      model: model,
+      promptTokens: Number(cu.prompt_tokens) || 0,
+      completionTokens: Number(cu.completion_tokens) || 0,
+      measured: true
+    } : null;
     return out;
   }
 
@@ -4641,6 +5299,13 @@
     var ch = data && Array.isArray(data.choices) ? data.choices[0] : null;
     var out = ch && ch.message ? String(ch.message.content || '') : '';
     if (!out.trim()) throw new Error('OpenRouter 빈 응답');
+    var ru = data && data.usage;
+    lastUsageMeta = ru ? {
+      model: model,
+      promptTokens: Number(ru.prompt_tokens) || 0,
+      completionTokens: Number(ru.completion_tokens) || 0,
+      measured: true
+    } : null;
     return out;
   }
 
@@ -4680,6 +5345,13 @@
 
     var text = String(data.answer || data.text || data.reply || '');
     if (!text.trim()) throw new Error('Worker 빈 응답');
+    var wu = data.usage || data.tokenUsage || null;
+    lastUsageMeta = wu ? {
+      model: String(data.model || modelForEngine(engine, who) || ''),
+      promptTokens: Number(wu.prompt_tokens || wu.promptTokens || wu.input_tokens) || 0,
+      completionTokens: Number(wu.completion_tokens || wu.completionTokens || wu.output_tokens) || 0,
+      measured: true
+    } : null;
     return { text: text, links: normalizeLinks(data.links) };
   }
 
@@ -4971,6 +5643,1036 @@
     return { text: out, links: links };
   }
 
+  /* ── 🎨 화면 테마 (시스템 자동 / 라이트 / 다크) ──────────
+     고른 값은 이 브라우저에만 저장하고, 위쪽 상태바 색(theme-color)도 함께 바꿉니다. */
+  var THEME_KEY = 'setchat.theme';
+  var THEME_META = { light: '#FFFFFF', dark: '#0F1115' };
+
+  function themeMode() {
+    try {
+      var v = localStorage.getItem(THEME_KEY);
+      return (v === 'light' || v === 'dark' || v === 'system') ? v : 'system';
+    } catch (e) { return 'system'; }
+  }
+
+  function systemDark() {
+    try { return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); }
+    catch (e) { return false; }
+  }
+
+  function resolvedTheme(mode) {
+    return (mode === 'dark' || (mode === 'system' && systemDark())) ? 'dark' : 'light';
+  }
+
+  function syncThemeButtons(mode) {
+    ['system', 'light', 'dark'].forEach(function (n) {
+      var b = document.getElementById('theme-' + n);
+      if (!b) return;
+      var on = n === mode;
+      b.className = 'seg-btn' + (on ? ' on' : '');
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+
+  function applyTheme(mode, announce) {
+    var m = (mode === 'light' || mode === 'dark' || mode === 'system') ? mode : 'system';
+    var theme = resolvedTheme(m);
+    var root = document.documentElement;
+    root.setAttribute('data-theme', theme);
+    root.setAttribute('data-theme-mode', m);
+
+    // 모바일 브라우저 상단바 색도 같이 바뀌게 합니다.
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', THEME_META[theme]);
+
+    try { localStorage.setItem(THEME_KEY, m); } catch (e) {}
+    syncThemeButtons(m);
+
+    if (announce) {
+      if (m === 'system') toast('기기 설정을 따라가요 — 지금은 ' + (theme === 'dark' ? '다크' : '라이트'));
+      else toast(theme === 'dark' ? '🌙 다크 모드로 바꿨어요' : '☀️ 라이트 모드로 바꿨어요');
+    }
+  }
+
+  function bindTheme() {
+    ['system', 'light', 'dark'].forEach(function (n) {
+      var b = document.getElementById('theme-' + n);
+      if (b) b.addEventListener('click', function () { applyTheme(n, true); });
+    });
+
+    // '시스템 자동'일 때는 기기 설정이 바뀌면 바로 따라갑니다.
+    try {
+      var mq = window.matchMedia('(prefers-color-scheme: dark)');
+      var onChange = function () { if (themeMode() === 'system') applyTheme('system', false); };
+      if (mq.addEventListener) mq.addEventListener('change', onChange);
+      else if (mq.addListener) mq.addListener(onChange);
+    } catch (e) {}
+
+    applyTheme(themeMode(), false);
+  }
+
+  /* ── 📊 AI 사용량·비용 (이 브라우저에만 저장) ─────────────────
+     요청 한 건이 아니라 시도(attempt) 단위로 남깁니다. Gemini 가 한도(429)로 실패해
+     Groq 으로 넘어갔다면 실패 시도와 성공 시도를 각각 기록해요.
+       시도: 공급자 · 모델 · 성공/폴백/오류 · 응답 시간(ms) · 토큰 · 예상 비용 · 무료/유료
+     · 토큰: 공급자가 usage 를 주면 실측, 없으면 글자 수 추정(estimated)
+     · 비용: 공개 요금표로 계산한 예상치(무료 모델은 0원)
+     · 월간 예상: 이번 달 누적 ÷ 지난 일수 × 이번 달 일수 */
+  var USAGE_KEY = 'setchat.usage.v1';
+  var USD_KRW = 1380;                 // 원화 참고 환율
+  var USAGE_DAYS_KEPT = 60;           // 기록 보관 일수
+  var MAX_ATTEMPTS_PER_DAY = 300;
+
+  var PROVIDER_LABEL = {
+    gemini: 'Gemini', groq: 'Groq', openrouter: 'OpenRouter',
+    openai: 'OpenAI', anthropic: 'Anthropic', custom: '커스텀 API'
+  };
+  var PROVIDER_KEYS = ['gemini', 'groq', 'openrouter', 'openai', 'anthropic', 'custom'];
+
+  // 100만 토큰당 USD [입력, 출력] — 공개 요금표를 참고한 값
+  var USAGE_PRICES = {
+    openai: {
+      'gpt-4o-mini': [0.15, 0.6],
+      'gpt-4o': [2.5, 10],
+      'gpt-4.1': [2.0, 8.0],
+      'o3-mini': [1.1, 4.4],
+      _default: [2.5, 10]
+    },
+    anthropic: {
+      'claude-sonnet-4-5': [3, 15],
+      'claude-haiku-4-5': [1, 5],
+      'claude-opus-4-1': [15, 75],
+      _default: [3, 15]
+    },
+    gemini: {
+      'gemini-2.5-flash': [0.3, 2.5],
+      'gemini-2.5-pro': [1.25, 10]
+    },
+    groq: {
+      'llama-3.3-70b-versatile': [0.59, 0.79]
+    }
+  };
+
+  // 무료로 쓰는 모델(자동 운영 기본값 포함). 여기 없으면 유료로 봅니다.
+  var USAGE_FREE_MODELS = {
+    gemini: ['gemini-3.5-flash-lite', 'gemini-3.8-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'],
+    groq: ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b', 'qwen/qwen3-32b', 'llama-3.1-8b-instant'],
+    openrouter: ['openrouter/free', 'openrouter/auto/free']
+  };
+
+  var USAGE_DEFAULT_LIMITS = { minuteLimit: 40, dayLimit: 1000 };
+  var USAGE_DEFAULT_AUTOSKIP = { enabled: true, failureThreshold: 3, cooldownMs: 5 * 60 * 1000 };
+
+  function usageBlankBucket() {
+    return {
+      calls: 0, attempts: 0, ok: 0, fallback: 0, error: 0,
+      promptTokens: 0, completionTokens: 0, costUsd: 0,
+      latencyMsTotal: 0, latencyCount: 0, maxLatencyMs: 0,
+      measuredTokens: 0, estimatedTokens: 0
+    };
+  }
+
+  function usageBlankDay() {
+    var d = usageBlankBucket();
+    d.freeCalls = 0;
+    d.paidCalls = 0;
+    d.byProvider = {};
+    d.byModel = {};
+    d.attemptLog = [];
+    return d;
+  }
+
+  function usageRound6(n) { return Math.round((Number(n) || 0) * 1e6) / 1e6; }
+
+  function usageLoad() {
+    var raw = null;
+    try { raw = localStorage.getItem(USAGE_KEY); } catch (e) { raw = null; }
+    var data = null;
+    if (raw) {
+      try { data = JSON.parse(raw); } catch (e) { data = null; }
+    }
+    if (!data || typeof data !== 'object') data = {};
+    if (!data.days || typeof data.days !== 'object') data.days = {};
+    if (!data.totals || typeof data.totals !== 'object') data.totals = usageBlankBucket();
+
+    var c = (data.controls && typeof data.controls === 'object') ? data.controls : {};
+    var disabled = Array.isArray(c.disabledProviders) ? c.disabledProviders.filter(function (p) {
+      return PROVIDER_KEYS.indexOf(String(p)) >= 0;
+    }) : [];
+    var auto = (c.autoSkip && typeof c.autoSkip === 'object') ? c.autoSkip : {};
+    var lim = (c.limits && typeof c.limits === 'object') ? c.limits : {};
+    data.controls = {
+      disabledProviders: disabled,
+      autoSkip: {
+        enabled: auto.enabled !== false,
+        failureThreshold: Math.max(1, Math.min(20, Number(auto.failureThreshold) || USAGE_DEFAULT_AUTOSKIP.failureThreshold)),
+        cooldownMs: Math.max(5000, Math.min(24 * 60 * 60 * 1000, Number(auto.cooldownMs) || USAGE_DEFAULT_AUTOSKIP.cooldownMs))
+      },
+      limits: {
+        minuteLimit: Math.max(1, Math.min(600, Number(lim.minuteLimit) || USAGE_DEFAULT_LIMITS.minuteLimit)),
+        dayLimit: Math.max(1, Math.min(100000, Number(lim.dayLimit) || USAGE_DEFAULT_LIMITS.dayLimit))
+      },
+      health: (c.health && typeof c.health === 'object') ? c.health : {}
+    };
+    if (typeof data.updatedAt !== 'number') data.updatedAt = 0;
+    return data;
+  }
+
+  var usage = usageLoad();
+
+  function usageSave() {
+    usage.updatedAt = Date.now();
+    // 오래된 날짜는 버립니다.
+    var keys = Object.keys(usage.days).sort();
+    while (keys.length > USAGE_DAYS_KEPT) delete usage.days[keys.shift()];
+    try {
+      localStorage.setItem(USAGE_KEY, JSON.stringify(usage));
+    } catch (e) {
+      // 저장 공간이 부족하면 최근 7일만 남기고 다시 시도합니다.
+      var keep = Object.keys(usage.days).sort().slice(-7);
+      var days = {};
+      keep.forEach(function (k) { days[k] = usage.days[k]; });
+      usage.days = days;
+      try { localStorage.setItem(USAGE_KEY, JSON.stringify(usage)); } catch (e2) {}
+    }
+  }
+
+  function usageTodayKey(ts) {
+    var d = ts ? new Date(ts) : new Date();
+    return d.getFullYear() + '-' + two(d.getMonth() + 1) + '-' + two(d.getDate());
+  }
+
+  function usageMonthKey(key) { return String(key || '').slice(0, 7); }
+
+  function usageTierOf(provider, model) {
+    var p = String(provider || '').toLowerCase();
+    var m = String(model || '').toLowerCase();
+    if (!p) return 'free';
+    if (p === 'openai' || p === 'anthropic' || p === 'custom') return 'paid';
+    if (USAGE_FREE_MODELS[p] && USAGE_FREE_MODELS[p].indexOf(m) >= 0) return 'free';
+    if (p === 'gemini') {
+      if (USAGE_PRICES.gemini[m]) return 'paid';
+      return /flash-lite|flash$/.test(m) || !m ? 'free' : 'paid';
+    }
+    if (p === 'groq') return USAGE_PRICES.groq[m] ? 'paid' : 'free';
+    if (p === 'openrouter') return m.indexOf('free') >= 0 ? 'free' : 'paid';
+    if (/[:/_-]free$/.test(m)) return 'free';
+    return 'paid';
+  }
+
+  function usagePriceOf(provider, model) {
+    var table = USAGE_PRICES[String(provider || '').toLowerCase()];
+    if (!table) return null;
+    var m = String(model || '').toLowerCase();
+    if (table[m]) return table[m];
+    return table._default || null;
+  }
+
+  // 글자 수로 토큰을 어림합니다(공급자가 usage 를 주지 않을 때).
+  function estimateTokens(text) {
+    var s = String(text === null || text === undefined ? '' : text);
+    if (!s) return 0;
+    var hangul = (s.match(/[가-힣]/g) || []).length;
+    var rest = s.replace(/[가-힣]/g, ' ');
+    var words = rest.match(/[A-Za-z0-9_]+/g) || [];
+    var latin = 0;
+    words.forEach(function (w) { latin += Math.max(1, Math.ceil(w.length / 4)); });
+    var marks = (rest.match(/[.,!?;:()\[\]{}"'`~@#$%^&*+=|\\/<>-]/g) || []).length;
+    return Math.max(1, Math.round(hangul * 1.05 + latin + marks * 0.3));
+  }
+
+  function estimatePromptTokens(messages, system) {
+    var n = 0;
+    (Array.isArray(messages) ? messages : []).forEach(function (m) {
+      n += estimateTokens(m && m.content) + 4;
+    });
+    if (system) n += estimateTokens(system) + 4;
+    return n;
+  }
+
+  function usageDay(key) {
+    var day = usage.days[key];
+    if (!day || typeof day !== 'object') {
+      day = usageBlankDay();
+      usage.days[key] = day;
+    }
+    if (!day.byProvider || typeof day.byProvider !== 'object') day.byProvider = {};
+    if (!day.byModel || typeof day.byModel !== 'object') day.byModel = {};
+    if (!Array.isArray(day.attemptLog)) day.attemptLog = [];
+    return day;
+  }
+
+  function usageHealth(provider) {
+    var key = String(provider || '').toLowerCase();
+    var h = usage.controls.health[key];
+    if (!h || typeof h !== 'object') {
+      h = { consecutiveFailures: 0, lastError: '', lastFailureAt: 0, skippedUntil: 0, skippedReason: '', lastOkAt: 0 };
+      usage.controls.health[key] = h;
+    }
+    return h;
+  }
+
+  // 공급자 상태: 수동 사용 중지 / 연속 실패 자동 건너뜀 / 정상
+  function providerStatus(provider) {
+    var key = String(provider || '').toLowerCase();
+    var h = usageHealth(key);
+    var now = Date.now();
+    var manual = usage.controls.disabledProviders.indexOf(key) >= 0;
+    var autoUntil = Number(h.skippedUntil) || 0;
+    var auto = !manual && usage.controls.autoSkip.enabled && autoUntil > now;
+
+    // 기다리는 시간이 지나면 자동 건너뜀을 풉니다.
+    if (!manual && autoUntil && autoUntil <= now) {
+      h.skippedUntil = 0;
+      h.skippedReason = '';
+      h.consecutiveFailures = 0;
+    }
+
+    return {
+      provider: key,
+      label: PROVIDER_LABEL[key] || key,
+      disabled: manual,
+      skipped: auto,
+      blocked: manual || auto,
+      reason: manual ? 'manual' : (auto ? 'auto' : ''),
+      message: manual
+        ? '설정에서 사용 중지했어요.'
+        : (auto ? ('자동 건너뜀: ' + (h.skippedReason || '연속 실패')) : ''),
+      skippedUntil: manual ? 0 : autoUntil,
+      consecutiveFailures: Number(h.consecutiveFailures) || 0,
+      lastError: String(h.lastError || '')
+    };
+  }
+
+  // 📊 시도 하나를 기록합니다.
+  function recordAttempt(input) {
+    var o = input || {};
+    var provider = String(o.provider || 'unknown').slice(0, 40).toLowerCase();
+    var model = String(o.model || '').slice(0, 120);
+    var ok = typeof o.ok === 'boolean' ? o.ok : false;
+    var outcome = ok ? (o.outcome === 'fallback' ? 'fallback' : 'ok') : 'error';
+    var tier = (o.tier === 'paid' || o.tier === 'free') ? o.tier : usageTierOf(provider, model);
+    var via = o.via === 'worker' ? 'worker' : 'direct';
+    var estimated = o.estimated !== false;
+
+    var prompt = Number.isFinite(o.promptTokens) ? Math.max(0, Math.round(o.promptTokens)) : 0;
+    var completion = Number.isFinite(o.completionTokens) ? Math.max(0, Math.round(o.completionTokens)) : 0;
+    var latency = Number.isFinite(o.latencyMs) ? Math.max(0, Math.min(300000, Math.round(o.latencyMs))) : 0;
+
+    var price = usagePriceOf(provider, model);
+    var cost = 0;
+    if (tier === 'paid' && price) {
+      cost = usageRound6((prompt / 1e6) * price[0] + (completion / 1e6) * price[1]);
+    }
+
+    var key = usageTodayKey();
+    var day = usageDay(key);
+
+    function bump(bucket) {
+      bucket.attempts += 1;
+      if (ok) {
+        if (outcome === 'fallback') bucket.fallback += 1;
+        else bucket.ok += 1;
+      } else {
+        bucket.error += 1;
+      }
+      bucket.promptTokens += prompt;
+      bucket.completionTokens += completion;
+      bucket.costUsd = usageRound6((bucket.costUsd || 0) + cost);
+      bucket.latencyMsTotal += latency;
+      bucket.latencyCount += 1;
+      bucket.maxLatencyMs = Math.max(bucket.maxLatencyMs || 0, latency);
+      if (estimated) bucket.estimatedTokens += 1;
+      else bucket.measuredTokens += 1;
+    }
+
+    day.calls += 1;
+    bump(day);
+    day.freeCalls += tier === 'free' ? 1 : 0;
+    day.paidCalls += tier === 'paid' ? 1 : 0;
+
+    bump(usage.totals);
+    usage.totals.calls += 1;
+    usage.totals.freeCalls = (usage.totals.freeCalls || 0) + (tier === 'free' ? 1 : 0);
+    usage.totals.paidCalls = (usage.totals.paidCalls || 0) + (tier === 'paid' ? 1 : 0);
+
+    var pb = day.byProvider[provider];
+    if (!pb) pb = day.byProvider[provider] = usageBlankBucket();
+    pb.calls += 1;
+    bump(pb);
+
+    var mkey = provider + '|' + model;
+    var mb = day.byModel[mkey];
+    if (!mb) {
+      mb = day.byModel[mkey] = usageBlankBucket();
+      mb.provider = provider;
+      mb.model = model;
+      mb.tier = tier;
+    }
+    mb.calls += 1;
+    bump(mb);
+
+    var attempt = {
+      at: Date.now(),
+      provider: provider,
+      model: model,
+      ok: ok,
+      outcome: outcome,
+      reason: String(o.reason || '').slice(0, 120),
+      latencyMs: latency,
+      promptTokens: prompt,
+      completionTokens: completion,
+      totalTokens: prompt + completion,
+      estimated: estimated,
+      tier: tier,
+      via: via,
+      costUsd: cost
+    };
+    day.attemptLog.push(attempt);
+    if (day.attemptLog.length > MAX_ATTEMPTS_PER_DAY) {
+      day.attemptLog.splice(0, day.attemptLog.length - MAX_ATTEMPTS_PER_DAY);
+    }
+
+    // 공급자 건강 상태 — 연속 실패면 잠시 자동 건너뜁니다.
+    var countHealth = o.countHealth !== false;
+    var h = usageHealth(provider);
+    if (countHealth) {
+      if (ok) {
+        h.consecutiveFailures = 0;
+        h.lastOkAt = attempt.at;
+        h.skippedUntil = 0;
+        h.skippedReason = '';
+      } else {
+        h.consecutiveFailures = (Number(h.consecutiveFailures) || 0) + 1;
+        h.lastError = String(o.reason || '요청 실패').slice(0, 120);
+        h.lastFailureAt = attempt.at;
+        if (usage.controls.autoSkip.enabled && h.consecutiveFailures >= usage.controls.autoSkip.failureThreshold) {
+          h.skippedUntil = attempt.at + usage.controls.autoSkip.cooldownMs;
+          h.skippedReason = /quota|한도|429|402/i.test(String(o.reason || '')) ? '한도 초과' : '연속 실패';
+        }
+      }
+    }
+
+    usageSave();
+    if (el.modal && el.modal.classList.contains('open') && !el.modal.hidden) {
+      // 설정 창이 열려 있으면 숫자를 바로 갱신합니다(과한 렌더는 피하려고 한 번만 미룹니다).
+      if (usageRenderTimer) clearTimeout(usageRenderTimer);
+      usageRenderTimer = setTimeout(function () { renderUsage(usageSummary(30)); }, 150);
+    }
+    return attempt;
+  }
+
+  var usageRenderTimer = null;
+  var lastUsageMeta = null;   // 방금 부른 엔진이 알려 준 토큰 사용량
+
+  // 분당·일일 호출 한도 — 넘으면 호출을 막고 안내합니다.
+  var usageClock = { dayKey: '', dayCount: 0, minuteStart: 0, minuteCount: 0 };
+
+  function usageLimitStatus() {
+    var lim = usage.controls.limits;
+    var now = Date.now();
+    var day = usageTodayKey();
+    if (usageClock.dayKey !== day) {
+      var d = usage.days[day];
+      usageClock = { dayKey: day, dayCount: d ? (Number(d.calls) || 0) : 0, minuteStart: now, minuteCount: 0 };
+    }
+    if (now - usageClock.minuteStart >= 60 * 1000) {
+      usageClock.minuteStart = now;
+      usageClock.minuteCount = 0;
+    }
+    return {
+      minuteLimit: lim.minuteLimit,
+      dayLimit: lim.dayLimit,
+      usedThisMinute: usageClock.minuteCount,
+      usedToday: usageClock.dayCount,
+      remainingMinute: Math.max(0, lim.minuteLimit - usageClock.minuteCount),
+      remainingToday: Math.max(0, lim.dayLimit - usageClock.dayCount),
+      retryAfterSec: Math.max(1, Math.ceil((60 * 1000 - (now - usageClock.minuteStart)) / 1000))
+    };
+  }
+
+  function reserveCall() {
+    var st = usageLimitStatus();
+    if (st.usedToday >= st.dayLimit) {
+      var de = new Error('오늘 AI 호출 한도(' + st.dayLimit + '회)를 모두 썼어요. 내일 다시 시도하거나 설정 › 🔑 API·연결 › 📊 AI 사용량·비용에서 한도를 늘려 주세요.');
+      de.limitBlocked = true;
+      de.status = 429;
+      throw de;
+    }
+    if (st.usedThisMinute >= st.minuteLimit) {
+      var me = new Error('1분에 ' + st.minuteLimit + '회까지 부를 수 있어요. ' + st.retryAfterSec + '초 뒤에 다시 시도해 주세요.');
+      me.limitBlocked = true;
+      me.status = 429;
+      throw me;
+    }
+    usageClock.minuteCount += 1;
+    usageClock.dayCount += 1;
+    return st;
+  }
+
+  function usageModelName(engine, who) {
+    if (lastUsageMeta && lastUsageMeta.model) return String(lastUsageMeta.model);
+    var m = modelForEngine(engine, who);
+    if (m) return m;
+    if (isCustomKey(who)) {
+      var c = customById(who);
+      if (c && c.model) return String(c.model);
+    }
+    return '';
+  }
+
+  function usageTokensFor(who, ctx, outText) {
+    var measured = !!(lastUsageMeta && lastUsageMeta.measured &&
+      (Number(lastUsageMeta.promptTokens) > 0 || Number(lastUsageMeta.completionTokens) > 0));
+    if (measured) {
+      return {
+        promptTokens: Math.max(0, Math.round(Number(lastUsageMeta.promptTokens) || 0)),
+        completionTokens: Math.max(0, Math.round(Number(lastUsageMeta.completionTokens) || 0)),
+        estimated: false
+      };
+    }
+    var prompt = 0;
+    try { prompt = estimatePromptTokens(historyFor(who, ctx), personaFor(who, ctx)); }
+    catch (e) { prompt = 0; }
+    return { promptTokens: prompt, completionTokens: estimateTokens(outText || ''), estimated: true };
+  }
+
+  // replyFor 가 엔진을 부를 때마다 시도 하나를 남깁니다.
+  function usageRecordTry(engine, who, ctx, via, ok, out, latencyMs, priorFailures, err) {
+    var tokens = usageTokensFor(who, ctx, ok ? (out && out.text) : '');
+    var status = errStatus(err);
+    recordAttempt({
+      provider: engine,
+      model: usageModelName(engine, who),
+      ok: ok,
+      outcome: ok ? (priorFailures > 0 ? 'fallback' : 'ok') : 'error',
+      latencyMs: latencyMs,
+      promptTokens: tokens.promptTokens,
+      completionTokens: tokens.completionTokens,
+      estimated: tokens.estimated,
+      via: via,
+      reason: ok ? '' : shortErr(err, 120),
+      // 설정 오류(400·401)는 잠깐 기다린다고 풀리지 않으니 자동 건너뜀에 넣지 않습니다.
+      countHealth: !(status === 400 || status === 401)
+    });
+  }
+
+  function usageMerge(into, from) {
+    into.calls += Number(from.calls) || 0;
+    into.attempts += Number(from.attempts) || 0;
+    into.ok += Number(from.ok) || 0;
+    into.fallback += Number(from.fallback) || 0;
+    into.error += Number(from.error) || 0;
+    into.promptTokens += Number(from.promptTokens) || 0;
+    into.completionTokens += Number(from.completionTokens) || 0;
+    into.costUsd = usageRound6((into.costUsd || 0) + (Number(from.costUsd) || 0));
+    into.latencyMsTotal += Number(from.latencyMsTotal) || 0;
+    into.latencyCount += Number(from.latencyCount) || 0;
+    into.maxLatencyMs = Math.max(into.maxLatencyMs || 0, Number(from.maxLatencyMs) || 0);
+    into.measuredTokens += Number(from.measuredTokens) || 0;
+    into.estimatedTokens += Number(from.estimatedTokens) || 0;
+  }
+
+  function usageRateOf(b) {
+    var good = (Number(b.ok) || 0) + (Number(b.fallback) || 0);
+    var total = good + (Number(b.error) || 0);
+    return total ? Math.round((good / total) * 1000) / 10 : 0;
+  }
+
+  function usageAvgLatency(b) {
+    var n = Number(b.latencyCount) || 0;
+    return n ? Math.round((Number(b.latencyMsTotal) || 0) / n) : 0;
+  }
+
+  function usageShape(b) {
+    var ok = Number(b.ok) || 0;
+    var fb = Number(b.fallback) || 0;
+    var er = Number(b.error) || 0;
+    var all = ok + fb + er;
+    return {
+      calls: Number(b.calls) || 0,
+      attempts: Number(b.attempts) || 0,
+      ok: ok, fallback: fb, error: er,
+      successCount: ok + fb,
+      failCount: er,
+      successRate: usageRateOf(b),
+      failRate: all ? Math.round((er / all) * 1000) / 10 : 0,
+      promptTokens: Number(b.promptTokens) || 0,
+      completionTokens: Number(b.completionTokens) || 0,
+      totalTokens: (Number(b.promptTokens) || 0) + (Number(b.completionTokens) || 0),
+      measuredTokens: Number(b.measuredTokens) || 0,
+      estimatedTokens: Number(b.estimatedTokens) || 0,
+      costUsd: Number(b.costUsd) || 0,
+      avgLatencyMs: usageAvgLatency(b),
+      maxLatencyMs: Number(b.maxLatencyMs) || 0
+    };
+  }
+
+  // 이번 달 누적·월간 예상
+  function usageMonthSummary() {
+    var today = usageTodayKey();
+    var mk = usageMonthKey(today);
+    var keys = Object.keys(usage.days).filter(function (k) { return k.indexOf(mk) === 0; }).sort();
+    var cost = 0, calls = 0;
+    keys.forEach(function (k) {
+      var day = usage.days[k];
+      cost += Number(day.costUsd) || 0;
+      calls += Number(day.calls) || 0;
+    });
+    var dayOfMonth = Number(today.slice(8, 10)) || 1;
+    var now = new Date();
+    var daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    var projected = dayOfMonth > 0 ? usageRound6((cost / dayOfMonth) * daysInMonth) : cost;
+    return {
+      month: mk,
+      days: keys.length,
+      dayOfMonth: dayOfMonth,
+      daysInMonth: daysInMonth,
+      calls: calls,
+      costUsd: usageRound6(cost),
+      costKrw: Math.round(cost * USD_KRW),
+      projectedUsd: projected,
+      projectedKrw: Math.round(projected * USD_KRW)
+    };
+  }
+
+  // 화면에 그릴 사용량 요약 — 서버판 /api/usage 응답과 같은 모양으로 맞춥니다.
+  function usageSummary(windowDays) {
+    var win = Math.max(1, Math.min(USAGE_DAYS_KEPT, Number(windowDays) || 30));
+    var keys = Object.keys(usage.days).sort().slice(-win).reverse();
+
+    var list = [];
+    var models = {};
+    var providers = {};
+    var totals = usageBlankBucket();
+    var freeCalls = 0, paidCalls = 0;
+
+    keys.forEach(function (key) {
+      var day = usage.days[key];
+      list.push({
+        date: key,
+        calls: Number(day.calls) || 0,
+        attempts: Number(day.attempts) || 0,
+        ok: Number(day.ok) || 0,
+        fallback: Number(day.fallback) || 0,
+        error: Number(day.error) || 0,
+        freeCalls: Number(day.freeCalls) || 0,
+        paidCalls: Number(day.paidCalls) || 0,
+        costUsd: Number(day.costUsd) || 0,
+        avgLatencyMs: usageAvgLatency(day)
+      });
+      usageMerge(totals, day);
+      freeCalls += Number(day.freeCalls) || 0;
+      paidCalls += Number(day.paidCalls) || 0;
+
+      Object.keys(day.byModel || {}).forEach(function (mk) {
+        var m = day.byModel[mk];
+        var agg = models[mk];
+        if (!agg) {
+          agg = models[mk] = usageBlankBucket();
+          agg.provider = m.provider;
+          agg.model = m.model;
+          agg.tier = m.tier;
+        }
+        usageMerge(agg, m);
+      });
+      Object.keys(day.byProvider || {}).forEach(function (pk) {
+        if (!providers[pk]) providers[pk] = usageBlankBucket();
+        usageMerge(providers[pk], day.byProvider[pk]);
+      });
+    });
+
+    var todayKeyStr = usageTodayKey();
+    var todayDay = usage.days[todayKeyStr] || null;
+
+    // 최근 시도 — 최신 5건
+    var log = [];
+    keys.slice().reverse().forEach(function (k) {
+      (usage.days[k].attemptLog || []).forEach(function (a) { log.push(a); });
+    });
+    log = log.slice(-30).reverse();
+
+    var st = usageLimitStatus();
+    var shaped = usageShape(totals);
+
+    return {
+      today: todayKeyStr,
+      windowDays: win,
+      days: list,
+      totals: {
+        calls: shaped.calls, attempts: shaped.attempts,
+        ok: shaped.ok, fallback: shaped.fallback, error: shaped.error,
+        successCount: shaped.successCount, failCount: shaped.failCount,
+        successRate: shaped.successRate,
+        promptTokens: shaped.promptTokens, completionTokens: shaped.completionTokens,
+        totalTokens: shaped.totalTokens,
+        measuredTokens: shaped.measuredTokens, estimatedTokens: shaped.estimatedTokens,
+        costUsd: shaped.costUsd, costKrw: Math.round(shaped.costUsd * USD_KRW),
+        avgLatencyMs: shaped.avgLatencyMs, maxLatencyMs: shaped.maxLatencyMs,
+        freeCalls: freeCalls, paidCalls: paidCalls
+      },
+      models: Object.keys(models).map(function (k) {
+        var m = usageShape(models[k]);
+        m.key = k;
+        m.provider = models[k].provider;
+        m.model = models[k].model;
+        m.tier = models[k].tier;
+        return m;
+      }).sort(function (a, b) { return b.calls - a.calls; }),
+      providers: PROVIDER_KEYS.map(function (p) {
+        var b = providers[p] || usageBlankBucket();
+        var shape = usageShape(b);
+        var ps = providerStatus(p);
+        shape.provider = p;
+        shape.label = PROVIDER_LABEL[p] || p;
+        shape.disabled = ps.disabled;
+        shape.skipped = ps.skipped;
+        shape.blocked = ps.blocked;
+        shape.statusMessage = ps.message;
+        shape.consecutiveFailures = ps.consecutiveFailures;
+        shape.lastError = ps.lastError;
+        return shape;
+      }),
+      latency: { avgMs: shaped.avgLatencyMs, maxMs: shaped.maxLatencyMs, count: totals.latencyCount },
+      tokens: {
+        prompt: shaped.promptTokens, completion: shaped.completionTokens,
+        total: shaped.totalTokens, measured: shaped.measuredTokens, estimated: shaped.estimatedTokens
+      },
+      limits: {
+        minuteLimit: st.minuteLimit, dayLimit: st.dayLimit,
+        usedThisMinute: st.usedThisMinute, usedToday: st.usedToday,
+        remainingToday: st.remainingToday
+      },
+      controls: {
+        disabledProviders: usage.controls.disabledProviders.slice(),
+        autoSkip: {
+          enabled: usage.controls.autoSkip.enabled,
+          failureThreshold: usage.controls.autoSkip.failureThreshold,
+          cooldownMs: usage.controls.autoSkip.cooldownMs
+        }
+      },
+      month: usageMonthSummary(),
+      attempts: log,
+      currency: { usdKrw: USD_KRW, unit: 'USD' },
+      updatedAt: usage.updatedAt,
+      note: '토큰·비용은 공개 요금표로 계산한 예상치예요(usage 가 없으면 글자 수 추정). 실제 청구서와 조금 다를 수 있어요.'
+    };
+  }
+
+  function usageReset() {
+    usage.days = {};
+    usage.totals = usageBlankBucket();
+    usage.totals.freeCalls = 0;
+    usage.totals.paidCalls = 0;
+    usage.controls.health = {};
+    usageSave();
+  }
+
+  /* ── 📊 사용량 카드 그리기 ─────────────── */
+  function fmtCount(n) {
+    var v = Number(n) || 0;
+    try { return v.toLocaleString('ko-KR'); } catch (e) { return String(v); }
+  }
+
+  function fmtWon(n) { return fmtCount(Math.round(Number(n) || 0)) + '원'; }
+
+  function fmtUsd(n) {
+    var v = Number(n) || 0;
+    if (!v) return '$0';
+    if (v < 0.01) return '$' + v.toFixed(4);
+    if (v < 1) return '$' + v.toFixed(3);
+    return '$' + v.toFixed(2);
+  }
+
+  function fmtMs(n) {
+    var v = Number(n) || 0;
+    if (!v) return '–';
+    if (v >= 1000) return (v / 1000).toFixed(1) + '초';
+    return Math.round(v) + 'ms';
+  }
+
+  function fmtUsageTime(ts) {
+    if (!ts) return '';
+    var d = new Date(Number(ts) || 0);
+    return two(d.getMonth() + 1) + '/' + two(d.getDate()) + ' ' + two(d.getHours()) + ':' + two(d.getMinutes());
+  }
+
+  function usageEl(id) { return document.getElementById(id); }
+
+  function usageProviderRow(p) {
+    var row = h('div', 'usage-row' + (p.disabled ? ' off' : ''));
+    row.setAttribute('data-provider', p.provider);
+
+    row.appendChild(h('span', 'u-name', p.label || PROVIDER_LABEL[p.provider] || p.provider));
+
+    if (p.disabled || p.skipped) {
+      row.appendChild(h('span', 'u-status bad', p.disabled ? '사용 중지' : '자동 건너뜀'));
+    }
+
+    var num = fmtCount(p.calls) + '회 · 성공률 ' + (Number(p.successRate) || 0) + '%' +
+      (p.avgLatencyMs ? ' · ' + fmtMs(p.avgLatencyMs) : '') +
+      (p.costUsd ? ' · ' + fmtUsd(p.costUsd) : '');
+    row.appendChild(h('span', 'u-num', num));
+
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'u-act ' + (p.disabled ? 'ok' : 'warn');
+    btn.textContent = p.disabled ? '다시 켜기' : '사용 중지';
+    btn.setAttribute('data-provider', p.provider);
+    btn.setAttribute('data-next', p.disabled ? '0' : '1');
+    btn.setAttribute('aria-label', (p.label || p.provider) + (p.disabled ? ' 다시 켜기' : ' 사용 중지'));
+    row.appendChild(btn);
+
+    row.title = '성공 ' + fmtCount(p.ok) + ' · 폴백 ' + fmtCount(p.fallback) + ' · 실패 ' + fmtCount(p.error) +
+      ' · 시도 ' + fmtCount(p.attempts) + ' · 토큰 ' + fmtCount(p.totalTokens || 0) +
+      (p.lastError ? ' · 마지막 오류: ' + String(p.lastError).slice(0, 60) : '');
+    return row;
+  }
+
+  function renderUsage(data) {
+    if (!data) return;
+    var t = data.totals || {};
+
+    var calls = usageEl('usage-calls');
+    if (calls) calls.textContent = fmtCount(t.calls) + '회';
+    var callsSub = usageEl('usage-calls-sub');
+    if (callsSub) {
+      callsSub.textContent = '최근 ' + (data.windowDays || 30) + '일 · 무료 ' + fmtCount(t.freeCalls) +
+        ' · 유료 ' + fmtCount(t.paidCalls);
+    }
+    var split = usageEl('usage-split');
+    if (split) split.textContent = fmtCount(t.successCount) + ' · ' + fmtCount(t.fallback) + ' · ' + fmtCount(t.failCount);
+
+    var cost = usageEl('usage-cost');
+    if (cost) cost.textContent = fmtUsd(t.costUsd);
+    var costSub = usageEl('usage-cost-sub');
+    if (costSub) {
+      costSub.textContent = t.costUsd
+        ? '약 ' + fmtWon(t.costKrw) + ' · 환율 ' + fmtCount(data.currency && data.currency.usdKrw) + '원'
+        : '무료 호출만 있어요';
+    }
+
+    var month = data.month || {};
+    var mc = usageEl('usage-month-cost');
+    if (mc) mc.textContent = fmtWon(month.costKrw || 0);
+    var ms = usageEl('usage-month-sub');
+    if (ms) ms.textContent = (month.month || '') + ' · 호출 ' + fmtCount(month.calls) + '회';
+    var mp = usageEl('usage-month-proj');
+    if (mp) mp.textContent = fmtWon(month.projectedKrw || 0);
+
+    var lat = data.latency || {};
+    var lt = usageEl('usage-latency');
+    if (lt) lt.textContent = lat.avgMs ? fmtMs(lat.avgMs) : '–';
+    var ls = usageEl('usage-latency-sub');
+    if (ls) ls.textContent = '시도 ' + fmtCount(lat.count) + '번 평균';
+
+    // 공급자별 — 사용 중지/자동 건너뜀과 토글 (기록이 있거나 상태가 있는 것만)
+    var pbox = usageEl('usage-providers');
+    if (pbox) {
+      pbox.innerHTML = '';
+      (Array.isArray(data.providers) ? data.providers : []).filter(function (p) {
+        return (Number(p.calls) || 0) > 0 || p.disabled || p.skipped;
+      }).forEach(function (p) { pbox.appendChild(usageProviderRow(p)); });
+    }
+
+    // 모델별 줄
+    var box = usageEl('usage-models');
+    if (box) {
+      box.innerHTML = '';
+      var models = Array.isArray(data.models) ? data.models.slice(0, 8) : [];
+      if (!models.length) {
+        box.appendChild(h('p', 'usage-empty', '아직 기록이 없어요. AI와 대화하면 여기에 쌓입니다.'));
+      } else {
+        models.forEach(function (m) {
+          var row = h('div', 'usage-row');
+          row.appendChild(h('span', 'u-name', (PROVIDER_LABEL[m.provider] || m.provider || 'AI') +
+            (m.model ? ' · ' + m.model : '')));
+          row.appendChild(h('span', 'u-tier ' + (m.tier === 'paid' ? 'paid' : 'free'), m.tier === 'paid' ? '유료' : '무료'));
+          var num = fmtCount(m.calls) + '회 · 성공률 ' + (Number(m.successRate) || 0) + '%' +
+            (m.error ? ' · 실패 ' + fmtCount(m.error) : '') +
+            (m.costUsd ? ' · ' + fmtUsd(m.costUsd) : '');
+          row.appendChild(h('span', 'u-num', num));
+          row.title = '성공 ' + fmtCount(m.ok) + ' · 폴백 ' + fmtCount(m.fallback) + ' · 실패 ' + fmtCount(m.error) +
+            ' · 토큰 입력 ' + fmtCount(m.promptTokens) + ' / 출력 ' + fmtCount(m.completionTokens) +
+            ' (' + (m.measuredTokens ? '실측 ' : '') + (m.estimatedTokens ? '추정 ' + fmtCount(m.estimatedTokens) : '') + ')' +
+            ' · 평균 ' + fmtMs(m.avgLatencyMs);
+          box.appendChild(row);
+        });
+      }
+    }
+
+    // 최근 14일 막대
+    var dayBox = usageEl('usage-days');
+    if (dayBox) {
+      dayBox.innerHTML = '';
+      var days = Array.isArray(data.days) ? data.days.slice(0, 14).reverse() : [];
+      dayBox.hidden = !days.length;
+      var max = 1;
+      days.forEach(function (d) { max = Math.max(max, Number(d.calls) || 0); });
+      days.forEach(function (d) {
+        var col = h('div', 'usage-day' + (d.date === data.today ? ' on' : ''));
+        col.title = d.date + ' · ' + fmtCount(d.calls) + '회 · ' + fmtUsd(d.costUsd);
+        var bar = h('div', 'bar');
+        bar.style.height = Math.max(2, Math.round((Number(d.calls) || 0) / max * 38)) + 'px';
+        col.appendChild(bar);
+        dayBox.appendChild(col);
+      });
+    }
+
+    // 호출 한도
+    var lim = data.limits || {};
+    var lm = usageEl('usage-limit-minute');
+    if (lm && document.activeElement !== lm) lm.value = String(lim.minuteLimit || '');
+    var ld = usageEl('usage-limit-day');
+    if (ld && document.activeElement !== ld) ld.value = String(lim.dayLimit || '');
+    var ln = usageEl('usage-limit-note');
+    if (ln) {
+      ln.textContent = (lim.usedThisMinute === null || lim.usedThisMinute === undefined)
+        ? '한도는 이 브라우저에 저장돼요.'
+        : '지금 이 브라우저: 이번 분 ' + fmtCount(lim.usedThisMinute) + '/' + fmtCount(lim.minuteLimit) +
+          ' · 오늘 ' + fmtCount(lim.usedToday) + '/' + fmtCount(lim.dayLimit);
+    }
+
+    // 자동 건너뛰기
+    var auto = (data.controls && data.controls.autoSkip) || {};
+    var au = usageEl('usage-autoskip');
+    if (au) au.checked = auto.enabled !== false;
+    var an = usageEl('usage-autoskip-note');
+    if (an) {
+      an.textContent = auto.enabled === false
+        ? '꺼짐 — 실패해도 계속 다시 부릅니다'
+        : (Number(auto.failureThreshold) || 3) + '번 연속 실패하면 ' +
+          Math.round((Number(auto.cooldownMs) || 300000) / 60000) + '분 동안 건너뜁니다';
+    }
+
+    // 최근 시도
+    var at = usageEl('usage-attempts');
+    if (at) {
+      at.innerHTML = '';
+      var recent = Array.isArray(data.attempts) ? data.attempts.slice(0, 5) : [];
+      at.hidden = !recent.length;
+      recent.forEach(function (a) {
+        var row = h('div', 'usage-attempt' + (a.ok ? '' : ' bad'));
+        row.appendChild(h('span', 'a-dot'));
+        row.appendChild(h('span', 'a-name', (PROVIDER_LABEL[a.provider] || a.provider || 'AI') +
+          (a.model ? ' · ' + a.model : '') + (a.ok ? '' : ' · ' + (a.reason || '실패'))));
+        row.appendChild(h('span', 'a-meta', fmtMs(a.latencyMs) + ' · ' + fmtCount(a.totalTokens) + '토큰'));
+        row.title = fmtUsageTime(a.at) + ' · ' + (a.ok ? (a.outcome === 'fallback' ? '폴백 성공' : '성공') : '실패') +
+          ' · ' + (a.estimated ? '토큰 추정' : '토큰 실측') + (a.costUsd ? ' · ' + fmtUsd(a.costUsd) : '');
+        at.appendChild(row);
+      });
+    }
+
+    var noteBox = usageEl('usage-note');
+    if (noteBox) {
+      var note = data.note || '';
+      if (data.updatedAt) note += ' 마지막 기록 ' + fmtUsageTime(data.updatedAt) + '.';
+      noteBox.textContent = note;
+      noteBox.hidden = !note;
+    }
+  }
+
+  function saveUsageControls(patch, okText) {
+    var c = usage.controls;
+    var p = patch || {};
+
+    if (Array.isArray(p.disabledProviders)) {
+      c.disabledProviders = p.disabledProviders.filter(function (x) { return PROVIDER_KEYS.indexOf(x) >= 0; })
+        .filter(function (x, i, arr) { return arr.indexOf(x) === i; });
+    }
+    if (p.limits && typeof p.limits === 'object') {
+      var minute = Number(p.limits.minuteLimit);
+      var daily = Number(p.limits.dayLimit);
+      if (Number.isFinite(minute) && minute >= 1) c.limits.minuteLimit = Math.min(600, Math.round(minute));
+      if (Number.isFinite(daily) && daily >= 1) c.limits.dayLimit = Math.min(100000, Math.round(daily));
+    }
+    if (p.autoSkip && typeof p.autoSkip === 'object') {
+      if (typeof p.autoSkip.enabled === 'boolean') c.autoSkip.enabled = p.autoSkip.enabled;
+      var th = Number(p.autoSkip.failureThreshold);
+      if (Number.isFinite(th) && th >= 1) c.autoSkip.failureThreshold = Math.min(20, Math.round(th));
+      var cool = Number(p.autoSkip.cooldownMs);
+      if (Number.isFinite(cool) && cool >= 5000) c.autoSkip.cooldownMs = Math.min(24 * 60 * 60 * 1000, Math.round(cool));
+    }
+    if (Array.isArray(p.resetProviders)) {
+      p.resetProviders.forEach(function (name) {
+        var key = String(name || '').toLowerCase();
+        if (c.health[key]) {
+          c.health[key] = {
+            consecutiveFailures: 0, lastError: '', lastFailureAt: 0,
+            skippedUntil: 0, skippedReason: '', lastOkAt: Number(c.health[key].lastOkAt) || 0
+          };
+        }
+      });
+    }
+
+    usageSave();
+    renderUsage(usageSummary(30));
+    if (okText) toast(okText);
+  }
+
+  function bindUsage() {
+    var refresh = document.getElementById('usage-refresh');
+    if (refresh) {
+      refresh.addEventListener('click', function () {
+        renderUsage(usageSummary(30));
+        toast('사용량을 새로 불러왔어요');
+      });
+    }
+
+    var reset = document.getElementById('usage-reset');
+    if (reset) {
+      reset.addEventListener('click', function () {
+        if (!window.confirm('AI 사용량·비용 기록을 모두 지울까요? 되돌릴 수 없어요.')) return;
+        usageReset();
+        renderUsage(usageSummary(30));
+        toast('사용량 기록을 초기화했어요');
+      });
+    }
+
+    // 공급자별 사용 중지 / 다시 켜기 (목록은 다시 그려지므로 위임)
+    var box = document.getElementById('usage-providers');
+    if (box) {
+      box.addEventListener('click', function (ev) {
+        var btn = ev.target && ev.target.closest ? ev.target.closest('button[data-provider]') : null;
+        if (!btn) return;
+        var who = btn.getAttribute('data-provider');
+        var off = btn.getAttribute('data-next') === '1';
+        var list = usage.controls.disabledProviders.slice();
+        var i = list.indexOf(who);
+        if (off && i < 0) list.push(who);
+        if (!off && i >= 0) list.splice(i, 1);
+
+        btn.disabled = true;
+        saveUsageControls({ disabledProviders: list },
+          (PROVIDER_LABEL[who] || who) + (off ? ' 를 사용 중지했어요' : ' 를 다시 켰어요'));
+        // 다시 켤 때는 실패 기록도 지워 바로 쓸 수 있게 합니다.
+        if (!off) saveUsageControls({ resetProviders: [who] }, null);
+        btn.disabled = false;
+      });
+    }
+
+    var limitSave = document.getElementById('usage-limit-save');
+    if (limitSave) {
+      limitSave.addEventListener('click', function () {
+        var minute = Number((document.getElementById('usage-limit-minute') || {}).value);
+        var day = Number((document.getElementById('usage-limit-day') || {}).value);
+        if (!Number.isFinite(minute) || minute < 1 || !Number.isFinite(day) || day < 1) {
+          toast('한도는 1 이상의 숫자로 넣어 주세요');
+          return;
+        }
+        saveUsageControls({ limits: { minuteLimit: minute, dayLimit: day } }, '호출 한도를 저장했어요');
+      });
+    }
+
+    var autoBox = document.getElementById('usage-autoskip');
+    if (autoBox) {
+      autoBox.addEventListener('change', function () {
+        saveUsageControls({ autoSkip: { enabled: autoBox.checked } },
+          autoBox.checked ? '자동 건너뛰기를 켰어요' : '자동 건너뛰기를 껐어요');
+      });
+    }
+  }
+
   /* ── 설정 모달 ─────────────────────────── */
   function openModal() {
     el.keyGroq.value = state.settings.groqKey;
@@ -4994,6 +6696,7 @@
     syncMembers();
     syncSearchUI();
     syncStatus();
+    renderUsage(usageSummary(30));
     el.modal.classList.add('open');
     syncModalLock();
     showSettingsTab('ai');
@@ -5041,6 +6744,7 @@
     // 탭을 바꾸면 본문만 맨 위로 — 시트 머리·저장 바는 그대로라 흔들리지 않습니다.
     var body = document.getElementById('settings-body');
     if (body) body.scrollTop = 0;
+    if (name === 'api') renderUsage(usageSummary(30));
   }
   (function initSettingsTabs() {
     var bar = document.getElementById('sheet-tabs');
@@ -6449,12 +8153,15 @@
       el.originHint.textContent = '지금 파일을 직접 열어서 보고 있어요. 실시간 API 연결이 브라우저 보안(CORS)으로 막히면, 이 폴더에서 "python3 -m http.server 8000" 을 실행하고 http://localhost:8000/ 로 열어 주세요.';
     }
 
+    bindTheme();
+    bindUsage();
     render();
     syncStatus();
     syncMembers();
     syncSearchUI();
     syncDebateChip();
     syncDeep();
+    renderUsage(usageSummary(30));
     refreshLockSection();    if (hasLock()) showLock();
     if (removed > 0) {
       addMessage('system', '30일이 지난 메시지 ' + removed + '개를 정리했어요.');
