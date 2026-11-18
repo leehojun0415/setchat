@@ -399,6 +399,7 @@
     width:100%;max-width:420px;max-height:88vh;overflow-y:auto;
     background:#fff;border-radius:22px;
     padding:16px 16px 20px;
+    scroll-padding-bottom:104px;   /* 하단 고정 저장 바에 가려지지 않게 */
     box-shadow:0 24px 70px rgba(17,24,39,.28);
   }
   .sheet-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
@@ -826,8 +827,8 @@
       </p>
 
       <div class="btn-row">
-        <button type="button" class="btn primary" id="test-conn">연결 테스트</button>
-        <button type="button" class="btn" id="save-settings">저장</button>
+        <button type="button" class="btn primary" id="test-conn">전체 연결 테스트</button>
+        <button type="button" class="btn" id="save-settings">무료 키 저장</button>
         <button type="button" class="btn ghost" id="clear-keys">키 지우기</button>
       </div>
       <p class="test-result" id="test-result" hidden></p>
